@@ -1,16 +1,83 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-    <link rel="icon" href="data:," />
-    <title>zen-garden-vr</title>
+    <meta
+      name="description"
+      content="A seated, hands-only VR zen garden: grow a bonsai, then breathe with a firefly guide."
+    />
+    <meta name="theme-color" content="#1b1726" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%231b1726'/%3E%3Ccircle cx='32' cy='30' r='9' fill='%23ffd76a'/%3E%3Ccircle cx='32' cy='30' r='16' fill='%23ffd76a' opacity='.25'/%3E%3C/svg%3E"
+    />
+    <title>Zen Garden VR</title>
+    <style>
+      body {
+        margin: 0;
+        background: #1b1726;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+      /* Information card over the flat preview; never blocks the Enter XR button. */
+      .intro {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        transform: translateX(-50%);
+        width: min(560px, calc(100vw - 32px));
+        box-sizing: border-box;
+        padding: 16px 20px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 215, 106, 0.45);
+        background: rgba(20, 17, 31, 0.82);
+        color: #fff6dc;
+        pointer-events: none;
+        text-align: center;
+        line-height: 1.4;
+      }
+      .intro h1 {
+        margin: 0 0 4px;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .intro p {
+        margin: 0;
+        font-size: 15px;
+        color: #e9ddc0;
+      }
+      .intro ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px 14px;
+        margin: 10px 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: 13px;
+        color: #ffd76a;
+      }
+    </style>
   </head>
-  <body style="margin: 0">
+  <body>
     <div id="scene-container"></div>
+    <section class="intro" aria-label="About this experience">
+      <h1>Zen Garden</h1>
+      <p>
+        Grow a little bonsai with your hands, then rest and breathe with a
+        firefly guide. Come back to see your garden grow.
+      </p>
+      <ul>
+        <li>Hands only, no controllers</li>
+        <li>Seated</li>
+        <li>5 to 10 minutes</li>
+        <li>Sound on</li>
+      </ul>
+    </section>
     <script type="module" src="/src/index.ts"></script>
   </body>
 </html>
