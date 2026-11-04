@@ -47,9 +47,15 @@ export class BonsaiGrowthSystem extends createSystem({
       const stage = entity.getValue(Bonsai, 'stage') ?? 0;
       const water = entity.getValue(Bonsai, 'water') ?? 0;
       const mask = entity.getValue(Bonsai, 'prunedMask') ?? 0;
+      const planted = entity.getValue(Bonsai, 'planted') ?? false;
+      if (!planted) {
+        if (this.shownStage !== -2) this.applyVisibility(-1, 0);
+        this.shownStage = -2;
+        continue;
+      }
 
       if (stage !== this.shownStage || mask !== this.shownMask) {
-        if (stage !== this.shownStage && this.shownStage >= 0) this.pop = 0;
+        if (stage !== this.shownStage && this.shownStage !== -1) this.pop = 0;
         this.applyVisibility(stage, mask);
         this.shownStage = stage;
         this.shownMask = mask;

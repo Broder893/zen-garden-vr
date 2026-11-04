@@ -1,4 +1,11 @@
 import { defineComponents } from '@iwsdk/core';
-import { Bonsai, PruningShears, ReturnHome, WateringCan } from './garden-components.js';
+import {
+  Bonsai,
+  FireflyGuide,
+  PruningShears,
+  ReturnHome,
+  Seed,
+  WateringCan,
+} from './garden-components.js';
 
-export default defineComponents([Bonsai, WateringCan, PruningShears, ReturnHome]);
+export default defineComponents([Bonsai, WateringCan, PruningShears, ReturnHome, Seed, FireflyGuide]);
