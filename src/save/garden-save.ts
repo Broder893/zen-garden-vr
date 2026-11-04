@@ -18,15 +18,31 @@ export interface GardenSave {
   visits: number;
   /** Breathing sessions finished, over all visits. */
   meditations: number;
+  /** When the last counted visit began (ms since epoch). */
+  lastVisitAt: number;
   /** When the garden was last saved (ms since epoch). */
   savedAt: number;
+}
+
+/** Time away before entering the garden again counts as a new visit. */
+export const VISIT_GAP_MS = 3 * 60 * 60 * 1000;
+const MAX_FLOWERS = 7;
+
+/** Flowers earned after `visits` visits: one per return, up to seven. */
+export function flowersForVisits(visits: number): number {
+  return Math.min(MAX_FLOWERS, Math.max(0, visits - 1));
+}
+
+/** True when reaching `visits` grows a new flower. */
+export function visitGrowsFlower(visits: number): boolean {
+  return flowersForVisits(visits) > flowersForVisits(visits - 1);
 }
 
 const KEY = 'zen-garden-vr/save';
 const VERSION = 1;
 
 export function emptySave(): GardenSave {
-  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, savedAt: 0 };
+  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, lastVisitAt: 0, savedAt: 0 };
 }
 
 /** Reads the save; null when there is none, it is unreadable, or storage is blocked. */
@@ -78,6 +94,7 @@ export function parseSave(raw: string): GardenSave | null {
     prunedMask: clampInt(d.prunedMask, 0, 0xff),
     visits: clampInt(d.visits, 0, 1e6),
     meditations: clampInt(d.meditations, 0, 1e6),
+    lastVisitAt: clampInt(d.lastVisitAt, 0, Number.MAX_SAFE_INTEGER),
     savedAt: clampInt(d.savedAt, 0, Number.MAX_SAFE_INTEGER),
   };
 }

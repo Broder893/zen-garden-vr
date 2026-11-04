@@ -1,26 +1,31 @@
 import { BufferAttribute, BufferGeometry, Material, Matrix4, Mesh, Object3D } from '@iwsdk/core';
 
 /**
- * Replaces every mesh under `group` with one mesh per material, baked into
- * the group's own space. Cuts draw calls for static decorative parts.
- * Only position and normal are kept (enough for untextured materials).
- * Names of the merged meshes are lost: use it only on groups whose
- * children are never looked up by name at runtime.
+ * Replaces the single-material meshes under `group` with one mesh per
+ * material, baked into the group's own space. Cuts draw calls for static
+ * decorative parts. Only position and normal are kept (enough for
+ * untextured materials); names, visibility and userData of merged meshes are
+ * lost, so use it only where those are never needed at runtime. Anything it
+ * does not merge (multi-material meshes, empties with children) is kept.
  */
 export function mergeByMaterial(group: Object3D): void {
   group.updateMatrixWorld(true);
   const toGroup = new Matrix4().copy(group.matrixWorld).invert();
   const byMaterial = new Map<Material, BufferGeometry[]>();
+  const merged: Mesh[] = [];
   group.traverse((o) => {
     const mesh = o as Mesh;
     if (!mesh.isMesh || Array.isArray(mesh.material)) return;
     const geo = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone();
+    if (!geo.getAttribute('normal')) geo.computeVertexNormals();
     geo.applyMatrix4(new Matrix4().multiplyMatrices(toGroup, mesh.matrixWorld));
     const list = byMaterial.get(mesh.material) ?? [];
     list.push(geo);
     byMaterial.set(mesh.material, list);
+    merged.push(mesh);
   });
-  for (const child of [...group.children]) group.remove(child);
+  for (const mesh of merged) mesh.removeFromParent();
+  pruneEmpty(group);
 
   let n = 0;
   for (const [material, geos] of byMaterial) {
@@ -29,6 +34,16 @@ export function mergeByMaterial(group: Object3D): void {
     const mesh = new Mesh(merged, material);
     mesh.name = `${group.name}_Merged${n++}`;
     group.add(mesh);
+  }
+}
+
+/** Removes plain empties left behind once their meshes were merged away. */
+function pruneEmpty(node: Object3D): void {
+  for (const child of [...node.children]) {
+    pruneEmpty(child);
+    if (child.children.length === 0 && !(child as Mesh).isMesh && child.type === 'Group') {
+      child.removeFromParent();
+    }
   }
 }
 

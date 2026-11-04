@@ -30,6 +30,11 @@ export class EntranceSystem extends createSystem({
   private iblFull = 0;
   private t = -1;
 
+  /** True once the warm-up is far enough along for moments to be seen. */
+  get lit(): boolean {
+    return this.t >= WARM_UP_SECONDS * 0.7;
+  }
+
   init(): void {
     this.cleanupFuncs.push(
       this.world.visibilityState.subscribe((state) => {

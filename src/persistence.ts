@@ -1,7 +1,15 @@
 import { createSystem, Entity, VisibilityState } from '@iwsdk/core';
 import { Bonsai, Seed } from './garden-components.js';
 import { MeditationSystem } from './meditation.js';
-import { clearSave, emptySave, GardenSave, loadSave, storeSave } from './save/garden-save.js';
+import {
+  clearSave,
+  emptySave,
+  GardenSave,
+  loadSave,
+  storeSave,
+  VISIT_GAP_MS,
+  visitGrowsFlower,
+} from './save/garden-save.js';
 
 /** How often the garden checks for changes to save. */
 const SAVE_EVERY_SECONDS = 2;
@@ -10,8 +18,9 @@ const SAVE_EVERY_SECONDS = 2;
  * Keeps the garden between visits. On load it restores the bonsai (and hides
  * the seed if it was already planted); while playing it saves whenever the
  * state changes, and again when the page or headset goes away.
- * Open the app with `?fresh` to start over (handy for demos); the parameter
- * is then removed from the address so a reload keeps the new garden.
+ * Open the app with `?fresh` to start over, or `?nextvisit` to count this
+ * entry as a new visit without waiting (both handy for demos); the parameter
+ * is then removed from the address so a reload behaves normally.
  */
 export class PersistenceSystem extends createSystem({
   bonsai: { required: [Bonsai] },
@@ -27,12 +36,15 @@ export class PersistenceSystem extends createSystem({
   private sinceCheck = 0;
   private lastKey = '';
   private visitCounted = false;
+  private forceVisit = false;
+  /** True when entering VR this time counted as a new visit. */
+  newVisit = false;
   /** Storage refused a write: stop trying, the garden just runs unsaved. */
   private blocked = false;
   private meditation?: MeditationSystem;
 
   init(): void {
-    this.consumeFreshParam();
+    this.consumeDemoParams();
     const loaded = loadSave();
     this.save = loaded ?? emptySave();
     this.returning = loaded?.planted ?? false;
@@ -63,10 +75,16 @@ export class PersistenceSystem extends createSystem({
       () => window.removeEventListener('pagehide', flush),
       this.world.visibilityState.subscribe((state) => {
         if (state === VisibilityState.Visible && !this.visitCounted) {
-          // A visit is an entry into VR, not a page load or reload.
+          // A visit is an entry into VR after some time away, not a reload.
           this.visitCounted = true;
-          this.save.visits += 1;
-          flush();
+          const now = Date.now();
+          if (this.forceVisit || now - this.save.lastVisitAt >= VISIT_GAP_MS) {
+            this.newVisit = true;
+            this.save.visits += 1;
+            this.save.lastVisitAt = now;
+            this.lastKey = ''; // lastVisitAt is not in the change key: force a write
+            flush();
+          }
         }
         if (state === VisibilityState.Hidden || state === VisibilityState.VisibleBlurred) flush();
       }),
@@ -80,6 +98,11 @@ export class PersistenceSystem extends createSystem({
     if (this.sinceCheck < SAVE_EVERY_SECONDS) return;
     this.sinceCheck = 0;
     this.saveIfChanged();
+  }
+
+  /** True when this visit is the one that grows a new flower. */
+  get newFlowerThisVisit(): boolean {
+    return this.newVisit && visitGrowsFlower(this.save.visits);
   }
 
   /** True once the player has finished a breathing session on any visit. */
@@ -108,11 +131,14 @@ export class PersistenceSystem extends createSystem({
     if (!storeSave(s)) this.blocked = true;
   }
 
-  private consumeFreshParam(): void {
+  private consumeDemoParams(): void {
     const url = new URL(window.location.href);
-    if (!url.searchParams.has('fresh')) return;
-    clearSave();
+    const fresh = url.searchParams.has('fresh');
+    this.forceVisit = url.searchParams.has('nextvisit');
+    if (!fresh && !this.forceVisit) return;
+    if (fresh) clearSave();
     url.searchParams.delete('fresh');
+    url.searchParams.delete('nextvisit');
     try {
       window.history.replaceState(window.history.state, '', url);
     } catch {

@@ -21,9 +21,9 @@ World.create(
     .registerSystem(BonsaiGrowthSystem)
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
+    .registerSystem(EntranceSystem)
     .registerSystem(PersistenceSystem)
     .registerSystem(GuideSystem)
     .registerSystem(GardenAudioSystem)
-    .registerSystem(EntranceSystem)
     .registerSystem(VisitFlowerSystem);
 });
