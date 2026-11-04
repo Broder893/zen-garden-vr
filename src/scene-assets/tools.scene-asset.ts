@@ -5,14 +5,26 @@ import {
   Group,
   LatheGeometry,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   Object3D,
   Shape,
+  SphereGeometry,
   TorusGeometry,
   Vector2,
   Vector3,
 } from '@iwsdk/core';
 import { alignSpan } from './lib/hardsurface.js';
+
+/** Invisible, generous grab target so a loose pinch near the tool still grabs it. */
+const grabVolumeMat = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+function grabVolume(radius: number, x: number, y: number, z: number): Mesh {
+  const m = new Mesh(new SphereGeometry(radius, 12, 8), grabVolumeMat);
+  m.name = 'GrabVolume';
+  m.position.set(x, y, z);
+  m.userData.iwsdkPreviewBounds = 'exclude';
+  return m;
+}
 
 const v = (x: number, y: number, z: number) => new Vector3(x, y, z);
 
@@ -32,6 +44,12 @@ function tube(name: string, pts: Vector3[], r0: number, r1: number, mat: MeshSta
     m.name = `${name}_Seg${i}`;
     alignSpan(m, pts[i], pts[i + 1]);
     g.add(m);
+    if (i > 0) {
+      const k = new Mesh(new SphereGeometry(ra, 10, 8), mat);
+      k.name = `${name}_Joint${i}`;
+      k.position.copy(pts[i]);
+      g.add(k);
+    }
   }
   return g;
 }
@@ -60,6 +78,10 @@ export function createWateringCan(): Group {
   band.name = 'Band';
   band.position.y = 0.012;
   root.add(band);
+  const cap = new Mesh(new CylinderGeometry(0.026, 0.026, 0.006, 20), brassMat);
+  cap.name = 'Cap';
+  cap.position.y = 0.116;
+  root.add(cap);
   const spoutPts = [v(0.045, 0.025, 0), v(0.09, 0.07, 0), v(0.13, 0.115, 0)];
   root.add(tube('Spout', spoutPts, 0.011, 0.006, canMat));
   const rose = new Mesh(new ConeGeometry(0.016, 0.022, 14, 1, true), brassMat);
@@ -71,6 +93,7 @@ export function createWateringCan(): Group {
   tip.name = 'SpoutTip';
   tip.position.set(0.148, 0.135, 0);
   root.add(tip);
+  root.add(grabVolume(0.1, -0.01, 0.07, 0));
   return root;
 }
 
@@ -122,5 +145,6 @@ export function createShears(): Group {
   tip.name = 'BladeTip';
   tip.position.set(0.06, 0.006, 0);
   root.add(tip);
+  root.add(grabVolume(0.07, -0.04, 0.01, 0));
   return root;
 }
