@@ -1,4 +1,5 @@
-import { Color, createSystem, Entity, MeshStandardMaterial, Object3D } from '@iwsdk/core';
+import { Color, createSystem, Entity, MeshStandardMaterial, Object3D, Vector3 } from '@iwsdk/core';
+import { Sparkles } from './effects/sparkles.js';
 import { Bonsai, BonsaiStage } from './garden-components.js';
 
 /** Shoots that must be pruned before each stage can grow, by bonsai stage. */
@@ -9,6 +10,10 @@ export const SHOOTS_BY_STAGE: Record<number, string[]> = {
 
 const DRY = new Color('#8a6a4c');
 const WET = new Color('#2a1c12');
+/** Soil dries back toward the stage's water level over roughly this long. */
+const DRY_SECONDS = 45;
+/** A blooming tree is cared for: its soil never looks fully dry. */
+const BLOOM_MOISTURE = 0.6;
 
 /**
  * Shows the right stage, darkens the soil as it is watered, and advances the
@@ -22,8 +27,14 @@ export class BonsaiGrowthSystem extends createSystem({
   private pop = 1;
   private parts = new Map<string, Object3D>();
   private soil: MeshStandardMaterial | null = null;
+  /** Soil darkness shown, 0 dry .. 1 wet; follows water up fast, dries slowly. */
+  private wetness = -1;
+  private sparkles!: Sparkles;
+  private burstAt = new Vector3();
 
   init(): void {
+    this.sparkles = new Sparkles();
+    this.world.createTransformEntity(this.sparkles.mesh);
     const bind = (entity: Entity) => {
       const root = entity.object3D;
       if (!root) return;
@@ -43,6 +54,7 @@ export class BonsaiGrowthSystem extends createSystem({
   }
 
   update(delta: number): void {
+    this.sparkles.update(delta);
     for (const entity of this.queries.bonsai.entities) {
       const stage = entity.getValue(Bonsai, 'stage') ?? 0;
       const water = entity.getValue(Bonsai, 'water') ?? 0;
@@ -55,12 +67,16 @@ export class BonsaiGrowthSystem extends createSystem({
       }
 
       if (stage !== this.shownStage || mask !== this.shownMask) {
-        if (stage !== this.shownStage && this.shownStage !== -1) this.pop = 0;
+        // -1 means first frame (restored save): show it without ceremony.
+        if (stage !== this.shownStage && this.shownStage !== -1) {
+          this.pop = 0;
+          this.celebrate(entity, stage);
+        }
         this.applyVisibility(stage, mask);
         this.shownStage = stage;
         this.shownMask = mask;
       }
-      if (this.soil) this.soil.color.copy(DRY).lerp(WET, Math.min(1, water));
+      this.updateSoil(delta, stage, water);
 
       if (this.pop < 1) {
         this.pop = Math.min(1, this.pop + delta / 1.2);
@@ -72,10 +88,31 @@ export class BonsaiGrowthSystem extends createSystem({
       const shoots = SHOOTS_BY_STAGE[stage] ?? [];
       const allCut = (1 << shoots.length) - 1;
       if ((mask & allCut) !== allCut) continue;
+      this.wetness = 1; // just watered in full: the soil starts the new stage wet
       entity.setValue(Bonsai, 'stage', stage + 1);
       entity.setValue(Bonsai, 'water', 0);
       entity.setValue(Bonsai, 'prunedMask', 0);
     }
+  }
+
+  private updateSoil(delta: number, stage: number, water: number): void {
+    const target = Math.min(1, stage >= BonsaiStage.Blooming ? Math.max(water, BLOOM_MOISTURE) : water);
+    if (this.wetness < 0 || target > this.wetness) {
+      // Darken quickly while pouring (and start at the saved level).
+      this.wetness = this.wetness < 0 ? target : this.wetness + (target - this.wetness) * (1 - Math.exp(-6 * delta));
+    } else {
+      this.wetness = Math.max(target, this.wetness - delta / DRY_SECONDS);
+    }
+    if (this.soil) this.soil.color.copy(DRY).lerp(WET, this.wetness);
+  }
+
+  /** Sparkles rising from the canopy when the seed sprouts or the tree grows. */
+  private celebrate(entity: Entity, stage: number): void {
+    const root = entity.object3D;
+    if (!root) return;
+    root.getWorldPosition(this.burstAt);
+    this.burstAt.y += stage === BonsaiStage.Sprout ? 0.06 : 0.16;
+    this.sparkles.burst(this.burstAt, stage === BonsaiStage.Blooming ? 40 : 24, stage === BonsaiStage.Sprout ? 0.05 : 0.12);
   }
 
   /** World-space shoot objects still to be cut at this stage (for PruningSystem). */
