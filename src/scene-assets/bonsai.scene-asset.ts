@@ -11,6 +11,7 @@ import {
   Vector3,
 } from '@iwsdk/core';
 import { alignSpan, makeRandom } from './lib/hardsurface.js';
+import { mergeByMaterial } from './lib/merge.js';
 
 /**
  * Bonsai in a shallow glazed pot.
@@ -188,7 +189,10 @@ function createFlowers(): Group {
 export function createBonsai(): Group {
   const root = new Group();
   root.name = 'Bonsai';
-  root.add(createPot(), createSprout(), createYoung(), createMature(), createFlowers());
+  const stages = [createSprout(), createYoung(), createMature(), createFlowers()];
+  // Stage groups are only toggled and scaled as a whole: one mesh per material each.
+  for (const g of stages) mergeByMaterial(g);
+  root.add(createPot(), ...stages);
   root.add(
     overgrowth('Overgrowth_Young_0', v(-0.005, 0.17, 0), v(-0.04, 0.23, 0.04)),
     overgrowth('Overgrowth_Young_1', v(0.06, 0.128, 0), v(0.11, 0.17, 0.03)),
