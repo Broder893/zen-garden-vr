@@ -2,6 +2,7 @@ import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 import { GardenAudioSystem } from './audio-system.js';
 import { BonsaiGrowthSystem } from './bonsai-growth.js';
+import { EntranceSystem } from './entrance.js';
 import { GuideSystem } from './guide.js';
 import { MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
@@ -21,5 +22,6 @@ World.create(
     .registerSystem(MeditationSystem)
     .registerSystem(PersistenceSystem)
     .registerSystem(GuideSystem)
-    .registerSystem(GardenAudioSystem);
+    .registerSystem(GardenAudioSystem)
+    .registerSystem(EntranceSystem);
 });
