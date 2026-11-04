@@ -53,7 +53,7 @@ export class MeditationSystem extends createSystem({
   paused = false;
   /** 0-based index of the current breath. */
   breath = 0;
-  /** Sessions finished since load (persistence comes later). */
+  /** Sessions finished since load (PersistenceSystem adds earlier visits). */
   completed = 0;
   /** Current breath size, 0 (empty) .. 1 (full); drives orb and ring. */
   fullness = 0;

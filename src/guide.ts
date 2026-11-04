@@ -3,6 +3,7 @@ import {
   createSystem,
   Entity,
   GrabSystem,
+  VisibilityState,
   Grabbed,
   MeshBasicMaterial,
   Object3D,
@@ -21,6 +22,7 @@ import {
   WateringCan,
 } from './garden-components.js';
 import { MeditationCue, MeditationSystem } from './meditation.js';
+import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
 import { WateringSystem } from './watering.js';
 
@@ -37,6 +39,7 @@ type Mood = keyof typeof MOOD;
 /** Short subtitle lines (English). Kept under ~60 characters each. */
 export const LINES = {
   plantSeed: 'Welcome. Pinch the glowing seed to plant it.',
+  welcomeBack: 'Welcome back. Your little tree missed you.',
   planted: 'Your seed is planted. Let us help it grow.',
   pickCan: 'Pinch the watering can to lift it.',
   tiltCan: 'Tilt the can over the little tree to pour.',
@@ -116,12 +119,15 @@ export class GuideSystem extends createSystem({
   private grab?: GrabSystem;
   private meditation?: MeditationSystem;
   private hintShown = false;
+  private greeted = false;
+  private persistence?: PersistenceSystem;
 
   init(): void {
     this.watering = this.world.getSystem(WateringSystem);
     this.pruning = this.world.getSystem(PruningSystem);
     this.grab = this.world.getSystem(GrabSystem);
     this.meditation = this.world.getSystem(MeditationSystem);
+    this.persistence = this.world.getSystem(PersistenceSystem);
 
     const panel = this.world.getSceneObject<UIKitMLAsset>('subtitle-panel');
     this.panel = panel ?? null;
@@ -159,12 +165,20 @@ export class GuideSystem extends createSystem({
     if (!bonsai) return;
     this.watchEvents(bonsai);
 
+    // Greet on the first moment in VR, not at page load (it would expire unseen).
+    if (!this.greeted && this.world.visibilityState.peek() === VisibilityState.Visible) {
+      this.greeted = true;
+      if (this.persistence?.returning) this.showEvent('welcomeBack', EVENT_SECONDS + 1);
+    }
     if (this.eventLeft > 0) this.eventLeft -= delta;
     // After the first growth event, point out the stone once, straight after
     // the event line so no task line flashes (and gets half-spoken) in between.
     if (!this.hintShown && this.lastStage >= BonsaiStage.Young && this.eventLeft <= 0) {
       this.hintShown = true;
-      if (!this.meditation?.active) this.showEvent('meditateHint', EVENT_SECONDS + 1);
+      // Only for players who have never tried the stone.
+      if (!this.meditation?.active && !this.persistence?.hasMeditated) {
+        this.showEvent('meditateHint', EVENT_SECONDS + 1);
+      }
     }
     const cue = this.meditation?.cue ?? null;
     let mood: Mood;

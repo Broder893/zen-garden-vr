@@ -4,6 +4,7 @@ import { GardenAudioSystem } from './audio-system.js';
 import { BonsaiGrowthSystem } from './bonsai-growth.js';
 import { GuideSystem } from './guide.js';
 import { MeditationSystem } from './meditation.js';
+import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
@@ -18,6 +19,7 @@ World.create(
     .registerSystem(BonsaiGrowthSystem)
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
+    .registerSystem(PersistenceSystem)
     .registerSystem(GuideSystem)
     .registerSystem(GardenAudioSystem);
 });
