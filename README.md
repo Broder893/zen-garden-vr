@@ -1,45 +1,74 @@
-# IWSDK App
+# Zen Garden
 
-This project uses `iwsdk.config.json` for declarative scene, asset, component,
-XR, and emulator configuration. Application systems remain explicit in
-`src/index.ts`.
+A pocket zen garden for your work breaks: grow a bonsai with your bare hands,
+breathe with a firefly, and come back to watch it bloom.
+
+**Try it on Meta Quest:** open **https://broder893.github.io/zen-garden-vr/** in the
+Quest Browser and press **Enter VR**. Hands only, seated, 5 to 10 minutes, sound on.
+
+Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experience).
+
+## The experience
+
+- **Plant and grow.** Pinch the glowing seed, water the sprout by tilting the can over
+  it, and trim the glowing overgrown shoots with the shears. The bonsai grows through
+  four stages (sprout, young, mature, in bloom).
+- **Breathe.** Pinch the meditation stone for a guided breathing session of about
+  80 seconds: an orb of light grows as you breathe in and shrinks as you breathe out.
+  Pinch again to pause.
+- **A guide, not a manual.** A firefly flies to whatever matters next and says it in
+  one short sentence, spoken and subtitled in English. It stays within your view and,
+  once the tree blooms, follows your hand.
+- **Come back.** The garden is saved on the device. Every return visit (after a few
+  hours away) grows a new flower in the sand, up to seven.
+
+## Hand interactions
+
+| Gesture | What it does |
+| --- | --- |
+| Pinch near an object | Picks up the watering can or shears (large invisible grab zones, 6–10 cm) |
+| Tilt the can spout-down | Pours water; it counts when the spout is over the tree |
+| Touch a glowing shoot with the blades | Cuts it (within 7 cm) |
+| Pinch the seed / the stone | Plants the seed / starts, pauses, resumes breathing |
+| Open the hand | Releases a tool; it glides back to its place on the table |
+
+Everything sits on a table within about 60 cm of a seated player. Controllers are
+never required.
+
+## How it is built
+
+- [IWSDK](https://iwsdk.dev) (Immersive Web SDK) on WebXR and Three.js, TypeScript, Vite.
+- **ECS systems**, one job each: watering, pruning, growth, guide, meditation, audio,
+  saving, entrance, visit flowers (`src/*.ts`, registered in `src/index.ts`).
+- **Procedural models** (`src/scene-assets/`), composed in
+  `public/scenes/main.iwsdk.scene.json`. The bonsai merges its parts per material: the
+  scene is about 80 draw calls and 14k triangles.
+- **Audio synthesised live** with the Web Audio API (`src/audio/`): generative music,
+  water, shears, chimes, singing bowls. No audio files ship with the app.
+- **Voice** through the device's speech synthesis (Web Speech API); every line is also
+  a subtitle (`public/ui/subtitle.uikitml`).
+- **Saving** to `localStorage` with validation and error handling (`src/save/`).
+
+Developed without a headset, in IWER (IWSDK's WebXR emulator), with scripted hands.
+
+## Run it locally
+
+Requires Node.js 20.19+ (or 22.12+).
 
 ```sh
 npm install
-npm run dev
+npm run dev        # managed dev server + browser with the XR emulator
+npm run typecheck
+npm run build      # production build in dist/
 ```
 
-Use the Runtime and Editor controls in the managed browser to switch between
-the running experience and its authored scene.
+Every push to `main` is built and published to GitHub Pages by
+`.github/workflows/deploy.yml`.
 
-## Starter content
+Address options for demos: `?fresh` starts a new garden, `?nextvisit` counts the
+next VR entry as a return visit without waiting. Both are removed from the address
+right after use.
 
-The robot and welcome panel are small examples of authored scene content plus
-runtime systems. The robot turns toward the player's head and plays a sound
-when pressed. To remove the robot, delete its scene node, its `RobotSystem`
-registration from `src/index.ts` or `src/index.js`, and its `Robot` registration
-from `src/components.ts` or `src/components.js`; you can then delete the unused
-robot component and system files. To remove the welcome panel, delete its scene
-node and its `PanelSystem` registration from the application entry point.
+## Credits
 
-The robot stands on the second of three numbered stations. The first holds dark
-pieces you can grab and move, and the third holds a ring you can spin in place.
-The studio props (the plinths and the dark pieces, plus the floor and stage in VR
-and Desktop 3D) are built in code in `src/scene-assets/studio.scene-asset.ts` or
-`.js`. The VR and Desktop 3D background furniture is built the same way in
-`src/scene-assets/decor.scene-asset.ts` or `.js`, so the starter downloads no
-extra models. To remove any of them, delete their scene nodes and their entries
-in `src/assets.ts` or `src/assets.js`, then delete the files you no longer use.
-The station labels are `public/ui/label-*.uikitml`.
-
-The rest of the look is built-in components in the scene, which you can edit in
-the editor without code. The soft light on every object is the scene root's
-`IBLGradient` (select the Level Root to edit it), and the soft shadows under
-each object are `ContactShadow` nodes. In VR and Desktop 3D, the sky is the
-scene root's `DomeGradient` (its colors, tilt and dither are also on the Level
-Root), and the floor fades into it through the `DomeFade` on the floor node. AR
-projects have no sky or floor, so passthrough stays visible, and a
-`ShadowCatcher` node grounds the stations.
-
-- Minimal scene walkthrough: https://iwsdk.dev/guides/01b-minimal-scene.html
-- XR-enabled projects — IWER emulator controls: https://iwsdk.dev/guides/02-testing-experience.html#iwer-controls
+All models, sounds and code are original to this project. See [CREDITS.md](CREDITS.md).

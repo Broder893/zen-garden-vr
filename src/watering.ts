@@ -10,6 +10,7 @@ import {
   SphereGeometry,
   Vector3,
 } from '@iwsdk/core';
+import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { Bonsai, WateringCan } from './garden-components.js';
 
 const MAX_DROPS = 48;
@@ -30,6 +31,7 @@ export class WateringSystem extends createSystem({
   bonsai: { required: [Bonsai] },
 }) {
   private tips = new Map<number, Object3D>();
+  private bonsai!: FirstEntity;
   private drops!: InstancedMesh;
   private pos = new Float32Array(MAX_DROPS * 3);
   private vel = new Float32Array(MAX_DROPS * 3);
@@ -51,6 +53,7 @@ export class WateringSystem extends createSystem({
   wateringBonsai = false;
 
   init(): void {
+    this.bonsai = trackFirst(this.queries.bonsai, this.cleanupFuncs);
     const mat = new MeshStandardMaterial({
       color: '#9fd4ff',
       emissive: '#3a7fb8',
@@ -74,7 +77,7 @@ export class WateringSystem extends createSystem({
   }
 
   update(delta: number): void {
-    const bonsai = this.queries.bonsai.entities.values().next().value as Entity | undefined;
+    const bonsai = this.bonsai.entity;
     const bonsaiObj = bonsai?.object3D;
     if (bonsaiObj) {
       bonsaiObj.getWorldPosition(this.target);

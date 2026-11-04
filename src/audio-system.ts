@@ -1,5 +1,6 @@
-import { createSystem, Entity, VisibilityState } from '@iwsdk/core';
+import { createSystem, VisibilityState } from '@iwsdk/core';
 import { GardenMusic } from './audio/garden-music.js';
+import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { SoundEngine } from './audio/sound-engine.js';
 import { GuideVoice } from './audio/voice.js';
 import { Bonsai, BonsaiStage } from './garden-components.js';
@@ -44,7 +45,7 @@ export class GardenAudioSystem extends createSystem({
   private meditation?: MeditationSystem;
   private spokenAt = new Map<LineId, number>();
   private lastLine: LineId | null = null;
-  private bonsai: Entity | null = null;
+  private bonsai!: FirstEntity;
   // Last seen garden state; null until the first frame so restored saves stay silent.
   private lastCuts: number | null = null;
   private lastStage: number | null = null;
@@ -70,13 +71,7 @@ export class GardenAudioSystem extends createSystem({
       window.addEventListener(type, unlock);
       this.cleanupFuncs.push(() => window.removeEventListener(type, unlock));
     }
-    this.cleanupFuncs.push(
-      this.queries.bonsai.subscribe('qualify', (e) => (this.bonsai = e)),
-      this.queries.bonsai.subscribe('disqualify', (e) => {
-        if (this.bonsai === e) this.bonsai = null;
-      }),
-    );
-    for (const e of this.queries.bonsai.entities) this.bonsai = e;
+    this.bonsai = trackFirst(this.queries.bonsai, this.cleanupFuncs);
 
     const xr = this.renderer.xr;
     xr.addEventListener('sessionstart', unlock);
@@ -129,7 +124,7 @@ export class GardenAudioSystem extends createSystem({
     }
     this.lastCuts = cuts;
 
-    const bonsai = this.bonsai;
+    const bonsai = this.bonsai.entity;
     if (!bonsai) return;
     const planted = bonsai.getValue(Bonsai, 'planted') ?? false;
     if (planted && this.lastPlanted === false) {

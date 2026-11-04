@@ -7,6 +7,7 @@ import {
   MeshStandardMaterial,
   VisibilityState,
 } from '@iwsdk/core';
+import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { BreathOrb, MeditationStone } from './garden-components.js';
 
 /** Where a session is. `idle` = no session. Pausing is a separate flag that keeps the phase. */
@@ -66,6 +67,8 @@ export class MeditationSystem extends createSystem({
   private orbMats: MeshBasicMaterial[] = [];
   private orbBaseOpacity: number[] = [];
   private grab?: GrabSystem;
+  private stone!: FirstEntity;
+  private orb!: FirstEntity;
 
   get active(): boolean {
     return this.phase !== 'idle';
@@ -92,6 +95,8 @@ export class MeditationSystem extends createSystem({
 
   init(): void {
     this.grab = this.world.getSystem(GrabSystem);
+    this.stone = trackFirst(this.queries.stones, this.cleanupFuncs);
+    this.orb = trackFirst(this.queries.orbs, this.cleanupFuncs);
     // Subscribe and the initial loop can both see an entity: bind each once.
     const bound = new WeakSet<Entity>();
     const bindStone = (e: Entity) => {
@@ -159,7 +164,7 @@ export class MeditationSystem extends createSystem({
   }
 
   private advance(delta: number): void {
-    const stone = this.first(this.queries.stones.entities);
+    const stone = this.stone.entity;
     if (!stone) return;
     this.phaseTime += delta;
     const inhale = stone.getValue(MeditationStone, 'inhaleSeconds') ?? 4;
@@ -206,7 +211,7 @@ export class MeditationSystem extends createSystem({
     // Orb: fades in for a session, out when idle or finishing.
     const showOrb = this.phase !== 'idle' && this.phase !== 'outro';
     this.orbFade += ((showOrb ? 1 : 0) - this.orbFade) * (1 - Math.exp(-2.5 * delta));
-    const orb = this.first(this.queries.orbs.entities)?.object3D;
+    const orb = this.orb.entity?.object3D;
     if (orb) {
       orb.visible = this.orbFade > 0.01;
       const pausedDim = this.paused ? 0.5 : 1;
@@ -220,10 +225,5 @@ export class MeditationSystem extends createSystem({
       ? 0.4 + 1.6 * this.fullness
       : 0.5 + 0.4 * Math.sin(this.time * 1.6);
     for (const m of this.ringMats) m.emissiveIntensity = glow;
-  }
-
-  private first(set: Set<Entity>): Entity | undefined {
-    for (const e of set) return e;
-    return undefined;
   }
 }

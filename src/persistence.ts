@@ -1,4 +1,5 @@
 import { createSystem, Entity, VisibilityState } from '@iwsdk/core';
+import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { Bonsai, Seed } from './garden-components.js';
 import { MeditationSystem } from './meditation.js';
 import {
@@ -31,7 +32,7 @@ export class PersistenceSystem extends createSystem({
   /** The state as last loaded or saved. */
   save: GardenSave = emptySave();
   private restored = new WeakSet<Entity>();
-  private bonsai: Entity | null = null;
+  private bonsai!: FirstEntity;
   private baseMeditations = 0;
   private sinceCheck = 0;
   private lastKey = '';
@@ -51,8 +52,8 @@ export class PersistenceSystem extends createSystem({
     this.baseMeditations = this.save.meditations;
     this.meditation = this.world.getSystem(MeditationSystem);
 
+    this.bonsai = trackFirst(this.queries.bonsai, this.cleanupFuncs);
     const restoreBonsai = (e: Entity) => {
-      this.bonsai = e;
       if (this.restored.has(e)) return;
       this.restored.add(e);
       e.setValue(Bonsai, 'planted', this.save.planted);
@@ -68,9 +69,6 @@ export class PersistenceSystem extends createSystem({
     window.addEventListener('pagehide', flush);
     this.cleanupFuncs.push(
       this.queries.bonsai.subscribe('qualify', restoreBonsai),
-      this.queries.bonsai.subscribe('disqualify', (e) => {
-        if (this.bonsai === e) this.bonsai = null;
-      }),
       this.queries.seeds.subscribe('qualify', hideSeed),
       () => window.removeEventListener('pagehide', flush),
       this.world.visibilityState.subscribe((state) => {
@@ -114,7 +112,7 @@ export class PersistenceSystem extends createSystem({
   private saveIfChanged(): void {
     if (this.blocked) return;
     const s = this.save;
-    const b = this.bonsai;
+    const b = this.bonsai.entity;
     // Only read the bonsai once it holds the restored values, never the scene defaults.
     if (b && this.restored.has(b)) {
       s.planted = b.getValue(Bonsai, 'planted') ?? false;

@@ -25,6 +25,7 @@ import {
 import { MeditationCue, MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
+import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { EntranceSystem } from './entrance.js';
 import { WateringSystem } from './watering.js';
 
@@ -134,6 +135,12 @@ export class GuideSystem extends createSystem({
   private grab?: GrabSystem;
   private meditation?: MeditationSystem;
   private hintShown = false;
+  private guideRef!: FirstEntity;
+  private bonsaiRef!: FirstEntity;
+  private seedRef!: FirstEntity;
+  private canRef!: FirstEntity;
+  private shearsRef!: FirstEntity;
+  private orbRef!: FirstEntity;
   private greeted = false;
   private persistence?: PersistenceSystem;
   private entrance?: EntranceSystem;
@@ -142,6 +149,12 @@ export class GuideSystem extends createSystem({
     this.watering = this.world.getSystem(WateringSystem);
     this.pruning = this.world.getSystem(PruningSystem);
     this.grab = this.world.getSystem(GrabSystem);
+    this.guideRef = trackFirst(this.queries.guide, this.cleanupFuncs);
+    this.bonsaiRef = trackFirst(this.queries.bonsai, this.cleanupFuncs);
+    this.seedRef = trackFirst(this.queries.seeds, this.cleanupFuncs);
+    this.canRef = trackFirst(this.queries.cans, this.cleanupFuncs);
+    this.shearsRef = trackFirst(this.queries.shears, this.cleanupFuncs);
+    this.orbRef = trackFirst(this.queries.orbs, this.cleanupFuncs);
     this.meditation = this.world.getSystem(MeditationSystem);
     this.persistence = this.world.getSystem(PersistenceSystem);
     this.entrance = this.world.getSystem(EntranceSystem);
@@ -178,7 +191,7 @@ export class GuideSystem extends createSystem({
     this.player.head.getWorldPosition(this.head);
     this.disposePlantedSeeds();
 
-    const bonsai = this.first(this.queries.bonsai.entities);
+    const bonsai = this.bonsaiRef.entity;
     if (!bonsai) return;
     this.watchEvents(bonsai);
 
@@ -240,7 +253,7 @@ export class GuideSystem extends createSystem({
     const bonsaiObj = bonsai.object3D;
     if (!bonsai.getValue(Bonsai, 'planted')) {
       this.line = 'plantSeed';
-      this.targetOf(this.first(this.queries.seeds.entities)?.object3D, 0);
+      this.targetOf(this.seedRef.entity?.object3D, 0);
       return 'welcome';
     }
     const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
@@ -260,7 +273,7 @@ export class GuideSystem extends createSystem({
     if (nextShoot >= 0) {
       if (this.queries.heldShears.entities.size === 0) {
         this.line = 'pickShears';
-        this.targetOf(this.first(this.queries.shears.entities)?.object3D, 0.02);
+        this.targetOf(this.shearsRef.entity?.object3D, 0.02);
       } else {
         this.line = 'touchShoot';
         this.targetOf(bonsaiObj?.getObjectByName(shoots[nextShoot])?.getObjectByName('CutPoint'), -0.05);
@@ -270,7 +283,7 @@ export class GuideSystem extends createSystem({
 
     if (this.queries.heldCans.entities.size === 0) {
       this.line = 'pickCan';
-      this.targetOf(this.first(this.queries.cans.entities)?.object3D, 0.12);
+      this.targetOf(this.canRef.entity?.object3D, 0.12);
     } else if (this.watering?.wateringBonsai) {
       this.line = 'pouring';
       this.targetOf(bonsaiObj, 0.18);
@@ -283,25 +296,26 @@ export class GuideSystem extends createSystem({
 
   /** Hover beside the breathing orb, level with it, so both stay in view. */
   private targetNextToOrb(): void {
-    const orb = this.first(this.queries.orbs.entities)?.object3D;
+    const orb = this.orbRef.entity?.object3D;
     if (!orb) return;
     orb.getWorldPosition(this.target);
     this.target.x += 0.14;
-    this.target.y -= this.first(this.queries.guide.entities)?.getValue(FireflyGuide, 'hoverHeight') ?? 0.1;
+    this.target.y -= this.guideRef.entity?.getValue(FireflyGuide, 'hoverHeight') ?? 0.1;
   }
 
   /** Targets a tracked hand (right first); false when neither is tracked. */
   private targetHand(): boolean {
-    for (const space of [this.player.gripSpaces.right, this.player.gripSpaces.left]) {
-      if (!space) continue;
-      space.getWorldPosition(this.toward);
-      const d = this.toward.distanceTo(this.head);
-      if (d < HAND_MIN || d > HAND_MAX) continue;
-      this.target.copy(this.toward);
-      this.target.y -= 0.02;
-      return true;
-    }
-    return false;
+    return this.targetSpace(this.player.gripSpaces.right) || this.targetSpace(this.player.gripSpaces.left);
+  }
+
+  private targetSpace(space: Object3D | undefined): boolean {
+    if (!space) return false;
+    space.getWorldPosition(this.toward);
+    const d = this.toward.distanceTo(this.head);
+    if (d < HAND_MIN || d > HAND_MAX) return false;
+    this.target.copy(this.toward);
+    this.target.y -= 0.02;
+    return true;
   }
 
   /** Keeps a world point inside the gaze cone, at the same distance from the head. */
@@ -340,7 +354,7 @@ export class GuideSystem extends createSystem({
   }
 
   private moveFirefly(delta: number, mood: Mood): void {
-    const guide = this.first(this.queries.guide.entities);
+    const guide = this.guideRef.entity;
     const obj = guide?.object3D;
     if (!guide || !obj) return;
     const hover = guide.getValue(FireflyGuide, 'hoverHeight') ?? 0.1;
@@ -387,10 +401,5 @@ export class GuideSystem extends createSystem({
         seed.dispose();
       }
     }
-  }
-
-  private first(set: Set<Entity>): Entity | undefined {
-    for (const e of set) return e;
-    return undefined;
   }
 }
