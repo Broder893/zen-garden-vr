@@ -69,6 +69,111 @@
       }
     },
     {
+      "id": "bonsai",
+      "name": "Bonsai",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "bonsai"
+      },
+      "transform": {
+        "position": [
+          0,
+          0.77,
+          -0.58
+        ]
+      },
+      "components": {
+        "Bonsai": {
+          "stage": 0,
+          "water": 0,
+          "prunedMask": 0
+        }
+      }
+    },
+    {
+      "id": "watering-can",
+      "name": "Watering Can",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "watering-can"
+      },
+      "transform": {
+        "position": [
+          0.27,
+          0.77,
+          -0.45
+        ],
+        "rotationDeg": [
+          0,
+          180,
+          0
+        ]
+      },
+      "components": {
+        "OneHandGrabbable": {},
+        "WateringCan": {
+          "pourThreshold": 0.35
+        },
+        "ReturnHome": {
+          "captured": false,
+          "homePosition": [
+            0,
+            0,
+            0
+          ],
+          "homeQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "shears",
+      "name": "Pruning Shears",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "shears"
+      },
+      "transform": {
+        "position": [
+          -0.26,
+          0.77,
+          -0.42
+        ],
+        "rotationDeg": [
+          0,
+          25,
+          0
+        ]
+      },
+      "components": {
+        "OneHandGrabbable": {},
+        "PruningShears": {
+          "cutRadius": 0.07
+        },
+        "ReturnHome": {
+          "captured": false,
+          "homePosition": [
+            0,
+            0,
+            0
+          ],
+          "homeQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      }
+    },
+    {
       "id": "lantern-light",
       "name": "Lantern Light",
       "transform": {
