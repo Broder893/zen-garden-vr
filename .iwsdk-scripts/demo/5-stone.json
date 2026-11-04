@@ -1,0 +1,54 @@
+{
+ "device": "hand-right",
+ "body": "auto",
+ "steps": [
+  {
+   "label": "reach stone",
+   "target": "Meditation Stone",
+   "orientation": {
+    "fingers": [
+     0,
+     0,
+     -1
+    ],
+    "palm": [
+     0,
+     -1,
+     0
+    ]
+   },
+   "pinch": {
+    "value": 1,
+    "at": "arrival"
+   },
+   "duration": 1.6,
+   "approach": {
+    "distance": 0.1,
+    "normal": "up"
+   }
+  },
+  {
+   "label": "hold",
+   "duration": 0.3
+  },
+  {
+   "label": "release",
+   "pinch": 0,
+   "duration": 0.2
+  },
+  {
+   "label": "rest",
+   "position": {
+    "x": 0.25,
+    "y": 0.85,
+    "z": -0.15
+   },
+   "anchor": "grasp",
+   "duration": 1.5,
+   "depart": {
+    "distance": 0.08,
+    "normal": "up"
+   }
+  }
+ ]
+}

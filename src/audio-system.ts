@@ -87,6 +87,14 @@ export class GardenAudioSystem extends createSystem({
       () => this.voice.dispose(),
     );
     log(`context ${this.engine.ctx?.state ?? 'unavailable'}, voice ${this.voice.available}`);
+    if (import.meta.env.DEV) {
+      // Dev only: lets .iwsdk-scripts/record.mjs capture the picture and the app's sound.
+      (window as unknown as { __zenDev?: unknown }).__zenDev = {
+        ctx: this.engine.ctx,
+        master: this.engine.master,
+        renderer: this.renderer,
+      };
+    }
   }
 
   update(delta: number): void {

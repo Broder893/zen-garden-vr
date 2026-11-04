@@ -1,0 +1,46 @@
+{
+ "device": "hand-right",
+ "body": "auto",
+ "steps": [
+  {
+   "label": "reach seed",
+   "target": "Seed",
+   "orientation": {
+    "fingers": [
+     0,
+     0,
+     -1
+    ],
+    "palm": [
+     0,
+     -1,
+     0
+    ]
+   },
+   "pinch": {
+    "value": 1,
+    "at": "arrival"
+   },
+   "duration": 1.6
+  },
+  {
+   "label": "hold",
+   "duration": 0.4
+  },
+  {
+   "label": "release",
+   "pinch": 0,
+   "duration": 0.2
+  },
+  {
+   "label": "rest",
+   "position": {
+    "x": 0.25,
+    "y": 0.92,
+    "z": -0.2
+   },
+   "anchor": "grasp",
+   "duration": 1.2
+  }
+ ]
+}

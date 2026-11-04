@@ -1,0 +1,70 @@
+{
+ "device": "hand-right",
+ "body": "auto",
+ "steps": [
+  {
+   "label": "raise hand",
+   "position": {
+    "x": 0.12,
+    "y": 1.0,
+    "z": -0.35
+   },
+   "anchor": "wrist",
+   "orientation": {
+    "fingers": [
+     0,
+     0.3,
+     -1
+    ],
+    "palm": [
+     0,
+     1,
+     0
+    ]
+   },
+   "duration": 1.6
+  },
+  {
+   "label": "hold",
+   "duration": 1.5
+  },
+  {
+   "label": "drift left",
+   "position": {
+    "x": -0.08,
+    "y": 1.04,
+    "z": -0.38
+   },
+   "anchor": "wrist",
+   "duration": 2.5
+  },
+  {
+   "label": "hold",
+   "duration": 1.5
+  },
+  {
+   "label": "drift right",
+   "position": {
+    "x": 0.15,
+    "y": 0.98,
+    "z": -0.33
+   },
+   "anchor": "wrist",
+   "duration": 2.5
+  },
+  {
+   "label": "hold",
+   "duration": 1.5
+  },
+  {
+   "label": "lower",
+   "position": {
+    "x": 0.25,
+    "y": 0.85,
+    "z": -0.15
+   },
+   "anchor": "wrist",
+   "duration": 1.5
+  }
+ ]
+}

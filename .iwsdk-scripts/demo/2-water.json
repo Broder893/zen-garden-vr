@@ -1,0 +1,87 @@
+{
+ "device": "hand-right",
+ "body": "auto",
+ "steps": [
+  {
+   "label": "grab can",
+   "target": "Watering Can",
+   "orientation": {
+    "fingers": [
+     0,
+     0,
+     -1
+    ],
+    "palm": [
+     0,
+     -1,
+     0
+    ]
+   },
+   "pinch": {
+    "value": 1,
+    "at": "arrival"
+   },
+   "duration": 1.6
+  },
+  {
+   "label": "lift",
+   "position": {
+    "x": 0.12,
+    "y": 1.0,
+    "z": -0.55
+   },
+   "duration": 1.4
+  },
+  {
+   "label": "tilt",
+   "orientation": {
+    "fingers": [
+     0,
+     0,
+     -1
+    ],
+    "palm": [
+     0.77,
+     -0.64,
+     0
+    ]
+   },
+   "duration": 0.9
+  },
+  {
+   "label": "pour",
+   "duration": 3.6
+  },
+  {
+   "label": "level",
+   "orientation": {
+    "fingers": [
+     0,
+     0,
+     -1
+    ],
+    "palm": [
+     0,
+     -1,
+     0
+    ]
+   },
+   "duration": 0.6
+  },
+  {
+   "label": "release",
+   "pinch": 0,
+   "duration": 0.2
+  },
+  {
+   "label": "rest",
+   "position": {
+    "x": 0.3,
+    "y": 0.92,
+    "z": -0.2
+   },
+   "anchor": "grasp",
+   "duration": 1.2
+  }
+ ]
+}
