@@ -62,7 +62,7 @@ Multiplayer, più ambienti, guida con AI, passthrough, personaggi umani animati.
 
 ## Audio e licenze
 - Musica: solo brani con licenza libera che permetta l'uso in un'app (es. CC0 o royalty-free con uso consentito), oppure originali. **Annotare fonte e licenza di ogni file** in `CREDITS.md`.
-- Voce guida: registrata dall'utente oppure sintetica con termini che permettano l'uso. In entrambi i casi in inglese, con sottotitoli. *(Scelta ancora da fare.)*
+- Voce guida: registrata dall'utente oppure sintetica con termini che permettano l'uso. In entrambi i casi in inglese, con sottotitoli. **Scelta (4 nov 2026): voce sintetica del dispositivo** (Web Speech API, `src/audio/voice.ts`), nessun file vocale distribuito; i sottotitoli restano sempre attivi come riserva.
 
 ## Test senza visore
 - Usa un emulatore WebXR nel browser (verifica nella documentazione IWSDK quale è consigliato).
