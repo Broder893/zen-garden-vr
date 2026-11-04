@@ -14,11 +14,13 @@ import { SHOOTS_BY_STAGE } from './bonsai-growth.js';
 import {
   Bonsai,
   BonsaiStage,
+  BreathOrb,
   FireflyGuide,
   PruningShears,
   Seed,
   WateringCan,
 } from './garden-components.js';
+import { MeditationCue, MeditationSystem } from './meditation.js';
 import { PruningSystem } from './pruning.js';
 import { WateringSystem } from './watering.js';
 
@@ -28,6 +30,7 @@ const MOOD = {
   water: new Color('#8fd3ff'),
   prune: new Color('#b8ff7a'),
   bloom: new Color('#ffb3d1'),
+  calm: new Color('#b9a8ff'),
 } as const;
 type Mood = keyof typeof MOOD;
 
@@ -45,9 +48,29 @@ export const LINES = {
   touchShoot: 'Touch a glowing shoot with the blades.',
   snip: 'Snip! Nicely done.',
   bloomed: 'Your bonsai is in bloom. Well done.',
-  rest: 'Rest here a while, or come back tomorrow.',
+  rest: 'Rest here, or pinch the stone to breathe.',
+  meditateHint: 'Any time, pinch the glowing stone to breathe.',
+  breatheIntro: 'Let us breathe together. Follow the light.',
+  breatheIn: 'Breathe in...',
+  breatheHold: 'Hold...',
+  breatheOut: 'And breathe out...',
+  breatheSoften: 'Breathe out... let your shoulders soften.',
+  breatheNotice: 'Breathe in... notice the cool air.',
+  meditatePaused: 'Paused. Pinch the stone to continue.',
+  meditateDone: 'Well done. Come back to breathe any time.',
 } as const;
 export type LineId = keyof typeof LINES;
+
+const CUE_LINES: Record<Exclude<MeditationCue, null>, LineId> = {
+  intro: 'breatheIntro',
+  in: 'breatheIn',
+  hold: 'breatheHold',
+  out: 'breatheOut',
+  soften: 'breatheSoften',
+  notice: 'breatheNotice',
+  paused: 'meditatePaused',
+  done: 'meditateDone',
+};
 
 /** How long a one-off event line stays before the next task line returns. */
 const EVENT_SECONDS = 3;
@@ -67,6 +90,7 @@ export class GuideSystem extends createSystem({
   heldCans: { required: [WateringCan, Grabbed] },
   shears: { required: [PruningShears] },
   heldShears: { required: [PruningShears, Grabbed] },
+  orbs: { required: [BreathOrb] },
 }) {
   /** Current line id (read by audio/voice later). */
   line: LineId = 'plantSeed';
@@ -88,11 +112,14 @@ export class GuideSystem extends createSystem({
   private watering?: WateringSystem;
   private pruning?: PruningSystem;
   private grab?: GrabSystem;
+  private meditation?: MeditationSystem;
+  private hintShown = false;
 
   init(): void {
     this.watering = this.world.getSystem(WateringSystem);
     this.pruning = this.world.getSystem(PruningSystem);
     this.grab = this.world.getSystem(GrabSystem);
+    this.meditation = this.world.getSystem(MeditationSystem);
 
     const panel = this.world.getSceneObject<UIKitMLAsset>('subtitle-panel');
     this.panel = panel ?? null;
@@ -131,8 +158,19 @@ export class GuideSystem extends createSystem({
     this.watchEvents(bonsai);
 
     if (this.eventLeft > 0) this.eventLeft -= delta;
-    const mood = this.chooseTask(bonsai);
-    this.setLine(this.eventLeft > 0 && this.event ? this.event : this.line);
+    const cue = this.meditation?.cue ?? null;
+    let mood: Mood;
+    if (cue) {
+      // A breathing session owns the voice and the firefly until it ends.
+      mood = 'calm';
+      this.eventLeft = 0;
+      this.line = CUE_LINES[cue];
+      this.targetNextToOrb();
+      this.setLine(this.line);
+    } else {
+      mood = this.chooseTask(bonsai);
+      this.setLine(this.eventLeft > 0 && this.event ? this.event : this.line);
+    }
     this.moveFirefly(delta, mood);
     this.billboardPanel();
   }
@@ -150,6 +188,11 @@ export class GuideSystem extends createSystem({
       if (stage === BonsaiStage.Blooming) this.showEvent('bloomed', EVENT_SECONDS + 2);
     }
     this.lastStage = stage;
+    // After the first growth event, point out the stone once.
+    if (!this.hintShown && this.lastStage >= BonsaiStage.Young && this.eventLeft <= 0) {
+      this.hintShown = true;
+      if (!this.meditation?.active) this.showEvent('meditateHint', EVENT_SECONDS + 1);
+    }
     const cuts = this.pruning?.cuts ?? 0;
     if (cuts !== this.lastCuts && this.eventLeft <= 0) this.showEvent('snip', SNIP_SECONDS);
     this.lastCuts = cuts;
@@ -200,6 +243,15 @@ export class GuideSystem extends createSystem({
     return 'water';
   }
 
+  /** Hover beside the breathing orb, level with it, so both stay in view. */
+  private targetNextToOrb(): void {
+    const orb = this.first(this.queries.orbs.entities)?.object3D;
+    if (!orb) return;
+    orb.getWorldPosition(this.target);
+    this.target.x += 0.14;
+    this.target.y -= this.first(this.queries.guide.entities)?.getValue(FireflyGuide, 'hoverHeight') ?? 0.1;
+  }
+
   /** Target = object's world position raised by `lift` metres (plus hover height). */
   private targetOf(obj: Object3D | undefined, lift: number): void {
     if (!obj) return;
@@ -237,7 +289,12 @@ export class GuideSystem extends createSystem({
     }
     this.color.lerp(MOOD[mood], 1 - Math.exp(-3 * delta));
     this.flash = Math.max(0, this.flash - delta * 1.5);
-    const pulse = 1 + 0.12 * Math.sin(t * 3) + 0.25 * this.flash;
+    // In a breathing session the firefly swells with the breath and dims when paused.
+    const med = this.meditation;
+    const pulse =
+      med?.active && mood === 'calm'
+        ? (med.paused ? 0.7 : 0.85 + 0.4 * med.fullness) + 0.15 * this.flash
+        : 1 + 0.12 * Math.sin(t * 3) + 0.25 * this.flash;
     obj.scale.setScalar(pulse);
     for (let i = 1; i < this.mats.length; i++) this.mats[i].color.copy(this.color);
   }

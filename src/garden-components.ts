@@ -35,3 +35,15 @@ export const Seed = createComponent('Seed', {});
 export const FireflyGuide = createComponent('FireflyGuide', {
   hoverHeight: { type: Types.Float32, default: 0.1, min: 0, max: 0.4, help: 'Metres above the current task target' },
 });
+
+/** The stone that starts and pauses a guided breathing session when pinched. */
+export const MeditationStone = createComponent('MeditationStone', {
+  // Limits keep the longest session within the 3 minutes the brief allows.
+  breaths: { type: Types.Int8, default: 6, min: 1, max: 10, label: 'Breaths per session' },
+  inhaleSeconds: { type: Types.Float32, default: 4, min: 2, max: 6 },
+  holdSeconds: { type: Types.Float32, default: 2, min: 0, max: 4 },
+  exhaleSeconds: { type: Types.Float32, default: 6, min: 2, max: 8 },
+});
+
+/** Tag: the orb that grows on each inhale and shrinks on each exhale. */
+export const BreathOrb = createComponent('BreathOrb', {});

@@ -200,6 +200,69 @@
       }
     },
     {
+      "id": "meditation-stone",
+      "name": "Meditation Stone",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "meditation-stone"
+      },
+      "transform": {
+        "position": [
+          0.08,
+          0.77,
+          -0.27
+        ],
+        "rotationDeg": [
+          0,
+          -20,
+          0
+        ]
+      },
+      "components": {
+        "OneHandGrabbable": {},
+        "MeditationStone": {
+          "breaths": 6,
+          "inhaleSeconds": 4,
+          "holdSeconds": 2,
+          "exhaleSeconds": 6
+        },
+        "ReturnHome": {
+          "captured": false,
+          "homePosition": [
+            0,
+            0,
+            0
+          ],
+          "homeQuaternion": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": "breath-orb",
+      "name": "Breath Orb",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "breath-orb"
+      },
+      "transform": {
+        "position": [
+          0,
+          0.98,
+          -0.45
+        ]
+      },
+      "components": {
+        "BreathOrb": {}
+      }
+    },
+    {
       "id": "firefly",
       "name": "Firefly",
       "framingRole": "content",

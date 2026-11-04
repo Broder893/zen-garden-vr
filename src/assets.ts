@@ -1,6 +1,7 @@
 import { AssetType, defineAssets } from '@iwsdk/core';
 import { createBonsai } from './scene-assets/bonsai.scene-asset.js';
 import { createFirefly, createSeed } from './scene-assets/guide.scene-asset.js';
+import { createBreathOrb, createMeditationStone } from './scene-assets/meditation.scene-asset.js';
 import { createZenTable } from './scene-assets/table.scene-asset.js';
 import { createShears, createWateringCan } from './scene-assets/tools.scene-asset.js';
 
@@ -17,5 +18,7 @@ export default defineAssets({
   shears: createShears(),
   firefly: createFirefly(),
   seed: createSeed(),
+  'meditation-stone': createMeditationStone(),
+  'breath-orb': createBreathOrb(),
   'subtitle-panel': ui('subtitle.uikitml', 'Subtitle Panel'),
 });
