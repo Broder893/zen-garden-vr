@@ -7,6 +7,7 @@ import { GuideSystem } from './guide.js';
 import { MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
+import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
 
@@ -23,5 +24,6 @@ World.create(
     .registerSystem(PersistenceSystem)
     .registerSystem(GuideSystem)
     .registerSystem(GardenAudioSystem)
-    .registerSystem(EntranceSystem);
+    .registerSystem(EntranceSystem)
+    .registerSystem(VisitFlowerSystem);
 });

@@ -24,6 +24,7 @@ import {
 import { MeditationCue, MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
+import { visitGrowsFlower } from './visit-flowers.js';
 import { WateringSystem } from './watering.js';
 
 /** Firefly moods: each tints the glow so the task reads before the words do. */
@@ -40,6 +41,7 @@ type Mood = keyof typeof MOOD;
 export const LINES = {
   plantSeed: 'Welcome. Pinch the glowing seed to plant it.',
   welcomeBack: 'Welcome back. Your little tree missed you.',
+  welcomeGift: 'Welcome back. A new flower grew while you were away.',
   planted: 'Your seed is planted. Let us help it grow.',
   pickCan: 'Pinch the watering can to lift it.',
   tiltCan: 'Tilt the can over the little tree to pour.',
@@ -168,7 +170,10 @@ export class GuideSystem extends createSystem({
     // Greet on the first moment in VR, not at page load (it would expire unseen).
     if (!this.greeted && this.world.visibilityState.peek() === VisibilityState.Visible) {
       this.greeted = true;
-      if (this.persistence?.returning) this.showEvent('welcomeBack', EVENT_SECONDS + 1);
+      const p = this.persistence;
+      if (p?.returning) {
+        this.showEvent(visitGrowsFlower(p.save.visits) ? 'welcomeGift' : 'welcomeBack', EVENT_SECONDS + 1);
+      }
     }
     if (this.eventLeft > 0) this.eventLeft -= delta;
     // After the first growth event, point out the stone once, straight after

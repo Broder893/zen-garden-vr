@@ -263,6 +263,188 @@
       }
     },
     {
+      "id": "visit-flower-1",
+      "name": "Visit Flower 1",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "visit-flower"
+      },
+      "transform": {
+        "position": [
+          -0.36,
+          0.77,
+          -0.76
+        ],
+        "rotationDeg": [
+          0,
+          53,
+          0
+        ]
+      },
+      "components": {
+        "VisitFlower": {
+          "order": 1
+        }
+      }
+    },
+    {
+      "id": "visit-flower-2",
+      "name": "Visit Flower 2",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "visit-flower"
+      },
+      "transform": {
+        "position": [
+          0.36,
+          0.77,
+          -0.76
+        ],
+        "rotationDeg": [
+          0,
+          106,
+          0
+        ]
+      },
+      "components": {
+        "VisitFlower": {
+          "order": 2
+        }
+      }
+    },
+    {
+      "id": "visit-flower-3",
+      "name": "Visit Flower 3",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "visit-flower"
+      },
+      "transform": {
+        "position": [
+          -0.15,
+          0.77,
+          -0.8
+        ],
+        "rotationDeg": [
+          0,
+          159,
+          0
+        ]
+      },
+      "components": {
+        "VisitFlower": {
+          "order": 3
+        }
+      }
+    },
+    {
+      "id": "visit-flower-4",
+      "name": "Visit Flower 4",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "visit-flower"
+      },
+      "transform": {
+        "position": [
+          0.17,
+          0.77,
+          -0.79
+        ],
+        "rotationDeg": [
+          0,
+          212,
+          0
+        ]
+      },
+      "components": {
+        "VisitFlower": {
+          "order": 4
+        }
+      }
+    },
+    {
+      "id": "visit-flower-5",
+      "name": "Visit Flower 5",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "visit-flower"
+      },
+      "transform": {
+        "position": [
+          -0.42,
+          0.77,
+          -0.6
+        ],
+        "rotationDeg": [
+          0,
+          265,
+          0
+        ]
+      },
+      "components": {
+        "VisitFlower": {
+          "order": 5
+        }
+      }
+    },
+    {
+      "id": "visit-flower-6",
+      "name": "Visit Flower 6",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "visit-flower"
+      },
+      "transform": {
+        "position": [
+          0.43,
+          0.77,
+          -0.62
+        ],
+        "rotationDeg": [
+          0,
+          318,
+          0
+        ]
+      },
+      "components": {
+        "VisitFlower": {
+          "order": 6
+        }
+      }
+    },
+    {
+      "id": "visit-flower-7",
+      "name": "Visit Flower 7",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "visit-flower"
+      },
+      "transform": {
+        "position": [
+          -0.41,
+          0.77,
+          -0.22
+        ],
+        "rotationDeg": [
+          0,
+          11,
+          0
+        ]
+      },
+      "components": {
+        "VisitFlower": {
+          "order": 7
+        }
+      }
+    },
+    {
       "id": "firefly",
       "name": "Firefly",
       "framingRole": "content",

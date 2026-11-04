@@ -47,3 +47,8 @@ export const MeditationStone = createComponent('MeditationStone', {
 
 /** Tag: the orb that grows on each inhale and shrinks on each exhale. */
 export const BreathOrb = createComponent('BreathOrb', {});
+
+/** A flower that appears on the Nth return visit (order 1 = second visit). */
+export const VisitFlower = createComponent('VisitFlower', {
+  order: { type: Types.Int8, default: 1, min: 1, max: 7, label: 'Appears on return visit #' },
+});

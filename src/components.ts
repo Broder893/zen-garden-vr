@@ -7,6 +7,7 @@ import {
   PruningShears,
   ReturnHome,
   Seed,
+  VisitFlower,
   WateringCan,
 } from './garden-components.js';
 
@@ -19,4 +20,5 @@ export default defineComponents([
   FireflyGuide,
   MeditationStone,
   BreathOrb,
+  VisitFlower,
 ]);
