@@ -1,5 +1,6 @@
 import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
+import { GardenAudioSystem } from './audio-system.js';
 import { BonsaiGrowthSystem } from './bonsai-growth.js';
 import { GuideSystem } from './guide.js';
 import { MeditationSystem } from './meditation.js';
@@ -17,5 +18,6 @@ World.create(
     .registerSystem(BonsaiGrowthSystem)
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
-    .registerSystem(GuideSystem);
+    .registerSystem(GuideSystem)
+    .registerSystem(GardenAudioSystem);
 });

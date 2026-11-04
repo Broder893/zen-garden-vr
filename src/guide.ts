@@ -92,8 +92,10 @@ export class GuideSystem extends createSystem({
   heldShears: { required: [PruningShears, Grabbed] },
   orbs: { required: [BreathOrb] },
 }) {
-  /** Current line id (read by audio/voice later). */
+  /** The task line chosen this frame (an event line may be showing instead; see shownLine). */
   line: LineId = 'plantSeed';
+  /** The line on screen right now (task or event); the voice speaks this. */
+  shownLine: LineId = 'plantSeed';
   private shownText = '';
   private subtitle: UIKit.Text | null = null;
   private panel: Object3D | null = null;
@@ -158,6 +160,12 @@ export class GuideSystem extends createSystem({
     this.watchEvents(bonsai);
 
     if (this.eventLeft > 0) this.eventLeft -= delta;
+    // After the first growth event, point out the stone once, straight after
+    // the event line so no task line flashes (and gets half-spoken) in between.
+    if (!this.hintShown && this.lastStage >= BonsaiStage.Young && this.eventLeft <= 0) {
+      this.hintShown = true;
+      if (!this.meditation?.active) this.showEvent('meditateHint', EVENT_SECONDS + 1);
+    }
     const cue = this.meditation?.cue ?? null;
     let mood: Mood;
     if (cue) {
@@ -188,11 +196,6 @@ export class GuideSystem extends createSystem({
       if (stage === BonsaiStage.Blooming) this.showEvent('bloomed', EVENT_SECONDS + 2);
     }
     this.lastStage = stage;
-    // After the first growth event, point out the stone once.
-    if (!this.hintShown && this.lastStage >= BonsaiStage.Young && this.eventLeft <= 0) {
-      this.hintShown = true;
-      if (!this.meditation?.active) this.showEvent('meditateHint', EVENT_SECONDS + 1);
-    }
     const cuts = this.pruning?.cuts ?? 0;
     if (cuts !== this.lastCuts && this.eventLeft <= 0) this.showEvent('snip', SNIP_SECONDS);
     this.lastCuts = cuts;
@@ -263,6 +266,7 @@ export class GuideSystem extends createSystem({
     const text = LINES[id];
     if (text === this.shownText) return;
     this.shownText = text;
+    this.shownLine = id;
     this.flash = 1;
     this.subtitle?.setProperties({ text });
   }
