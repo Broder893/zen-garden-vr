@@ -47,7 +47,7 @@ const flowerMat = new MeshStandardMaterial({
 });
 
 const padGeo = new IcosahedronGeometry(1, 1);
-const flowerGeo = new IcosahedronGeometry(0.007, 0);
+const flowerGeo = new IcosahedronGeometry(0.011, 0);
 const knuckleGeo = new SphereGeometry(1, 10, 8);
 
 const v = (x: number, y: number, z: number) => new Vector3(x, y, z);

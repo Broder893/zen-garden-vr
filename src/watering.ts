@@ -17,6 +17,8 @@ const EMIT_PER_SEC = 45;
 const FILL_SECONDS = 3;
 /** Horizontal metres between spout and trunk that still count as watering. */
 const REACH = 0.22;
+/** After the bonsai grows, pause filling so one long pour can't skip a stage. */
+const GRACE_SECONDS = 1.5;
 
 /**
  * Tilting a held watering can spout-down pours drops. Pouring while the spout
@@ -41,6 +43,8 @@ export class WateringSystem extends createSystem({
   private m = new Matrix4();
   private hidden = new Matrix4().makeScale(0, 0, 0);
   private floorY = 0;
+  private lastStage = -1;
+  private stageAge = 0;
   /** True while any can is pouring this frame (read by audio/guide later). */
   pouring = false;
   /** True while pouring lands on the bonsai. */
@@ -75,6 +79,12 @@ export class WateringSystem extends createSystem({
     if (bonsaiObj) {
       bonsaiObj.getWorldPosition(this.target);
       this.floorY = this.target.y + 0.05;
+      const stage = bonsai?.getValue(Bonsai, 'stage') ?? 0;
+      if (stage !== this.lastStage) {
+        this.lastStage = stage;
+        this.stageAge = 0;
+      }
+      this.stageAge += delta;
     }
     this.pouring = false;
     this.wateringBonsai = false;
@@ -97,7 +107,7 @@ export class WateringSystem extends createSystem({
       if (dx * dx + dz * dz > REACH * REACH || this.tip.y < this.target.y) continue;
       this.wateringBonsai = true;
       const water = bonsai.getValue(Bonsai, 'water') ?? 0;
-      if (water < 1) bonsai.setValue(Bonsai, 'water', Math.min(1, water + delta / FILL_SECONDS));
+      if (water < 1 && this.stageAge >= GRACE_SECONDS) bonsai.setValue(Bonsai, 'water', Math.min(1, water + delta / FILL_SECONDS));
     }
     this.stepDrops(delta);
   }

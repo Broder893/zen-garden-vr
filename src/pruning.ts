@@ -4,6 +4,8 @@ import { Bonsai, PruningShears } from './garden-components.js';
 
 const SNIP_SECONDS = 0.25;
 const OPEN_YAW = 0.12;
+/** New shoots can't be cut until they have grown in (avoids instant cuts next to held shears). */
+const GRACE_SECONDS = 1.5;
 
 interface ShearsParts {
   tip: Object3D;
@@ -25,6 +27,10 @@ export class PruningSystem extends createSystem({
   private cutPoints = new Map<string, Object3D>();
   private tipPos = new Vector3();
   private cutPos = new Vector3();
+  private lastStage = -1;
+  private stageAge = 0;
+  /** Bit i set once the blades have been away from shoot i; a cut needs the blades to arrive. */
+  private armed = 0;
   /** Increments on every cut (read by audio/guide later). */
   cuts = 0;
 
@@ -61,6 +67,13 @@ export class PruningSystem extends createSystem({
 
     for (const bonsai of this.queries.bonsai.entities) {
       const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
+      if (stage !== this.lastStage) {
+        this.lastStage = stage;
+        this.stageAge = 0;
+        this.armed = 0;
+      }
+      this.stageAge += delta;
+      if (this.stageAge < GRACE_SECONDS) continue;
       const shoots = SHOOTS_BY_STAGE[stage];
       if (!shoots) continue;
       let mask = bonsai.getValue(Bonsai, 'prunedMask') ?? 0;
@@ -74,7 +87,11 @@ export class PruningSystem extends createSystem({
           const cp = this.cutPoints.get(shoots[i]);
           if (!cp) continue;
           cp.getWorldPosition(this.cutPos);
-          if (this.cutPos.distanceTo(this.tipPos) > radius) continue;
+          if (this.cutPos.distanceTo(this.tipPos) > radius) {
+            this.armed |= 1 << i;
+            continue;
+          }
+          if (!(this.armed & (1 << i))) continue;
           mask |= 1 << i;
           p.snip = 0;
           this.cuts++;
