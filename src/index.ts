@@ -17,6 +17,7 @@ import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
 import { RakeSystem } from './rake.js';
 import { SeasonSystem } from './season.js';
+import { WeatherSystem } from './weather.js';
 import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
@@ -32,6 +33,7 @@ World.create(
     .registerSystem(HealthSystem)
     .registerSystem(SeasonSystem)
     .registerSystem(DayNightSystem)
+    .registerSystem(WeatherSystem)
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
     .registerSystem(EntranceSystem)
@@ -62,6 +64,7 @@ World.create(
       health: world.getSystem(HealthSystem),
       season: world.getSystem(SeasonSystem),
       dayNight: world.getSystem(DayNightSystem),
+      weather: world.getSystem(WeatherSystem),
     };
   }
 });

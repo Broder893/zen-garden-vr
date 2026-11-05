@@ -9,6 +9,7 @@ import { MeditationPhase, MeditationSystem } from './meditation.js';
 import { PruningSystem } from './pruning.js';
 import { RakeSystem } from './rake.js';
 import { HealthSystem } from './health.js';
+import { WeatherSystem } from './weather.js';
 import { Health, HealthState } from './save/plant-health.js';
 import { WateringSystem } from './watering.js';
 
@@ -61,6 +62,7 @@ export class GardenAudioSystem extends createSystem({
   private wasRunning = false;
   private rake?: RakeSystem;
   private health?: HealthSystem;
+  private weather?: WeatherSystem;
   private lastHealth: HealthState = Health.Healthy;
 
   init(): void {
@@ -73,6 +75,7 @@ export class GardenAudioSystem extends createSystem({
     this.meditation = this.world.getSystem(MeditationSystem);
     this.rake = this.world.getSystem(RakeSystem);
     this.health = this.world.getSystem(HealthSystem);
+    this.weather = this.world.getSystem(WeatherSystem);
 
     // Browsers only start audio after a user gesture; the Enter VR click counts.
     const unlock = () => this.engine.unlock();
@@ -120,6 +123,9 @@ export class GardenAudioSystem extends createSystem({
     this.waterSounds(delta);
     this.engine.setRake(this.rake?.raking ? 1 : 0);
     this.healthCues();
+    // Weather sounds, in steps so the loop's gain is not re-set every frame.
+    this.engine.setRain(Math.round((this.weather?.rainLevel ?? 0) * 10) / 10);
+    this.engine.setWind(Math.round((this.weather?.windLevel ?? 0) * (0.75 + 0.25 * Math.sin(this.time * 0.6)) * 10) / 10);
     this.gardenEvents();
     this.meditationEvents();
     this.speak();

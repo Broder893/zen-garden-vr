@@ -31,6 +31,7 @@ import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { BreathBreakSystem } from './breath-break.js';
 import { ComfortSystem } from './comfort.js';
 import { HealthSystem } from './health.js';
+import { WeatherSystem } from './weather.js';
 import { Health, HealthState } from './save/plant-health.js';
 import { levelFor } from './save/growth-levels.js';
 import { EntranceSystem } from './entrance.js';
@@ -105,6 +106,9 @@ export const LINES = {
   tenseBreatheDwell: 'Your tree looks tense. Look at the stone to breathe.',
   recovered: 'Your tree is feeling better.',
   wrongCut: 'That branch was healthy. Trim only the glowing shoots.',
+  // Weather (src/weather.ts).
+  rainStarts: 'A gentle rain. It is watering your tree.',
+  breezeStarts: 'A soft breeze. The soil dries, the leaves dance.',
   breakInviteTense: 'Your tree is tense. Let us breathe together.',
   levelPot: 'Level 6! Your tree has a new glazed pot.',
   levelLantern: 'Level 7! A stone lantern now glows by your tree.',
@@ -267,6 +271,7 @@ export class GuideSystem extends createSystem({
     this.health = this.world.getSystem(HealthSystem);
     this.breathBreak = this.world.getSystem(BreathBreakSystem);
     this.breathBreak?.attachGuide(this);
+    this.world.getSystem(WeatherSystem)?.attachGuide(this);
 
     const panel = this.world.getSceneObject<UIKitMLAsset>('subtitle-panel');
     this.panel = panel ?? null;

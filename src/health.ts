@@ -53,6 +53,10 @@ export class HealthSystem extends createSystem({
   state: HealthState = Health.Healthy;
   /** Displayed wilt, 0..1 (eases toward the stress). */
   wilt = 0;
+  /** Sway angle (radians) from the breeze, set by WeatherSystem. */
+  sway = 0;
+  /** Extra easing of stress and excess water (a breeze dries the soil), set by WeatherSystem. */
+  weatherEase = 1;
   /** Times a breathing session brought the tree back to health (this visit). */
   healedByBreath = 0;
   private sessionsSeen = 0;
@@ -110,7 +114,7 @@ export class HealthSystem extends createSystem({
     const med = this.meditation;
     // Breathing near the tree is its best care: everything eases faster meanwhile...
     const breathing = !!med?.active && !med.paused;
-    const k = breathing ? BREATH_RECOVERY_FACTOR : 1;
+    const k = (breathing ? BREATH_RECOVERY_FACTOR : 1) * this.weatherEase;
     if (overwater > 0) {
       overwater = Math.max(0, overwater - (delta / OVERWATER_DRAIN_SECONDS) * k);
       b.setValue(Bonsai, 'overwater', overwater);
@@ -137,7 +141,9 @@ export class HealthSystem extends createSystem({
     for (const g of this.stages) {
       // The canopy sinks and leans a little (uniform growth scale lives in x/z).
       g.scale.y = g.scale.x * (1 - DROOP * w);
-      g.rotation.z = LEAN * w;
+      // Wilt leans it; a breeze (WeatherSystem) sways it.
+      g.rotation.z = LEAN * w + this.sway;
+      g.rotation.x = this.sway * 0.5;
     }
     const toStressed = Math.min(1, w / 0.5);
     const toWilted = Math.max(0, (w - 0.5) / 0.5);

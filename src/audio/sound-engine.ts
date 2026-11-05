@@ -27,6 +27,8 @@ export class SoundEngine {
   /** Loop nodes exist only while sounding, so silence costs nothing. */
   private pour: NoiseLoop = { level: 0, src: null, gain: null };
   private rake: NoiseLoop = { level: 0, src: null, gain: null };
+  private rain: NoiseLoop = { level: 0, src: null, gain: null };
+  private wind: NoiseLoop = { level: 0, src: null, gain: null };
 
   constructor() {
     let ctx: AudioContext | null = null;
@@ -173,6 +175,16 @@ export class SoundEngine {
   /** Fingers drawing in the sand: a soft, low hiss (0 = off). */
   setRake(level: number): void {
     this.setLoop(this.rake, level, 'lowpass', 700, 0.7, 0.1);
+  }
+
+  /** Rain on leaves and sand: a soft, wide hiss (0 = off). */
+  setRain(level: number): void {
+    this.setLoop(this.rain, level, 'lowpass', 2600, 0.5, 0.14);
+  }
+
+  /** A breeze through the bamboo: a low, breathy rush (0 = off). */
+  setWind(level: number): void {
+    this.setLoop(this.wind, level, 'bandpass', 420, 0.45, 0.16);
   }
 
   /** Starts, adjusts or fades out one filtered-noise loop. */
