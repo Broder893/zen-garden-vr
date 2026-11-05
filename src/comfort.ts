@@ -11,6 +11,7 @@ import {
 import {
   MeditationStone,
   PruningShears,
+  ReturnHome,
   Seed,
   WateringCan,
 } from './garden-components.js';
@@ -57,6 +58,16 @@ const HIGHLIGHT = new Color('#ffd23f');
 const HIGHLIGHT_INTENSITY = 0.4;
 const SUBTITLE_SCALE = { normal: 0.8, large: 1.2 };
 const PANEL_SCALE = { normal: 0.6, large: 0.75 };
+/** Where the tools rest for each hands setting: [x, z, yaw degrees] on the table top. */
+const TOOL_LAYOUT: Record<Hands, { can: [number, number, number]; shears: [number, number, number] }> = {
+  // Matches the authored scene: can on the right, shears on the left.
+  both: { can: [0.27, -0.45, 180], shears: [-0.26, -0.42, 25] },
+  // One hand: both tools on that hand's side, the shears nearer the player.
+  right: { can: [0.27, -0.47, 180], shears: [0.3, -0.27, 155] },
+  left: { can: [-0.27, -0.47, 0], shears: [-0.3, -0.29, 25] },
+};
+const TABLE_TOP_Y = 0.77;
+
 /** A second touch on the same button this soon is the same poke, not a new one. */
 const CLICK_GUARD_MS = 450;
 
@@ -118,7 +129,11 @@ export class ComfortSystem extends createSystem({
       this.cleanupFuncs.push(q.subscribe('qualify', bind));
       for (const e of q.entities) bind(e);
     }
-    this.cleanupFuncs.push(this.queries.stones.subscribe('qualify', () => (this.paceApplied = null)));
+    this.cleanupFuncs.push(
+      this.queries.stones.subscribe('qualify', () => (this.paceApplied = null)),
+      this.queries.cans.subscribe('qualify', () => this.applyLayout()),
+      this.queries.shears.subscribe('qualify', () => this.applyLayout()),
+    );
     this.applyAll();
   }
 
@@ -188,6 +203,7 @@ export class ComfortSystem extends createSystem({
     this.subtitlePill?.setProperties({ backgroundColor: t.subtitleBg, borderColor: t.border, borderWidth: s.highContrast ? 0.35 : 0.15 });
     this.subtitleText?.setProperties({ color: s.highContrast ? '#ffffff' : '#fff6dc' });
     this.subtitlePanel?.scale.setScalar(s.largeText ? SUBTITLE_SCALE.large : SUBTITLE_SCALE.normal);
+    this.applyLayout();
     for (const h of this.highlighted) {
       if (s.highContrast) {
         h.mat.emissive.copy(HIGHLIGHT);
@@ -197,6 +213,34 @@ export class ComfortSystem extends createSystem({
         h.mat.emissiveIntensity = h.intensity;
       }
     }
+  }
+
+  /** Moves the tools' resting places for the hands setting; ReturnHome glides them there. */
+  private applyLayout(): void {
+    const layout = TOOL_LAYOUT[this.settings.hands];
+    for (const e of this.queries.cans.entities) this.setHome(e, layout.can);
+    for (const e of this.queries.shears.entities) this.setHome(e, layout.shears);
+  }
+
+  private setHome(e: Entity, [x, z, yawDeg]: [number, number, number]): void {
+    if (!e.hasComponent(ReturnHome)) return;
+    const pos = e.getVectorView(ReturnHome, 'homePosition');
+    pos[0] = x;
+    pos[1] = TABLE_TOP_Y;
+    pos[2] = z;
+    const half = (yawDeg * Math.PI) / 360;
+    const q = e.getVectorView(ReturnHome, 'homeQuaternion');
+    q[0] = 0;
+    q[1] = Math.sin(half);
+    q[2] = 0;
+    q[3] = Math.cos(half);
+    // Already captured: ReturnHome must not overwrite this with the authored pose.
+    e.setValue(ReturnHome, 'captured', true);
+  }
+
+  /** True when this hand may be used (both, or the one chosen in one-hand mode). */
+  usesHand(side: 'left' | 'right'): boolean {
+    return this.settings.hands === 'both' || this.settings.hands === side;
   }
 
   private applyPace(): void {

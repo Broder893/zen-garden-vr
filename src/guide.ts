@@ -27,6 +27,7 @@ import { MeditationCue, MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
+import { ComfortSystem } from './comfort.js';
 import { EntranceSystem } from './entrance.js';
 import { WateringSystem } from './watering.js';
 import { GestureHint, GestureKind } from './effects/gesture-hint.js';
@@ -177,6 +178,7 @@ export class GuideSystem extends createSystem({
   private greeted = false;
   private persistence?: PersistenceSystem;
   private entrance?: EntranceSystem;
+  private comfort?: ComfortSystem;
 
   init(): void {
     this.watering = this.world.getSystem(WateringSystem);
@@ -192,6 +194,7 @@ export class GuideSystem extends createSystem({
     this.meditation = this.world.getSystem(MeditationSystem);
     this.persistence = this.world.getSystem(PersistenceSystem);
     this.entrance = this.world.getSystem(EntranceSystem);
+    this.comfort = this.world.getSystem(ComfortSystem);
 
     const panel = this.world.getSceneObject<UIKitMLAsset>('subtitle-panel');
     this.panel = panel ?? null;
@@ -416,7 +419,12 @@ export class GuideSystem extends createSystem({
 
   /** Targets a tracked hand (right first); false when neither is tracked. */
   private targetHand(): boolean {
-    return this.targetSpace(this.player.gripSpaces.right) || this.targetSpace(this.player.gripSpaces.left);
+    // In one-hand mode the firefly follows only the hand in use.
+    const c = this.comfort;
+    return (
+      ((c?.usesHand('right') ?? true) && this.targetSpace(this.player.gripSpaces.right)) ||
+      ((c?.usesHand('left') ?? true) && this.targetSpace(this.player.gripSpaces.left))
+    );
   }
 
   private targetSpace(space: Object3D | undefined): boolean {
