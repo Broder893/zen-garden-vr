@@ -5,6 +5,7 @@ import { BonsaiGrowthSystem } from './bonsai-growth.js';
 import { BreathBreakSystem } from './breath-break.js';
 import { ComfortSystem } from './comfort.js';
 import { DwellSystem } from './dwell.js';
+import { DayNightSystem } from './day-night.js';
 import { EntranceSystem } from './entrance.js';
 import { FirstMomentsSystem } from './first-moments.js';
 import { GuideSystem } from './guide.js';
@@ -30,6 +31,7 @@ World.create(
     .registerSystem(BonsaiGrowthSystem)
     .registerSystem(HealthSystem)
     .registerSystem(SeasonSystem)
+    .registerSystem(DayNightSystem)
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
     .registerSystem(EntranceSystem)
@@ -59,6 +61,7 @@ World.create(
       rake: world.getSystem(RakeSystem),
       health: world.getSystem(HealthSystem),
       season: world.getSystem(SeasonSystem),
+      dayNight: world.getSystem(DayNightSystem),
     };
   }
 });
