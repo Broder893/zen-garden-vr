@@ -12,6 +12,7 @@ import {
 } from '@iwsdk/core';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { AssistHeld, Bonsai, WateringCan } from './garden-components.js';
+import { OVERWATER_POUR_SECONDS } from './save/plant-health.js';
 
 const MAX_DROPS = 48;
 const EMIT_PER_SEC = 45;
@@ -52,6 +53,8 @@ export class WateringSystem extends createSystem({
   pouring = false;
   /** True while pouring lands on the bonsai. */
   wateringBonsai = false;
+  /** True while pouring onto a tree that already has all its water (too much). */
+  overflowing = false;
 
   init(): void {
     this.bonsai = trackFirst(this.queries.bonsai, this.cleanupFuncs);
@@ -92,6 +95,7 @@ export class WateringSystem extends createSystem({
     }
     this.pouring = false;
     this.wateringBonsai = false;
+    this.overflowing = false;
 
     // Pinch-held and hands-free ("hold to select") cans pour the same way.
     for (const can of this.queries.held.entities) this.pourFrom(can, delta, bonsai);
@@ -118,6 +122,12 @@ export class WateringSystem extends createSystem({
     this.wateringBonsai = true;
     const water = bonsai.getValue(Bonsai, 'water') ?? 0;
     if (water < 1 && this.stageAge >= GRACE_SECONDS) bonsai.setValue(Bonsai, 'water', Math.min(1, water + delta / FILL_SECONDS));
+    else if (water >= 1 && this.stageAge >= GRACE_SECONDS) {
+      // Already full: the excess pools (no experience for it); HealthSystem drains it and shows the stress.
+      this.overflowing = true;
+      const over = bonsai.getValue(Bonsai, 'overwater') ?? 0;
+      bonsai.setValue(Bonsai, 'overwater', Math.min(1, over + delta / OVERWATER_POUR_SECONDS));
+    }
   }
 
   private emit(delta: number): void {

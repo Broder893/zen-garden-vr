@@ -8,6 +8,8 @@ import { GuideSystem, LINES, LineId } from './guide.js';
 import { MeditationPhase, MeditationSystem } from './meditation.js';
 import { PruningSystem } from './pruning.js';
 import { RakeSystem } from './rake.js';
+import { HealthSystem } from './health.js';
+import { Health, HealthState } from './save/plant-health.js';
 import { WateringSystem } from './watering.js';
 
 /** Lines are spoken again only after this long, so task hints never nag. */
@@ -57,6 +59,8 @@ export class GardenAudioSystem extends createSystem({
   private time = 0;
   private wasRunning = false;
   private rake?: RakeSystem;
+  private health?: HealthSystem;
+  private lastHealth: HealthState = Health.Healthy;
 
   init(): void {
     this.engine = new SoundEngine();
@@ -67,6 +71,7 @@ export class GardenAudioSystem extends createSystem({
     this.pruning = this.world.getSystem(PruningSystem);
     this.meditation = this.world.getSystem(MeditationSystem);
     this.rake = this.world.getSystem(RakeSystem);
+    this.health = this.world.getSystem(HealthSystem);
 
     // Browsers only start audio after a user gesture; the Enter VR click counts.
     const unlock = () => this.engine.unlock();
@@ -113,6 +118,7 @@ export class GardenAudioSystem extends createSystem({
     this.music.tick(delta, med?.active ?? false, med?.fullness ?? 0);
     this.waterSounds(delta);
     this.engine.setRake(this.rake?.raking ? 1 : 0);
+    this.healthCues();
     this.gardenEvents();
     this.meditationEvents();
     this.speak();
@@ -150,6 +156,20 @@ export class GardenAudioSystem extends createSystem({
       log(`grew to stage ${stage}`);
     }
     this.lastStage = stage;
+  }
+
+  /** Not only visual: a soft low tone when the tree gets worse, a light rising one when it is well again. */
+  private healthCues(): void {
+    const state = this.health?.state ?? Health.Healthy;
+    if (state > this.lastHealth) {
+      this.engine.chime(SCALE[0] / 2, 0, 0.12, 2.8);
+      this.engine.chime(SCALE[1] / 2, 0.35, 0.09, 2.8);
+      log(`health worse: ${state}`);
+    } else if (state === Health.Healthy && this.lastHealth !== Health.Healthy) {
+      this.engine.arpeggio([SCALE[2], SCALE[4], SCALE[7]], 0.16, 0.1);
+      log('health recovered');
+    }
+    this.lastHealth = state;
   }
 
   private meditationEvents(): void {

@@ -30,6 +30,7 @@ import { PruningSystem } from './pruning.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { BreathBreakSystem } from './breath-break.js';
 import { ComfortSystem } from './comfort.js';
+import { HealthSystem } from './health.js';
 import { levelFor } from './save/growth-levels.js';
 import { EntranceSystem } from './entrance.js';
 import { WateringSystem } from './watering.js';
@@ -96,6 +97,9 @@ export const LINES = {
   // Levels (src/save/growth-levels.ts).
   dailyGift: 'A daily gift: your tree grew stronger overnight.',
   levelUp: 'Your garden reached a new level.',
+  // Careful care (src/health.ts): gentle suggestions, never blame.
+  tooMuchWater: 'That is plenty of water. Let it rest a moment.',
+  letItDrain: 'Too much water. Let the soil drain a little.',
   levelPot: 'Level 6! Your tree has a new glazed pot.',
   levelLantern: 'Level 7! A stone lantern now glows by your tree.',
   levelStream: 'Level 8! A little stream runs through the sand.',
@@ -127,6 +131,8 @@ const DWELL: Partial<Record<LineId, LineId>> = {
   meditatePaused: 'meditatePausedDwell',
 };
 const NO_SHOOTS: string[] = [];
+/** Excess water above which the firefly asks to wait rather than care. */
+const DRAIN_HINT = 0.15;
 /** What each level past the bloom brings (src/unlocks.ts shows it). */
 const LEVEL_LINES: Record<number, LineId> = { 6: 'levelPot', 7: 'levelLantern', 8: 'levelStream', 9: 'levelBreath' };
 /** Levels 1-5 are the tree's stages, announced by their own growth lines. */
@@ -226,6 +232,8 @@ export class GuideSystem extends createSystem({
   private stoneRef!: FirstEntity;
   private greeted = false;
   private giftPending = false;
+  private overflowWarned = false;
+  private health?: HealthSystem;
   private lastLevel = -1;
   private persistence?: PersistenceSystem;
   private entrance?: EntranceSystem;
@@ -247,6 +255,7 @@ export class GuideSystem extends createSystem({
     this.persistence = this.world.getSystem(PersistenceSystem);
     this.entrance = this.world.getSystem(EntranceSystem);
     this.comfort = this.world.getSystem(ComfortSystem);
+    this.health = this.world.getSystem(HealthSystem);
     this.breathBreak = this.world.getSystem(BreathBreakSystem);
     this.breathBreak?.attachGuide(this);
 
@@ -452,6 +461,11 @@ export class GuideSystem extends createSystem({
       this.showEvent(LEVEL_LINES[level] ?? 'levelUp', EVENT_SECONDS + 1);
     }
     this.lastLevel = level;
+    // Pouring on a full tree: say so once per episode (only once mistakes may show).
+    if (this.watering?.overflowing && !this.overflowWarned && this.health?.mistakesShow) {
+      this.overflowWarned = true;
+      this.showEvent('tooMuchWater', EVENT_SECONDS + 1);
+    } else if ((bonsai.getValue(Bonsai, 'overwater') ?? 0) < 0.05) this.overflowWarned = false;
     const cuts = this.pruning?.cuts ?? 0;
     if (cuts !== this.lastCuts && this.eventLeft <= 0) this.showEvent('snip', SNIP_SECONDS);
     this.lastCuts = cuts;
@@ -464,6 +478,12 @@ export class GuideSystem extends createSystem({
       this.task = 'plantSeed';
       this.targetOf(this.seedRef.entity?.object3D, 0);
       return 'welcome';
+    }
+    // Too much water: the one thing to do is wait while the soil drains.
+    if ((bonsai.getValue(Bonsai, 'overwater') ?? 0) > DRAIN_HINT && !this.watering?.overflowing) {
+      this.task = 'letItDrain';
+      this.targetOf(bonsaiObj, 0.2);
+      return 'water';
     }
     const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
     const canHandsFree = this.queries.assistedCans.entities.size > 0;

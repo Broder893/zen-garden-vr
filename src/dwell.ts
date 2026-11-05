@@ -233,7 +233,9 @@ export class DwellSystem extends createSystem({
     // A can tips forward (spout down, around its own Z) while over the tree.
     if (hold.entity.hasComponent(WateringCan)) {
       this.m.decompose(this.center, this.scratchQ, this.scratchS);
-      const want = this.overTree(this.center) ? 1 : 0;
+      // ...but never once the tree has all its water: hands-free pouring cannot drown it.
+      const full = (this.bonsai.entity?.getValue(Bonsai, 'water') ?? 0) >= 1;
+      const want = this.overTree(this.center) && !full ? 1 : 0;
       hold.tilt += (want - hold.tilt) * (1 - Math.exp(-4 * delta));
       this.m.multiply(this.tiltM.makeRotationZ(-POUR_TILT * hold.tilt));
     }

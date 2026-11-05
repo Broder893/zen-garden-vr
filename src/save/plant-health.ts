@@ -18,7 +18,7 @@ export function healthOf(stress: number): HealthState {
 }
 
 /** Seconds of pouring onto an already full tree to reach full overwater (1). */
-export const OVERWATER_POUR_SECONDS = 5;
+export const OVERWATER_POUR_SECONDS = 8;
 /** Overwater drains away by itself in about this long (the soil dries). */
 export const OVERWATER_DRAIN_SECONDS = 75;
 /** Stress fades by itself over about this long once its cause is gone. */
@@ -33,6 +33,6 @@ export const NEGLECT_STRESS = 0.4;
 
 /** The stress that overwatering causes: none until a little excess, wilted near the top. */
 export function stressFromOverwater(overwater: number): number {
-  const k = Math.min(1, Math.max(0, (overwater - 0.2) / 0.65));
+  const k = Math.min(1, Math.max(0, (overwater - 0.3) / 0.6));
   return k * k * (3 - 2 * k) * 0.9;
 }

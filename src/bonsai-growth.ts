@@ -22,6 +22,7 @@ function bits(mask: number): number {
 }
 
 const DRY = new Color('#8a6a4c');
+const PUDDLE = new Color('#20262c');
 const WET = new Color('#2a1c12');
 /** Soil dries back toward the stage's water level over roughly this long. */
 const DRY_SECONDS = 45;
@@ -44,6 +45,8 @@ export class BonsaiGrowthSystem extends createSystem({
   private soil: MeshStandardMaterial | null = null;
   /** Soil darkness shown, 0 dry .. 1 wet; follows water up fast, dries slowly. */
   private wetness = -1;
+  /** Shown puddle, 0..1 (follows overwater). */
+  private puddle = 0;
   private sparkles!: Sparkles;
   private burstAt = new Vector3();
   private bonsaiRef!: FirstEntity;
@@ -123,7 +126,7 @@ export class BonsaiGrowthSystem extends createSystem({
       this.shownStage = stage;
       this.shownMask = mask;
     }
-    this.updateSoil(delta, stage, water);
+    this.updateSoil(delta, stage, water, entity.getValue(Bonsai, 'overwater') ?? 0);
 
     if (this.pop < 1) {
       this.pop = Math.min(1, this.pop + delta / 1.2);
@@ -171,7 +174,7 @@ export class BonsaiGrowthSystem extends createSystem({
     }
   }
 
-  private updateSoil(delta: number, stage: number, water: number): void {
+  private updateSoil(delta: number, stage: number, water: number, overwater: number): void {
     const target = Math.min(1, stage >= BonsaiStage.Blooming ? Math.max(water, BLOOM_MOISTURE) : water);
     if (this.wetness < 0 || target > this.wetness) {
       // Darken quickly while pouring (and start at the saved level).
@@ -179,7 +182,12 @@ export class BonsaiGrowthSystem extends createSystem({
     } else {
       this.wetness = Math.max(target, this.wetness - delta / DRY_SECONDS);
     }
-    if (this.soil) this.soil.color.copy(DRY).lerp(WET, this.wetness);
+    if (!this.soil) return;
+    this.soil.color.copy(DRY).lerp(WET, this.wetness);
+    // Too much water pools on top: darker and glossy, like a puddle in the pot.
+    this.puddle += (Math.min(1, overwater * 1.6) - this.puddle) * (1 - Math.exp(-2 * delta));
+    this.soil.color.lerp(PUDDLE, this.puddle * 0.6);
+    this.soil.roughness = 1 - 0.8 * this.puddle;
   }
 
   /** Sparkles rising from the canopy when the seed sprouts or the tree grows. */
