@@ -63,6 +63,12 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] At the end: "Lovely. Your tree grew a little with you.", the light comes back, sparkles on the tree.
 - [ ] Next break: hold an **open hand up in front of you, palm out** ("stop") for half a second: "Of course. We will breathe later." Does it recognise the gesture on the first try? Does it ever trigger by accident while caring for the tree?
 
+## 4c. Garden and sand rake
+
+- [ ] Look around: raked sand garden at sunset, three mossy rocks, a bamboo fence behind, a large stone lantern. Pleasant, not too dark or too bright?
+- [ ] Touch the table's sand with your fingertips and drag: grooves appear (three lines), with a soft sand sound. Does it start when your fingers touch, not before? Does it ever draw when you did not mean to (e.g. while reaching for the can)?
+- [ ] Close and reopen the app: your grooves are still there.
+
 ## 5. Comfort panel (accessibility)
 
 - [ ] At the front-left corner of the table there is a small **Comfort** button. Poke it with a fingertip: the settings open; poke **Done** to close.

@@ -17,6 +17,7 @@ import { EntranceSystem } from './entrance.js';
 import { AssistHeld, Bonsai, BreathOrb, PruningShears, WateringCan } from './garden-components.js';
 import type { LineId } from './guide.js';
 import { MeditationSystem } from './meditation.js';
+import { HandReader } from './hand-joints.js';
 import { isUnlocked } from './save/growth-levels.js';
 import { PruningSystem } from './pruning.js';
 
@@ -123,6 +124,7 @@ export class BreathBreakSystem extends createSystem({
   private v = new Vector3();
   private wrist = new Vector3();
   private tip = new Vector3();
+  private hands!: HandReader;
   private j0 = new Vector3();
   private j1 = new Vector3();
   private a = new Vector3();
@@ -142,6 +144,7 @@ export class BreathBreakSystem extends createSystem({
     this.count = panel?.getElementById<UIKit.Text>('breath-count') ?? null;
     if (this.panel) this.panel.visible = false;
     this.subtitles = this.world.getSceneObject('subtitle-panel') ?? null;
+    this.hands = new HandReader(this.renderer.xr, this.player);
   }
 
   /** The guide registers itself here (it is created after this system). */
@@ -370,64 +373,49 @@ export class BreathBreakSystem extends createSystem({
    * facing away: the universal "not now". Read from the WebXR hand joints.
    */
   private openHand(): boolean {
-    const xr = this.renderer.xr;
-    const frame = xr.getFrame();
-    const ref = xr.getReferenceSpace();
-    const session = xr.getSession();
-    if (!frame || !ref || !session || !frame.getJointPose) return false;
+    const hands = this.hands;
+    if (!hands.begin() || !hands.sources) return false;
     this.player.head.getWorldQuaternion(this.headQuat);
     this.horizontalForward();
-    const sources = session.inputSources;
+    const sources = hands.sources;
     for (let i = 0; i < sources.length; i++) {
       const source = sources[i];
       const hand = source.hand;
       if (!hand || source.handedness === 'none') continue;
       if (!(this.comfort?.usesHand(source.handedness) ?? true)) continue;
-      if (!this.jointWorld(frame, hand.get('wrist'), ref, this.wrist)) continue;
+      if (!hands.joint(hand, 'wrist', this.wrist)) continue;
       // Raised, and pushed out in front of the body.
       if (this.wrist.y < this.head.y - HAND_RAISED) continue;
       this.v.subVectors(this.wrist, this.head);
       this.v.y = 0;
       if (this.v.dot(this.forward) < HAND_FORWARD) continue;
       // Palm facing away: the normal of the knuckle triangle points forward.
-      if (!this.jointWorld(frame, hand.get('index-finger-metacarpal'), ref, this.a)) continue;
-      if (!this.jointWorld(frame, hand.get('pinky-finger-metacarpal'), ref, this.b)) continue;
+      if (!hands.joint(hand, 'index-finger-metacarpal', this.a)) continue;
+      if (!hands.joint(hand, 'pinky-finger-metacarpal', this.b)) continue;
       this.a.sub(this.wrist);
       this.b.sub(this.wrist);
       if (source.handedness === 'right') this.tip.crossVectors(this.a, this.b);
       else this.tip.crossVectors(this.b, this.a);
       if (this.tip.normalize().dot(this.forward) < PALM_FORWARD) continue;
-      if (this.fingersStraight(frame, hand, ref)) return true;
+      if (this.fingersStraight(hand)) return true;
     }
     return false;
   }
 
   /** Index, middle and ring each nearly straight from knuckle to tip. */
-  private fingersStraight(frame: XRFrame, hand: XRHand, ref: XRReferenceSpace): boolean {
+  private fingersStraight(hand: XRHand): boolean {
     for (const finger of FINGERS) {
       const bones = BONES[finger];
       let length = 0;
-      if (!this.jointWorld(frame, hand.get(bones[0]), ref, this.j0)) return false;
+      if (!this.hands.joint(hand, bones[0], this.j0)) return false;
       this.a.copy(this.j0);
       for (let i = 1; i < bones.length; i++) {
-        if (!this.jointWorld(frame, hand.get(bones[i]), ref, this.j1)) return false;
+        if (!this.hands.joint(hand, bones[i], this.j1)) return false;
         length += this.j1.distanceTo(this.j0);
         this.j0.copy(this.j1);
       }
       if (length <= 0 || this.j1.distanceTo(this.a) / length < STRAIGHT) return false;
     }
-    return true;
-  }
-
-  /** Writes a joint's world position into `out`; false when not tracked. */
-  private jointWorld(frame: XRFrame, joint: XRJointSpace | undefined, ref: XRReferenceSpace, out: Vector3): boolean {
-    if (!joint) return false;
-    const pose = frame.getJointPose?.(joint, ref);
-    if (!pose) return false;
-    const p = pose.transform.position;
-    out.set(p.x, p.y, p.z);
-    // Joint poses are in the XR reference space, which is the player's local frame.
-    this.player.localToWorld(out);
     return true;
   }
 }

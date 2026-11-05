@@ -8,6 +8,13 @@ import { AudioContext as SharedAudioContext } from '@iwsdk/core';
  * Every method is a no-op while the context is suspended or missing, so no
  * sounds queue up and burst out together when audio resumes.
  */
+/** A looping filtered-noise sound (water, sand) and its current level. */
+interface NoiseLoop {
+  level: number;
+  src: AudioBufferSourceNode | null;
+  gain: GainNode | null;
+}
+
 export class SoundEngine {
   readonly ctx: AudioContext | null;
   /** Everything ends here; fades in on first unlock. */
@@ -17,10 +24,9 @@ export class SoundEngine {
   readonly music: GainNode | null = null;
   readonly sfx: GainNode | null = null;
   private noise: AudioBuffer | null = null;
-  /** Pour stream nodes exist only while pouring, so silence costs nothing. */
-  private pourSrc: AudioBufferSourceNode | null = null;
-  private pourGain: GainNode | null = null;
-  private pourLevel = 0;
+  /** Loop nodes exist only while sounding, so silence costs nothing. */
+  private pour: NoiseLoop = { level: 0, src: null, gain: null };
+  private rake: NoiseLoop = { level: 0, src: null, gain: null };
 
   constructor() {
     let ctx: AudioContext | null = null;
@@ -159,33 +165,45 @@ export class SoundEngine {
     osc.stop(t + 0.14);
   }
 
-  /** Pouring stream on (1) or off (0). Cheap to call every frame: acts only on change. */
+  /** Water pouring from the can: a bright, airy noise loop (0 = off). Cheap every frame: acts on change. */
   setPour(level: number): void {
+    this.setLoop(this.pour, level, 'bandpass', 1500, 0.9, 0.22);
+  }
+
+  /** Fingers drawing in the sand: a soft, low hiss (0 = off). */
+  setRake(level: number): void {
+    this.setLoop(this.rake, level, 'lowpass', 700, 0.7, 0.1);
+  }
+
+  /** Starts, adjusts or fades out one filtered-noise loop. */
+  private setLoop(loop: NoiseLoop, level: number, type: BiquadFilterType, freq: number, q: number, gainMax: number): void {
     const ctx = this.live;
-    if (level === this.pourLevel) return;
-    this.pourLevel = level;
+    if (level === loop.level) return;
+    loop.level = level;
     if (!ctx || !this.noise || !this.sfx) return;
     const t = ctx.currentTime;
-    if (level > 0 && !this.pourSrc) {
+    if (level > 0 && !loop.src) {
       const src = ctx.createBufferSource();
       src.buffer = this.noise;
       src.loop = true;
       const filter = ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.value = 1500;
-      filter.Q.value = 0.9;
+      filter.type = type;
+      filter.frequency.value = freq;
+      filter.Q.value = q;
       const gain = ctx.createGain();
       gain.gain.setValueAtTime(0, t);
-      gain.gain.setTargetAtTime(level * 0.22, t, 0.12);
+      gain.gain.setTargetAtTime(level * gainMax, t, 0.12);
       src.connect(filter).connect(gain).connect(this.sfx);
       src.start(t, Math.random());
-      this.pourSrc = src;
-      this.pourGain = gain;
-    } else if (level === 0 && this.pourSrc && this.pourGain) {
-      this.pourGain.gain.setTargetAtTime(0, t, 0.12);
-      this.pourSrc.stop(t + 0.6);
-      this.pourSrc = null;
-      this.pourGain = null;
+      loop.src = src;
+      loop.gain = gain;
+    } else if (level > 0 && loop.gain) {
+      loop.gain.gain.setTargetAtTime(level * gainMax, t, 0.12);
+    } else if (level === 0 && loop.src && loop.gain) {
+      loop.gain.gain.setTargetAtTime(0, t, 0.12);
+      loop.src.stop(t + 0.6);
+      loop.src = null;
+      loop.gain = null;
     }
   }
 

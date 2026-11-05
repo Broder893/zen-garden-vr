@@ -13,6 +13,7 @@ import { UnlocksSystem } from './unlocks.js';
 import { MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
+import { RakeSystem } from './rake.js';
 import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
@@ -29,6 +30,8 @@ World.create(
     .registerSystem(MeditationSystem)
     .registerSystem(EntranceSystem)
     .registerSystem(PersistenceSystem)
+    // After PersistenceSystem: ?fresh clears the kept sand before it is loaded.
+    .registerSystem(RakeSystem)
     .registerSystem(ComfortSystem)
     .registerSystem(BreathBreakSystem)
     .registerSystem(GuideSystem)
@@ -49,6 +52,7 @@ World.create(
       breaks: world.getSystem(BreathBreakSystem),
       growth: world.getSystem(BonsaiGrowthSystem),
       persistence: world.getSystem(PersistenceSystem),
+      rake: world.getSystem(RakeSystem),
     };
   }
 });

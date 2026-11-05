@@ -32,6 +32,10 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   hand (left or right: both tools move to that side) and **hold to select**, which
   replaces every pinch with a hand held still beside the object (or a steady look at the
   seed or stone). Settings are saved separately from the garden.
+- **A zen garden around you.** The table stands in a raked sand garden at sunset, with
+  mossy rocks, a bamboo fence and a stone lantern. The table's own sand starts raked in
+  lines and rings; **touch it with your fingertips and drag** to draw grooves (three
+  fingers make a little rake). Your patterns are saved for the next visit.
 - **Come back and level up.** Care earns experience (plant 5, full watering 10, each
   trimmed shoot 5, a breathing session 15, a breathing break 10, a daily gift 20). Levels
   1-5 are the tree's stages; then come a glazed pot (6), a stone lantern (7), a stream
@@ -51,6 +55,7 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
 | Open the hand | Releases a tool; it glides back to its place on the table |
 | Poke a button | Changes a Comfort setting |
 | Open hand up, palm out | Skips a breathing break ("not now") |
+| Fingertips on the sand | Rake grooves into the table's sand |
 
 With **hold to select** on: keep a hand still by an object for 1.2 s (a ring of light
 fills) to plant, pick up or start breathing; look at the seed or stone for 2 s for the
@@ -65,7 +70,7 @@ never required.
 - [IWSDK](https://iwsdk.dev) (Immersive Web SDK) on WebXR and Three.js, TypeScript, Vite.
 - **ECS systems**, one job each: watering, pruning, growth, guide, meditation, audio,
   saving, entrance, visit flowers, comfort settings, hold-to-select, breathing breaks,
-  levels and unlocks (`src/*.ts`,
+  levels and unlocks, the sand rake (`src/*.ts`,
   registered in `src/index.ts`).
 - **Procedural models** (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. The bonsai merges its parts per material: the

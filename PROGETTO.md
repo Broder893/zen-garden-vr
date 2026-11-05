@@ -1,7 +1,7 @@
 # PROGETTO: Giardino Zen VR (Meta VR Start Developer Competition 2026)
 
 > File di passaggio per Claude Code. Leggilo per intero prima di scrivere codice.
-> Ultimo aggiornamento: 5 novembre 2026 (Fase 2: espansione concordata).
+> Ultimo aggiornamento: 5 novembre 2026 (Fase 2: espansione concordata; aggiunto il punto 4b, la pianta appassisce).
 
 ## Obiettivo
 Un'esperienza VR **rilassante, da seduti, usabile solo con le mani** (nessun controller), per i visori Meta Quest. Categoria: **Productivity** (abitudine legata a un momento ricorrente: pausa dal lavoro o sera). Divisione: **New Experience** (progetto iniziato dopo il 24 settembre 2026).
@@ -68,6 +68,22 @@ Regola: ogni funzione entra solo se la precedente è finita, funziona nell'emula
    - Tutto salvato in locale (`src/persistence.ts`), con gestione degli errori se il salvataggio non è disponibile.
    - Piccolo regalo giornaliero e fiori nella sabbia a ogni ritorno (già presenti).
 
+4b. **Cura attenta: la pianta appassisce, ma non muore mai (premio "Reason to Come Back" e "Design dell'esperienza")**
+   - **Principio**: gli errori si vedono e si sentono, ma sono sempre recuperabili. Nessun "game over", nessuna perdita di esperienza, livello o stadio. Il tono resta quello di un giardino rilassante: la lucciola non rimprovera, suggerisce ("Lasciamola riposare un momento").
+   - **Stati di salute** (nuovo stato da affiancare a `stage`, in `src/garden-components.ts`): *sana*, *stressata* (lieve), *appassita* (marcata). Dall'appassita si torna a sana senza perdere nulla. Ogni stato deve cambiare **forma e movimento**, non solo colore: foglie piegate, chioma più bassa, luce più fredda (serve anche per l'accessibilità e per l'alto contrasto).
+   - **Troppa acqua** (`src/watering.ts`): oggi l'acqua è un valore 0..1 per stadio. Se si continua a versare con l'acqua già piena, si accumula un valore `overwater` (0..1) e il tronco cede: foglie che ingialliscono e si piegano, una pozza nel vaso. Con `overwater` alto la pianta diventa stressata e poi appassita. Il valore scende da solo col tempo (circa 60-90 secondi di attesa) e al ritorno della visita (il terreno si asciuga, come già avviene). Versare in eccesso **non dà esperienza** (evita di accumulare punti versando acqua a vuoto). La lucciola suggerisce di aspettare.
+   - **Taglio sbagliato** (`src/pruning.ts`, `src/bonsai-growth.ts`): oggi si taglia toccando i germogli luminosi (`SHOOTS_BY_STAGE`, punti `CutPoint`), senza nozione di profondità. **Non misurare la profondità**: aggiungi al bonsai alcuni **rami sani non luminosi**, con il loro `CutPoint`. Tagliarne uno lascia un moncone e fa crescere `stress`; dopo circa tre tagli sbagliati la pianta appassisce. I monconi ricrescono al ritorno della visita. Tolleranza alta: il raggio di taglio esistente resta, e un taglio sbagliato non deve mai capitare per un tocco accidentale (usa la stessa logica "armata" già presente: le lame devono arrivare, non essere già lì).
+   - **Germogli non ancora pronti** (facoltativo, dopo il resto): i germogli nuovi brillano solo dopo qualche secondo (vedi `GRACE_SECONDS`); tagliarli prima li fa ricrescere e dà un po' di stress. Insegna la pazienza.
+   - **Recupero e collegamento con la meditazione**: la pianta stressata o appassita si riprende (a) aspettando, (b) con una **sessione di respirazione vicino a lei** (riusa `src/meditation.ts` e `src/breath-break.ts`: la pausa respiro è già una ricompensa, qui diventa anche una cura). Se l'utente trascura la pianta, appare "tesa" e la lucciola invita al respiro. È il collegamento centrale tra cura e meditazione: curalo bene.
+   - **Insetti o foglie secche** (facoltativo, ultima priorità): piccole particelle sulla chioma che si tolgono con la mano o con un soffio; nessuna penalità se si ignorano. Aggiungi solo se avanza tempo.
+   - **Stagioni**: il cambio di colore della chioma (punto 6) può entrare qui in versione minima: tinta della chioma legata alla data reale. Non serve altro in questa fase.
+   - **Primi 5 minuti protetti**: **nessun appassimento prima del primo "momento soddisfacente"** (il cronometro esiste già in `src/first-moments.ts`). Gli errori lievi iniziano solo dopo, così il tutorial resta sereno. Verifica che un giocatore che non fa errori non veda mai niente di negativo.
+   - **Accessibilità**: ogni errore ha un segnale **non solo visivo** (voce della lucciola in `src/audio/voice.ts`, un suono dolce in `src/audio/sound-engine.ts`, sottotitolo sempre attivo). Deve funzionare con "tieni fermo" (`src/dwell.ts`), con una sola mano e con alto contrasto (`src/comfort.ts`). L'annaffiatoio in modalità automatica non deve far annegare la pianta: limita l'erogazione quando l'acqua è piena.
+   - **Salvataggio** (`src/save/garden-save.ts`): aggiungi i campi di salute (`stress`, `overwater`, monconi) e **alza `VERSION` da 1 a 2 con una migrazione**: un salvataggio della versione 1 deve caricarsi con valori sani, senza perdere esperienza e fiori. Aggiungi un test o almeno una verifica manuale di questo caso.
+   - **Prestazioni**: nessuna draw call in più (siamo a circa 80). Cambia colore e posa con tinte e trasformazioni sui gruppi di foglie già esistenti, uniti per materiale come per il bonsai; niente luci in più. Niente animazione complessa di appassimento: bastano piegatura, abbassamento e tinta.
+   - **Documentazione**: aggiorna `DEVPOST.md`, `README.md` (sezione sull'esperienza), `QUEST-TEST.md` (casi: troppa acqua, taglio sbagliato, recupero con il respiro, caricamento di un vecchio salvataggio) e `DEMO-VIDEO.md` (una scena breve in cui la pianta appassisce e si riprende). Nei testi: "cura attenta", non frasi mediche.
+   - **Ordine di lavoro**: (1) salute e salvataggio con migrazione; (2) troppa acqua; (3) rami sani e taglio sbagliato; (4) recupero con il respiro; (5) segnali audio e voce; (6) stagioni minime; (7) germogli non pronti e insetti solo se avanza tempo.
+
 5. **Giardino zen sullo sfondo**
    - Sabbia con linee rastrellate, sassi, una lanterna di pietra, una staccionata di bambù e un cielo al tramonto, tutto con forme semplici e luci economiche. Verifica prima cosa c'è già nella scena (sabbia compresa).
    - **Rastrello con la mano**: l'utente disegna linee nella sabbia, che restano come traccia (texture che si aggiorna, niente fisica).
@@ -102,7 +118,7 @@ Multiplayer in tempo reale, più ambienti, guida con AI, passthrough, personaggi
 ## Piano da qui alla consegna
 - 5-6 novembre: punti 1 e 2 (primi 5 minuti, accessibilità).
 - 7-8 novembre: punto 3 (eventi di respirazione).
-- 9-10 novembre: punto 4 (livelli e crescita).
+- 9-10 novembre: punto 4 (livelli e crescita) e punto 4b (la pianta appassisce, recuperabile).
 - 11-12 novembre: punto 5 (giardino zen e rastrello). Decisione sul punto 8 (albero condiviso).
 - 13-14 novembre: punto 6 (atmosfera), rifinitura, ultimi controlli di prestazioni. **Blocco delle nuove funzioni il 14.**
 - 15-16 novembre: aggiornare `DEVPOST.md` e `README.md`, registrare il video (`DEMO-VIDEO.md`), test finale, **consegnare su Devpost**.

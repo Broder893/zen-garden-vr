@@ -7,6 +7,7 @@ import { Bonsai, BonsaiStage } from './garden-components.js';
 import { GuideSystem, LINES, LineId } from './guide.js';
 import { MeditationPhase, MeditationSystem } from './meditation.js';
 import { PruningSystem } from './pruning.js';
+import { RakeSystem } from './rake.js';
 import { WateringSystem } from './watering.js';
 
 /** Lines are spoken again only after this long, so task hints never nag. */
@@ -55,6 +56,7 @@ export class GardenAudioSystem extends createSystem({
   private dripIn = 0;
   private time = 0;
   private wasRunning = false;
+  private rake?: RakeSystem;
 
   init(): void {
     this.engine = new SoundEngine();
@@ -64,6 +66,7 @@ export class GardenAudioSystem extends createSystem({
     this.watering = this.world.getSystem(WateringSystem);
     this.pruning = this.world.getSystem(PruningSystem);
     this.meditation = this.world.getSystem(MeditationSystem);
+    this.rake = this.world.getSystem(RakeSystem);
 
     // Browsers only start audio after a user gesture; the Enter VR click counts.
     const unlock = () => this.engine.unlock();
@@ -109,6 +112,7 @@ export class GardenAudioSystem extends createSystem({
     const med = this.meditation;
     this.music.tick(delta, med?.active ?? false, med?.fullness ?? 0);
     this.waterSounds(delta);
+    this.engine.setRake(this.rake?.raking ? 1 : 0);
     this.gardenEvents();
     this.meditationEvents();
     this.speak();

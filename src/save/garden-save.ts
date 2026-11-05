@@ -81,8 +81,34 @@ export function storeSave(save: GardenSave): boolean {
 export function clearSave(): void {
   try {
     window.localStorage.removeItem(KEY);
+    window.localStorage.removeItem(SAND_KEY);
   } catch {
     /* storage blocked: nothing to clear */
+  }
+}
+
+/** The raked sand, as a PNG data URL (kept apart: it is much larger than the save). */
+const SAND_KEY = 'zen-garden-vr/sand';
+/** Larger than this and the sand is simply not kept (storage quotas are a few MB). */
+const SAND_MAX_CHARS = 600_000;
+
+export function loadSand(): string | null {
+  try {
+    const s = window.localStorage.getItem(SAND_KEY);
+    return s && s.startsWith('data:image/png') ? s : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Stores the sand image; false (and nothing kept) if too big or refused. */
+export function storeSand(dataUrl: string): boolean {
+  if (!dataUrl.startsWith('data:image/png') || dataUrl.length > SAND_MAX_CHARS) return false;
+  try {
+    window.localStorage.setItem(SAND_KEY, dataUrl);
+    return true;
+  } catch {
+    return false;
   }
 }
 
