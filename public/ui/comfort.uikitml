@@ -1,0 +1,103 @@
+<style>
+  .root {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+    width: 30;
+    height: 62;
+    gap: 1;
+  }
+  .opener {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding-top: 1.4;
+    padding-bottom: 1.4;
+    padding-left: 2;
+    padding-right: 2;
+    background-color: rgba(20, 17, 31, 0.85);
+    border-radius: 2.5;
+    border-width: 0.2;
+    border-color: #ffd76a;
+  }
+  .opener-text {
+    font-size: 2.2;
+    font-weight: medium;
+    color: #fff6dc;
+  }
+  .body {
+    display: none;
+    flex-direction: column;
+    gap: 1.1;
+    padding-top: 2;
+    padding-bottom: 2;
+    padding-left: 2;
+    padding-right: 2;
+    background-color: rgba(20, 17, 31, 0.92);
+    border-radius: 2.5;
+    border-width: 0.2;
+    border-color: #ffd76a;
+  }
+  .label {
+    font-size: 1.7;
+    color: #e8dcc0;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+    gap: 0.8;
+  }
+  .btn {
+    display: flex;
+    flex-grow: 1;
+    flex-basis: 0;
+    align-items: center;
+    justify-content: center;
+    padding-top: 1.2;
+    padding-bottom: 1.2;
+    background-color: #3a3350;
+    border-radius: 1.4;
+    border-width: 0.15;
+    border-color: #6d6390;
+  }
+  .btn-text {
+    font-size: 1.8;
+    color: #fff6dc;
+  }
+</style>
+<div id="comfort-root" class="root">
+  <div id="comfort-body" class="body">
+    <span class="label">Breathing pace</span>
+    <div class="row">
+      <div id="pace-slow" class="btn"><span id="pace-slow-t" class="btn-text">Slow</span></div>
+      <div id="pace-medium" class="btn"><span id="pace-medium-t" class="btn-text">Medium</span></div>
+      <div id="pace-fast" class="btn"><span id="pace-fast-t" class="btn-text">Fast</span></div>
+    </div>
+    <span class="label">High contrast</span>
+    <div class="row">
+      <div id="contrast-off" class="btn"><span id="contrast-off-t" class="btn-text">Off</span></div>
+      <div id="contrast-on" class="btn"><span id="contrast-on-t" class="btn-text">On</span></div>
+    </div>
+    <span class="label">Text size</span>
+    <div class="row">
+      <div id="text-normal" class="btn"><span id="text-normal-t" class="btn-text">Normal</span></div>
+      <div id="text-large" class="btn"><span id="text-large-t" class="btn-text">Large</span></div>
+    </div>
+    <span class="label">Hands</span>
+    <div class="row">
+      <div id="hands-both" class="btn"><span id="hands-both-t" class="btn-text">Both</span></div>
+      <div id="hands-left" class="btn"><span id="hands-left-t" class="btn-text">Left</span></div>
+      <div id="hands-right" class="btn"><span id="hands-right-t" class="btn-text">Right</span></div>
+    </div>
+    <span class="label">Hold to select (no pinch)</span>
+    <div class="row">
+      <div id="dwell-off" class="btn"><span id="dwell-off-t" class="btn-text">Off</span></div>
+      <div id="dwell-on" class="btn"><span id="dwell-on-t" class="btn-text">On</span></div>
+    </div>
+  </div>
+  <div id="comfort-open" class="opener">
+    <span id="comfort-open-text" class="opener-text">Comfort</span>
+  </div>
+</div>

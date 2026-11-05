@@ -2,6 +2,7 @@ import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 import { GardenAudioSystem } from './audio-system.js';
 import { BonsaiGrowthSystem } from './bonsai-growth.js';
+import { ComfortSystem } from './comfort.js';
 import { EntranceSystem } from './entrance.js';
 import { FirstMomentsSystem } from './first-moments.js';
 import { GuideSystem } from './guide.js';
@@ -24,6 +25,7 @@ World.create(
     .registerSystem(MeditationSystem)
     .registerSystem(EntranceSystem)
     .registerSystem(PersistenceSystem)
+    .registerSystem(ComfortSystem)
     .registerSystem(GuideSystem)
     .registerSystem(GardenAudioSystem)
     .registerSystem(VisitFlowerSystem)
@@ -34,6 +36,7 @@ World.create(
       guide: world.getSystem(GuideSystem),
       moments: world.getSystem(FirstMomentsSystem),
       meditation: world.getSystem(MeditationSystem),
+      comfort: world.getSystem(ComfortSystem),
     };
   }
 });

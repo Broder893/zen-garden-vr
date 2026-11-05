@@ -483,6 +483,27 @@
       }
     },
     {
+      "id": "comfort-panel",
+      "name": "Comfort Panel",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "comfort-panel"
+      },
+      "transform": {
+        "position": [
+          -0.44,
+          1.04,
+          -0.2
+        ],
+        "scale": 0.6
+      },
+      "components": {
+        "RayInteractable": {},
+        "PokeInteractable": {}
+      }
+    },
+    {
       "id": "lantern-light",
       "name": "Lantern Light",
       "transform": {

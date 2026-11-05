@@ -23,4 +23,5 @@ export default defineAssets({
   'breath-orb': createBreathOrb(),
   'visit-flower': createVisitFlower(),
   'subtitle-panel': ui('subtitle.uikitml', 'Subtitle Panel'),
+  'comfort-panel': ui('comfort.uikitml', 'Comfort Panel'),
 });
