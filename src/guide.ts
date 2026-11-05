@@ -31,6 +31,7 @@ import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { BreathBreakSystem } from './breath-break.js';
 import { ComfortSystem } from './comfort.js';
 import { HealthSystem } from './health.js';
+import { SharedTreeSystem } from './shared-tree.js';
 import { WeatherSystem } from './weather.js';
 import { Health, HealthState } from './save/plant-health.js';
 import { levelFor } from './save/growth-levels.js';
@@ -114,6 +115,10 @@ export const LINES = {
   levelLantern: 'Level 7! A stone lantern now glows by your tree.',
   levelStream: 'Level 8! A little stream runs through the sand.',
   levelBreath: 'Level 9! A new deep breath joins your breaks.',
+  // The shared tree (src/shared-tree.ts).
+  sharedIntro: 'Every visitor shares that big tree. Water it at the basin.',
+  sharedThanks: 'Your water flows to the shared tree.',
+  sharedOffline: 'Your water flows to the tree. Others will see it later.',
 } as const;
 export type LineId = keyof typeof LINES;
 
@@ -214,6 +219,8 @@ export class GuideSystem extends createSystem({
   private subtitle: UIKit.Text | null = null;
   private panel: Object3D | null = null;
   private event: LineId | null = null;
+  /** Where the firefly goes while the one-off line plays (null: it keeps to the task). */
+  private eventTarget: Object3D | null = null;
   private eventLeft = 0;
   private lastStage = -1;
   private lastCuts = 0;
@@ -272,6 +279,7 @@ export class GuideSystem extends createSystem({
     this.breathBreak = this.world.getSystem(BreathBreakSystem);
     this.breathBreak?.attachGuide(this);
     this.world.getSystem(WeatherSystem)?.attachGuide(this);
+    this.world.getSystem(SharedTreeSystem)?.attachGuide(this);
 
     const panel = this.world.getSceneObject<UIKitMLAsset>('subtitle-panel');
     this.panel = panel ?? null;
@@ -365,6 +373,7 @@ export class GuideSystem extends createSystem({
       mood = this.chooseTask(bonsai);
       // Only time on the task counts: not while away, nor while a one-off line plays.
       this.trackTask(inVR && this.eventLeft <= 0 ? delta : 0);
+      if (this.eventLeft > 0 && this.eventTarget) this.targetOf(this.eventTarget, 0.12);
       this.setLine(this.eventLeft > 0 && this.event ? this.event : this.line);
     }
     this.moveFirefly(delta, mood);
@@ -460,10 +469,11 @@ export class GuideSystem extends createSystem({
     return this.eventLeft > 0;
   }
 
-  /** Shows a one-off line for `seconds`, then the current task line returns. */
-  showEvent(id: LineId, seconds: number): void {
+  /** Shows a one-off line for `seconds`, then the current task line returns; `target` draws the firefly there meanwhile. */
+  showEvent(id: LineId, seconds: number, target: Object3D | null = null): void {
     this.event = id;
     this.eventLeft = seconds;
+    this.eventTarget = target;
   }
 
   private watchEvents(bonsai: Entity): void {

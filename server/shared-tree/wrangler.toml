@@ -1,0 +1,16 @@
+# Cloudflare Worker for the Zen Garden's shared tree (PROGETTO.md, point 8).
+name = "zen-shared-tree"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zen-shared-tree"
+# Filled in by `wrangler d1 create zen-shared-tree` before the first deploy.
+database_id = "00000000-0000-0000-0000-000000000000"
+
+# At most 12 care requests a minute from one connection (in memory, nothing stored).
+[[ratelimits]]
+name = "CARE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 12, period = 60 }

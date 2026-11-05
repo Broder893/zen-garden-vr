@@ -18,16 +18,19 @@ export class Sparkles {
   private m = new Matrix4();
   private hidden = new Matrix4().makeScale(0, 0, 0);
 
-  constructor(count = 40, color = '#fff2c4') {
+  /** `size`: mote radius in metres (the default suits the table; far objects need bigger). */
+  constructor(count = 40, color = '#fff2c4', size = 0.0035) {
     this.count = count;
     this.pos = new Float32Array(count * 3);
     this.vel = new Float32Array(count * 3);
     this.life = new Float32Array(count);
     const mat = new MeshBasicMaterial({ color, transparent: true, opacity: 0.9, depthWrite: false });
-    this.mesh = new InstancedMesh(new IcosahedronGeometry(0.0035, 0), mat, count);
+    this.mesh = new InstancedMesh(new IcosahedronGeometry(size, 0), mat, count);
     this.mesh.name = 'Sparkles';
     this.mesh.frustumCulled = false;
     for (let i = 0; i < count; i++) this.mesh.setMatrixAt(i, this.hidden);
+    // Nothing to draw until the first burst: no draw call while idle.
+    this.mesh.visible = false;
   }
 
   /** Releases `n` motes from `center`, spread over a sphere of `radius` metres. */
@@ -50,11 +53,13 @@ export class Sparkles {
       this.life[i] = LIFE_SECONDS * (0.7 + Math.random() * 0.3);
     }
     this.alive = LIFE_SECONDS;
+    this.mesh.visible = true;
   }
 
   update(delta: number): void {
     if (this.alive <= 0) return;
     this.alive -= delta;
+    if (this.alive <= 0) this.mesh.visible = false;
     const drag = Math.exp(-1.8 * delta);
     for (let i = 0; i < this.count; i++) {
       if (this.life[i] <= 0) continue;

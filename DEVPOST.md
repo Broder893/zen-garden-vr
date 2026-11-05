@@ -31,29 +31,30 @@ A pocket zen garden for your work breaks: grow a bonsai with your bare hands, br
 
 We take our breaks on the screen we work on, and come back more tired. We wanted a real break: hands busy with something small and alive, and a moment to breathe.
 
-Zen Garden is that ritual in a headset. A little garden sits on a table in front of you: plant a seed, water it, trim it, and watch a bonsai grow through four stages until it blossoms. It fits in a five to ten minute break, sitting down.
+Zen Garden is that ritual in a headset: a little garden on a table in front of you, where a bonsai grows from a seed to bloom. It fits in a five to ten minute break, sitting down.
 
 ### What it does
 
-- **A first five minutes that teaches itself.** A firefly guide flies to whatever matters next and says it in one short sentence, spoken and subtitled. A ghost gesture drawn in light acts the motion out. The tree first grows within a minute.
-- **A tree that needs you, and forgives.** It grows only when watered and trimmed. Careful care matters: too much water pools in the pot and cutting a healthy branch leaves a stump, and the tree droops, fades and leans. It never dies and you lose nothing: the firefly suggests waiting, or breathing with your tree, which brings it back fastest.
+- **A first five minutes that teaches itself.** A firefly flies to whatever matters next and says it in one short sentence, spoken and subtitled, while a ghost gesture in light acts the motion out. The tree first grows within a minute.
+- **A tree that needs you, and forgives.** Too much water or a cut healthy branch makes it droop, fade and lean. It never dies and you lose nothing: breathing with your tree brings it back fastest.
 - **Time to breathe.** Pinch the glowing stone: an orb of light grows as you breathe in and shrinks as you breathe out.
-- **Little breaks that find you.** Every few minutes of care (never while you hold a tool) the firefly invites a short pause. Show an open hand to say "not now". Otherwise the garden dims and a light in front of your eyes guides a few breaths; the tree gets water as a thank-you.
+- **Little breaks that find you.** Every few minutes of care the firefly invites a short pause; an open hand says "not now". Otherwise the garden dims and a light guides a few breaths.
 - **Comfortable for more bodies.** A Comfort panel offers **hold to select** (no pinch: keep a hand still by an object, or look at it), **one hand**, **high contrast**, **large text** and **breathing pace**. Subtitles are always on.
-- **A garden that lives with your day.** The raked garden around you follows the real clock and season: day, sunset, a night of fireflies, red autumn leaves. Sometimes a rain waters your tree. Rake the table's sand with your fingertips; your patterns stay.
-- **A reason to come back.** Every bit of care earns experience, and the garden levels up: the tree's stages first, then a glazed pot, a stone lantern, a little stream and a new deep breath. Each return the soil has dried and new shoots wait to be trimmed, the first visit of the day brings a gift, and a new flower grows in the sand.
+- **A garden that lives with your day.** The garden follows the real clock and season: day, sunset, a night of fireflies, red autumn leaves, a passing rain. Rake the sand with your fingertips.
+- **A reason to come back.** Care earns experience and levels: a glazed pot, a stone lantern, a stream, a new deep breath. Each return brings new shoots to trim, a daily gift and a flower in the sand.
+- **A tree we share.** One big tree in the garden belongs to everyone who visits. Pour water into the stone basin and a light carries it over; the tree blossoms with the day's care from every garden. No accounts, nothing personal sent.
 
 ### How we built it
 
 Zen Garden is a WebXR app built with Meta's Immersive Web SDK (IWSDK) and Three.js: it opens from a link in the Quest browser, nothing to install. The logic is a set of small ECS systems, each with one job.
 
-Everything is original and made in code. Models are procedural and merged per material: under 60 draw calls per eye even at night in the rain, and a quality setting that lowers itself if the headset struggles. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved locally with a versioned, validated format.
+Everything is original and made in code. Models are procedural and merged per material: about 66 draw calls per eye at the busiest, with a quality setting that lowers itself if the headset struggles. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved locally with a versioned, validated format. The shared tree talks to a tiny Cloudflare Worker that only counts anonymous cares; if it is unreachable, the garden carries on offline.
 
 We had no headset, so everything was built and tested in IWER, IWSDK's WebXR emulator, with scripted hands playing every step.
 
 ### What's next
 
-Tuning on real Quest hardware, more plants, a garden shared by everyone who visits, and more languages.
+Tuning on real Quest hardware, more plants, more ways to tend the shared tree together, and more languages.
 
 ---
 
@@ -72,6 +73,7 @@ The experience is completable from start to finish with hands only; controllers 
 - **One hand is enough.** In one-hand mode the tools rest on that hand's side and the firefly ignores the other hand.
 - **Open hand for "not now".** A breathing break can be declined by holding an open hand up in front of you, palm out. The app reads the WebXR hand joints: the hand must be raised and pushed forward, the palm facing away (from the knuckle triangle), and the index, middle and ring fingers straight (tip-to-knuckle distance at least 90% of the finger's length), held for 0.4 seconds. A relaxed or resting hand does not trigger it.
 - **Fingers as a rake.** The index, middle and ring fingertips (WebXR hand joints) draw grooves wherever they touch the table's sand, within 1.5 cm of its surface. A hand holding a tool does not rake. The grooves are drawn into a 512-pixel canvas texture, uploaded at most 15 times a second, and saved between visits.
+- **Pour to share.** Tipping the can over the stone basin beside the table (spout within 17 cm of its centre) for 1.2 seconds sends one care to the shared tree; hands-free, holding the can over the basin is enough.
 - **The guide follows you.** The firefly never strays more than 35 degrees from where you are looking, leading your eye to the next task, and once the tree is in bloom it follows your hand.
 
 ## Built with

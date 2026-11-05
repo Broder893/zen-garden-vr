@@ -1,0 +1,14 @@
+{
+ "device": "hand-right",
+ "body": "auto",
+ "steps": [
+  {"label": "hand by the can", "target": "Watering Can", "anchor": "grasp", "orientation": {"fingers": [0, 0, -1], "palm": [0, -1, 0]}, "duration": 1.6},
+  {"label": "hold still: the ring fills", "duration": 1.8},
+  {"label": "lift", "position": {"x": 0.45, "y": 1.0, "z": -0.45}, "anchor": "grip", "duration": 1.2},
+  {"label": "over the basin: it pours by itself", "position": {"x": 0.7, "y": 1.0, "z": -0.52}, "anchor": "grip", "duration": 1.4},
+  {"label": "pour", "duration": 4},
+  {"label": "lower to the table: let go", "position": {"x": 0.24, "y": 0.86, "z": -0.3}, "anchor": "grip", "duration": 1.6},
+  {"label": "stay", "duration": 1.4},
+  {"label": "away", "position": {"x": 0.2, "y": 0.95, "z": -0.1}, "anchor": "grip", "duration": 0.8}
+ ]
+}

@@ -46,3 +46,6 @@ pids/
 
 # Local verification screenshots
 artifacts/
+
+# Local overrides (e.g. the shared tree service on this machine)
+*.local

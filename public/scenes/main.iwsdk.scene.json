@@ -97,6 +97,27 @@
       }
     },
     {
+      "id": "shared-tree",
+      "content": {
+        "type": "asset",
+        "asset": "shared-tree",
+        "castShadow": false,
+        "receiveShadow": false
+      },
+      "transform": {
+        "position": [
+          1.6,
+          0,
+          -3.9
+        ],
+        "rotationDeg": [
+          0,
+          -25,
+          0
+        ]
+      }
+    },
+    {
       "id": "zen-table",
       "name": "Zen Table",
       "framingRole": "content",
@@ -616,6 +637,44 @@
           -0.2
         ],
         "scale": 0.8
+      }
+    },
+    {
+      "id": "stone-basin",
+      "content": {
+        "type": "asset",
+        "asset": "stone-basin"
+      },
+      "transform": {
+        "position": [
+          0.7,
+          0,
+          -0.52
+        ],
+        "rotationDeg": [
+          0,
+          -60,
+          0
+        ]
+      }
+    },
+    {
+      "id": "shared-sign",
+      "content": {
+        "type": "asset",
+        "asset": "shared-sign"
+      },
+      "transform": {
+        "position": [
+          0.7,
+          1.07,
+          -0.52
+        ],
+        "scale": [
+          0.75,
+          0.75,
+          0.75
+        ]
       }
     },
     {

@@ -80,6 +80,15 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] Open `...?weather=breeze`: the tree sways gently, wind in the bamboo. No discomfort?
 - [ ] Frame rate at night with rain (the busiest moment): smooth?
 
+## 4e. Shared tree
+
+- [ ] A big tree stands at the back right of the garden; a stone basin with a bamboo pipe stands beside the table on the right, with a small "Shared tree" sign.
+- [ ] Once your tree is mature, after a quiet moment the firefly flies to the basin: "Every visitor shares that big tree. Water it at the basin."
+- [ ] Pour the can into the basin for about a second: drips, a bowl sound, a light flies in an arc to the big tree, which sparkles and glows; the sign counts one more care. Easy to reach without leaning?
+- [ ] With **Hold to select**, hold the can over the basin: it pours by itself and the care counts.
+- [ ] With **Hands Left**, the basin and sign move to the left side.
+- [ ] Turn Wi-Fi off (or block the site) and pour: the sign says "Offline - your care will be sent later"; turn it back on and wait a minute: the count catches up. No errors, nothing else changes.
+
 ## 4c. Garden and sand rake
 
 - [ ] Look around: raked sand garden at sunset, three mossy rocks, a bamboo fence behind, a large stone lantern. Pleasant, not too dark or too bright?

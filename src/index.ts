@@ -18,6 +18,7 @@ import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
 import { RakeSystem } from './rake.js';
 import { SeasonSystem } from './season.js';
+import { SharedTreeSystem } from './shared-tree.js';
 import { WeatherSystem } from './weather.js';
 import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
@@ -38,6 +39,8 @@ World.create(
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
     .registerSystem(EntranceSystem)
+    // Before PersistenceSystem, which removes ?fresh from the address.
+    .registerSystem(SharedTreeSystem)
     .registerSystem(PersistenceSystem)
     // After PersistenceSystem: ?fresh clears the kept sand before it is loaded.
     .registerSystem(RakeSystem)
@@ -68,6 +71,8 @@ World.create(
       dayNight: world.getSystem(DayNightSystem),
       weather: world.getSystem(WeatherSystem),
       perf: world.getSystem(PerfSystem),
+      shared: world.getSystem(SharedTreeSystem),
+      watering: world.getSystem(WateringSystem),
     };
   }
 });

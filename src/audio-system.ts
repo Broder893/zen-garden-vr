@@ -9,6 +9,7 @@ import { MeditationPhase, MeditationSystem } from './meditation.js';
 import { PruningSystem } from './pruning.js';
 import { RakeSystem } from './rake.js';
 import { HealthSystem } from './health.js';
+import { SharedTreeSystem } from './shared-tree.js';
 import { WeatherSystem } from './weather.js';
 import { Health, HealthState } from './save/plant-health.js';
 import { WateringSystem } from './watering.js';
@@ -59,6 +60,8 @@ export class GardenAudioSystem extends createSystem({
   private lastPaused = false;
   private dripIn = 0;
   private time = 0;
+  private shared?: SharedTreeSystem;
+  private lastShared = { cares: 0, arrivals: 0 };
   private wasRunning = false;
   private rake?: RakeSystem;
   private health?: HealthSystem;
@@ -134,7 +137,8 @@ export class GardenAudioSystem extends createSystem({
   private waterSounds(delta: number): void {
     const w = this.watering;
     this.engine.setPour(w?.pouring ? 1 : 0);
-    if (!w?.wateringBonsai) return;
+    this.shared ??= this.world.getSystem(SharedTreeSystem);
+    if (!w?.wateringBonsai && !this.shared?.fillingBasin) return;
     this.dripIn -= delta;
     if (this.dripIn > 0) return;
     this.dripIn = 0.18 + Math.random() * 0.25;
@@ -156,6 +160,15 @@ export class GardenAudioSystem extends createSystem({
       log('wrong cut');
     }
     this.lastWrongCuts = wrong;
+    // The shared tree: a bowl as the light leaves the basin, a high shimmer as it reaches the tree.
+    const s = this.shared;
+    if (s && s.caresGiven > this.lastShared.cares) {
+      this.engine.bowl(SCALE[2], 0.16);
+      log('shared care');
+    }
+    if (s && s.arrivals > this.lastShared.arrivals) this.engine.arpeggio([SCALE[4], SCALE[6], SCALE[7]], 0.12, 0.09);
+    this.lastShared.cares = s?.caresGiven ?? 0;
+    this.lastShared.arrivals = s?.arrivals ?? 0;
 
     const bonsai = this.bonsai.entity;
     if (!bonsai) return;

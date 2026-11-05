@@ -53,6 +53,13 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   front corner shows the level and progress. The garden is saved on the device; each
   return visit (after a few hours) the soil dries and shoots grow back, the first visit
   of the day brings a gift, and a new flower grows in the sand, up to seven.
+- **A tree shared by everyone.** Behind the fence-line stands one big tree that every
+  visitor cares for together. Pour the can into the stone basin beside the table (or hold
+  it there hands-free): a light carries the water to the tree, which fills out and
+  blossoms with the day's care from all gardens. A small sign shows today's cares, how
+  many gardens gave them and the total. The firefly introduces it once the tree is mature.
+  It is asynchronous (no live multiplayer), sends no personal data (only a random garden
+  id), and works offline: the last counts stay on the sign and cares are sent later.
 
 ## Hand interactions
 
@@ -84,13 +91,17 @@ never required.
   registered in `src/index.ts`).
 - **Procedural models** (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. Models merge their parts per material and
-  particles are instanced: 56-58 draw calls and about 27k triangles per eye, even at
-  night in the rain (it was about 95 before merging the tools and table).
+  particles are instanced; idle sparkles are not drawn: about 66 draw calls and 31k
+  triangles per eye at the busiest (night, rain, the shared tree in view).
 - **Performance and quality** (`src/perf.ts`): the Comfort panel's *Visual quality* is
   Auto, High or Low. Low halves fireflies and raindrops, hides two background pieces
   and lowers the XR resolution from the next session; Auto does this by itself if the
   headset stays below 85% of its frame rate for 8 seconds. `?debug` shows fps, the
   worst frame, draw calls and triangles behind the table.
+- **Shared tree service** (`server/shared-tree/`): a Cloudflare Worker with a D1
+  database, a few dozen lines; anonymous counts, daily caps per garden, a rate limit per
+  connection kept only in memory, CORS limited to the app. The app reads its address from
+  `VITE_SHARED_TREE_URL`; without it the shared tree simply stays offline.
 - **Robust without storage or speech**: if saving is blocked the garden still works
   (it simply starts fresh next time); without speech synthesis the subtitles carry
   the guide.

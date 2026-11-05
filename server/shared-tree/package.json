@@ -1,0 +1,17 @@
+{
+  "name": "zen-shared-tree",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "db:local": "wrangler d1 execute zen-shared-tree --local --file=schema.sql",
+    "db:remote": "wrangler d1 execute zen-shared-tree --remote --file=schema.sql",
+    "test": "node test/api.test.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "~5.20260801.1",
+    "typescript": "^5.5.0",
+    "wrangler": "4.120.0"
+  }
+}

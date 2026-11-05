@@ -51,6 +51,12 @@ export class WateringSystem extends createSystem({
   private stageAge = 0;
   /** True while any can is pouring this frame (read by audio/guide later). */
   pouring = false;
+  /** Where the pouring spout is (world), valid while `pouring`. */
+  readonly pourTip = new Vector3();
+  /** Where the pouring can itself is (world), valid while `pouring`. */
+  readonly pourCan = new Vector3();
+  /** The pouring can is held hands-free ("hold to select"): it tips by itself. */
+  pourAssisted = false;
   /** True while pouring lands on the bonsai. */
   wateringBonsai = false;
   /** True while pouring onto a tree that already has all its water (too much). */
@@ -105,27 +111,33 @@ export class WateringSystem extends createSystem({
     this.overflowing = false;
 
     // Pinch-held and hands-free ("hold to select") cans pour the same way.
+    this.pourAssisted = false;
     for (const can of this.queries.held.entities) this.pourFrom(can, delta, bonsai);
-    for (const can of this.queries.assisted.entities) this.pourFrom(can, delta, bonsai);
+    for (const can of this.queries.assisted.entities) {
+      if (this.pourFrom(can, delta, bonsai)) this.pourAssisted = true;
+    }
     this.stepDrops(delta);
   }
 
-  private pourFrom(can: Entity, delta: number, bonsai: Entity | null): void {
+  /** Pours from one can if it is tipped; true when it pours this frame. */
+  private pourFrom(can: Entity, delta: number, bonsai: Entity | null): boolean {
     const tip = this.tips.get(can.index);
     const obj = can.object3D;
-    if (!tip || !obj) return;
+    if (!tip || !obj) return false;
     obj.getWorldQuaternion(this.quat);
     this.dir.set(1, 0, 0).applyQuaternion(this.quat);
     const threshold = can.getValue(WateringCan, 'pourThreshold') ?? 0.35;
-    if (-this.dir.y < threshold) return;
+    if (-this.dir.y < threshold) return false;
     this.pouring = true;
     tip.getWorldPosition(this.tip);
+    this.pourTip.copy(this.tip);
+    obj.getWorldPosition(this.pourCan);
     this.emit(delta);
 
-    if (!bonsai?.object3D) return;
+    if (!bonsai?.object3D) return true;
     const dx = this.tip.x - this.target.x;
     const dz = this.tip.z - this.target.z;
-    if (dx * dx + dz * dz > REACH * REACH || this.tip.y < this.target.y) return;
+    if (dx * dx + dz * dz > REACH * REACH || this.tip.y < this.target.y) return true;
     this.wateringBonsai = true;
     const water = bonsai.getValue(Bonsai, 'water') ?? 0;
     if (water < 1 && this.stageAge >= GRACE_SECONDS) {
@@ -138,6 +150,7 @@ export class WateringSystem extends createSystem({
       const over = bonsai.getValue(Bonsai, 'overwater') ?? 0;
       bonsai.setValue(Bonsai, 'overwater', Math.min(1, over + delta / OVERWATER_POUR_SECONDS));
     }
+    return true;
   }
 
   private emit(delta: number): void {

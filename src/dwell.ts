@@ -23,6 +23,7 @@ import {
 } from './garden-components.js';
 import { GuideSystem } from './guide.js';
 import { MeditationSystem } from './meditation.js';
+import { SharedTreeSystem } from './shared-tree.js';
 
 /** Seconds a hand must stay by an object to select it. */
 const HAND_DWELL = 1.2;
@@ -107,6 +108,7 @@ export class DwellSystem extends createSystem({
   private hand = new Vector3();
   private center = new Vector3();
   private toward = new Vector3();
+  private shared?: SharedTreeSystem;
   private ringAt = new Vector3();
   private m = new Matrix4();
   private m2 = new Matrix4();
@@ -235,7 +237,10 @@ export class DwellSystem extends createSystem({
       this.m.decompose(this.center, this.scratchQ, this.scratchS);
       // ...but never once the tree has all its water: hands-free pouring cannot drown it.
       const full = (this.bonsai.entity?.getValue(Bonsai, 'water') ?? 0) >= 1;
-      const want = this.overTree(this.center) && !full ? 1 : 0;
+      // The shared tree's basin takes water too (it can never overflow).
+      this.shared ??= this.world.getSystem(SharedTreeSystem);
+      const overBasin = this.shared?.overBasin(this.center, POUR_REACH) ?? false;
+      const want = (this.overTree(this.center) && !full) || overBasin ? 1 : 0;
       hold.tilt += (want - hold.tilt) * (1 - Math.exp(-4 * delta));
       this.m.multiply(this.tiltM.makeRotationZ(-POUR_TILT * hold.tilt));
     }
