@@ -31,6 +31,7 @@ import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { BreathBreakSystem } from './breath-break.js';
 import { ComfortSystem } from './comfort.js';
 import { HealthSystem } from './health.js';
+import { Health, HealthState } from './save/plant-health.js';
 import { levelFor } from './save/growth-levels.js';
 import { EntranceSystem } from './entrance.js';
 import { WateringSystem } from './watering.js';
@@ -100,6 +101,10 @@ export const LINES = {
   // Careful care (src/health.ts): gentle suggestions, never blame.
   tooMuchWater: 'That is plenty of water. Let it rest a moment.',
   letItDrain: 'Too much water. Let the soil drain a little.',
+  tenseBreathe: 'Your tree looks tense. Breathe with it at the stone.',
+  tenseBreatheDwell: 'Your tree looks tense. Look at the stone to breathe.',
+  recovered: 'Your tree is feeling better.',
+  breakInviteTense: 'Your tree is tense. Let us breathe together.',
   levelPot: 'Level 6! Your tree has a new glazed pot.',
   levelLantern: 'Level 7! A stone lantern now glows by your tree.',
   levelStream: 'Level 8! A little stream runs through the sand.',
@@ -129,6 +134,7 @@ const DWELL: Partial<Record<LineId, LineId>> = {
   rest: 'restDwell',
   meditateHint: 'meditateHintDwell',
   meditatePaused: 'meditatePausedDwell',
+  tenseBreathe: 'tenseBreatheDwell',
 };
 const NO_SHOOTS: string[] = [];
 /** Excess water above which the firefly asks to wait rather than care. */
@@ -233,6 +239,7 @@ export class GuideSystem extends createSystem({
   private greeted = false;
   private giftPending = false;
   private overflowWarned = false;
+  private lastHealth: HealthState = Health.Healthy;
   private health?: HealthSystem;
   private lastLevel = -1;
   private persistence?: PersistenceSystem;
@@ -408,6 +415,11 @@ export class GuideSystem extends createSystem({
           kind = 'tilt';
           lift = 0.14;
           break;
+        case 'tenseBreathe':
+          obj = this.stoneRef.entity?.object3D;
+          kind = 'pinch';
+          lift = 0.07;
+          break;
         case 'rest':
           // Until the player has tried it, show how to start breathing.
           if (!this.persistence?.hasMeditated) {
@@ -466,6 +478,10 @@ export class GuideSystem extends createSystem({
       this.overflowWarned = true;
       this.showEvent('tooMuchWater', EVENT_SECONDS + 1);
     } else if ((bonsai.getValue(Bonsai, 'overwater') ?? 0) < 0.05) this.overflowWarned = false;
+    // Well again: say so (the audio adds a light rising tone).
+    const health = this.health?.state ?? Health.Healthy;
+    if (health === Health.Healthy && this.lastHealth !== Health.Healthy) this.showEvent('recovered', EVENT_SECONDS);
+    this.lastHealth = health;
     const cuts = this.pruning?.cuts ?? 0;
     if (cuts !== this.lastCuts && this.eventLeft <= 0) this.showEvent('snip', SNIP_SECONDS);
     this.lastCuts = cuts;
@@ -478,6 +494,12 @@ export class GuideSystem extends createSystem({
       this.task = 'plantSeed';
       this.targetOf(this.seedRef.entity?.object3D, 0);
       return 'welcome';
+    }
+    // A tense tree: breathing with it is the way back (and the quickest).
+    if ((this.health?.state ?? Health.Healthy) >= Health.Stressed && !this.watering?.overflowing) {
+      this.task = 'tenseBreathe';
+      this.targetOf(this.stoneRef.entity?.object3D, 0.08);
+      return 'calm';
     }
     // Too much water: the one thing to do is wait while the soil drains.
     if ((bonsai.getValue(Bonsai, 'overwater') ?? 0) > DRAIN_HINT && !this.watering?.overflowing) {

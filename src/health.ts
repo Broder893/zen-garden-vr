@@ -53,6 +53,9 @@ export class HealthSystem extends createSystem({
   state: HealthState = Health.Healthy;
   /** Displayed wilt, 0..1 (eases toward the stress). */
   wilt = 0;
+  /** Times a breathing session brought the tree back to health (this visit). */
+  healedByBreath = 0;
+  private sessionsSeen = 0;
   private bonsai!: FirstEntity;
   private moments?: FirstMomentsSystem;
   private persistence?: PersistenceSystem;
@@ -101,17 +104,29 @@ export class HealthSystem extends createSystem({
       if (stress > 0) b.setValue(Bonsai, 'stress', 0);
       return;
     }
+    this.meditation ??= this.world.getSystem(MeditationSystem);
+    const med = this.meditation;
+    // Breathing near the tree is its best care: everything eases faster meanwhile...
+    const breathing = !!med?.active && !med.paused;
+    const k = breathing ? BREATH_RECOVERY_FACTOR : 1;
     if (overwater > 0) {
-      overwater = Math.max(0, overwater - delta / OVERWATER_DRAIN_SECONDS);
+      overwater = Math.max(0, overwater - (delta / OVERWATER_DRAIN_SECONDS) * k);
       b.setValue(Bonsai, 'overwater', overwater);
+    }
+    // ...and a finished session leaves it well again.
+    const sessions = (med?.completed ?? 0) + (med?.breaksCompleted ?? 0);
+    if (sessions > this.sessionsSeen) {
+      this.sessionsSeen = sessions;
+      if (stress > 0 || overwater > 0) {
+        this.healedByBreath++;
+        b.setValue(Bonsai, 'overwater', 0);
+        b.setValue(Bonsai, 'stress', 0);
+        return;
+      }
     }
     const floor = stressFromOverwater(overwater);
     if (stress < floor) stress = Math.min(floor, stress + delta * STRESS_RISE);
-    else if (stress > floor) {
-      this.meditation ??= this.world.getSystem(MeditationSystem);
-      const k = this.meditation?.active && !this.meditation.paused ? BREATH_RECOVERY_FACTOR : 1;
-      stress = Math.max(floor, stress - (delta / STRESS_EASE_SECONDS) * k);
-    }
+    else if (stress > floor) stress = Math.max(floor, stress - (delta / STRESS_EASE_SECONDS) * k);
     b.setValue(Bonsai, 'stress', stress);
   }
 

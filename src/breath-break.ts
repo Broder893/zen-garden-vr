@@ -18,6 +18,8 @@ import { AssistHeld, Bonsai, BreathOrb, PruningShears, WateringCan } from './gar
 import type { LineId } from './guide.js';
 import { MeditationSystem } from './meditation.js';
 import { HandReader } from './hand-joints.js';
+import { HealthSystem } from './health.js';
+import { Health } from './save/plant-health.js';
 import { isUnlocked } from './save/growth-levels.js';
 import { PruningSystem } from './pruning.js';
 
@@ -34,6 +36,10 @@ const INVITE_LINE_SECONDS = 3.5;
 const INVITE_SECONDS = INVITE_LINE_SECONDS * 2;
 /** How long an open hand must be shown to mean "not now". */
 const OPEN_HAND_SECONDS = 0.4;
+/** A tense tree: after this long, the firefly offers a break even outside the usual rhythm. */
+const TENSE_INVITE_SECONDS = 10;
+/** ...but not sooner than this after the last invitation. */
+const TENSE_COOLDOWN = 45;
 /** Light level during a break (fraction of normal). */
 const DIM_LEVEL = 0.25;
 /** Water given to the tree when a break is finished: breathing helps it grow. */
@@ -93,6 +99,10 @@ export class BreathBreakSystem extends createSystem({
   /** Breaks declined with an open hand (this session). */
   postponed = 0;
   private inviteTime = 0;
+  private tenseInvite = false;
+  private tenseTime = 0;
+  private sinceInvite = 999;
+  private health?: HealthSystem;
   private rewarded = false;
   private orbMoved = false;
   private panelSaved = false;
@@ -166,12 +176,21 @@ export class BreathBreakSystem extends createSystem({
     this.watchCare(bonsai.getValue(Bonsai, 'water') ?? 0, bonsai.getValue(Bonsai, 'stage') ?? 0);
 
     switch (this.state) {
-      case 'waiting':
+      case 'waiting': {
         if (!(bonsai.getValue(Bonsai, 'planted') ?? false)) return;
         // The clock only runs while the player is tending the tree, not resting.
         if (!this.meditation?.active) this.wait -= delta;
-        if (this.wait <= 0 && this.canInvite()) this.beginInvite();
+        this.sinceInvite += delta;
+        this.health ??= this.world.getSystem(HealthSystem);
+        const tense = (this.health?.state ?? Health.Healthy) >= Health.Stressed;
+        this.tenseTime = tense ? this.tenseTime + delta : 0;
+        if (this.wait <= 0 && this.canInvite()) this.beginInvite(false);
+        else if (this.tenseTime >= TENSE_INVITE_SECONDS && this.sinceInvite >= TENSE_COOLDOWN && this.canInviteNow()) {
+          // A tense tree: breathing is its best care, so the firefly offers it now.
+          this.beginInvite(true);
+        }
         break;
+      }
       case 'inviting':
         this.invite(delta, bonsai.getValue(Bonsai, 'stage') ?? 0);
         break;
@@ -201,8 +220,12 @@ export class BreathBreakSystem extends createSystem({
   }
 
   private canInvite(): boolean {
+    return this.cared && this.canInviteNow();
+  }
+
+  /** Nothing in the way of an invitation right now. */
+  private canInviteNow(): boolean {
     return (
-      this.cared &&
       !this.toolInHand() &&
       !(this.meditation?.active ?? false) &&
       (this.entrance?.lit ?? true) &&
@@ -210,7 +233,9 @@ export class BreathBreakSystem extends createSystem({
     );
   }
 
-  private beginInvite(): void {
+  private beginInvite(tense: boolean): void {
+    this.tenseInvite = tense;
+    this.sinceInvite = 0;
     this.state = 'inviting';
     this.inviteTime = 0;
     this.openHandTime = 0;
@@ -223,7 +248,8 @@ export class BreathBreakSystem extends createSystem({
 
   private invite(delta: number, stage: number): void {
     this.inviteTime += delta;
-    this.inviteLine = this.inviteTime < INVITE_LINE_SECONDS ? 'breakInvite' : 'breakSkip';
+    const first = this.tenseInvite ? 'breakInviteTense' : 'breakInvite';
+    this.inviteLine = this.inviteTime < INVITE_LINE_SECONDS ? first : 'breakSkip';
     if (this.toolInHand() || this.meditation?.active) {
       // A tool picked up, or the player started their own session at the stone:
       // never interrupt either; quietly try again a little later.
