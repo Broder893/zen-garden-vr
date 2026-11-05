@@ -1,4 +1,5 @@
 import { AssetType, defineAssets } from '@iwsdk/core';
+import { createGardenBackdrop } from './scene-assets/backdrop.scene-asset.js';
 import { createBonsai } from './scene-assets/bonsai.scene-asset.js';
 import { createVisitFlower } from './scene-assets/decor.scene-asset.js';
 import { createFirefly, createSeed } from './scene-assets/guide.scene-asset.js';
@@ -15,6 +16,7 @@ const ui = (file: string, name: string) => ({
 
 export default defineAssets({
   'zen-table': createZenTable(),
+  'garden-backdrop': createGardenBackdrop(),
   bonsai: createBonsai(),
   'watering-can': createWateringCan(),
   shears: createShears(),

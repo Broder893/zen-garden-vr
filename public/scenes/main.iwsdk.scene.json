@@ -4,20 +4,20 @@
   "components": {
     "com.iwsdk.components.DomeGradient": {
       "sky": [
-        0.08,
-        0.1,
-        0.2,
+        0.17,
+        0.13,
+        0.32,
         1
       ],
       "equator": [
-        0.2,
-        0.17,
-        0.26,
+        0.62,
+        0.34,
+        0.24,
         1
       ],
       "ground": [
+        0.1,
         0.07,
-        0.06,
         0.09,
         1
       ],
@@ -25,21 +25,21 @@
     },
     "com.iwsdk.components.IBLGradient": {
       "sky": [
-        0.35,
-        0.38,
-        0.55,
+        0.4,
+        0.37,
+        0.56,
         1
       ],
       "equator": [
-        0.4,
-        0.34,
-        0.4,
+        0.6,
+        0.44,
+        0.38,
         1
       ],
       "ground": [
-        0.2,
+        0.22,
         0.17,
-        0.2,
+        0.17,
         1
       ],
       "intensity": 0.5
@@ -52,6 +52,50 @@
   },
   "resources": {},
   "nodes": [
+    {
+      "id": "garden-backdrop",
+      "name": "Garden Backdrop",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "garden-backdrop"
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          -0.5
+        ]
+      },
+      "components": {
+        "com.iwsdk.components.DomeFade": {
+          "start": 5,
+          "end": 8
+        }
+      }
+    },
+    {
+      "id": "garden-lantern",
+      "name": "Garden Lantern",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "stone-lantern"
+      },
+      "transform": {
+        "position": [
+          -0.9,
+          0,
+          -3.4
+        ],
+        "rotationDeg": [
+          0,
+          20,
+          0
+        ],
+        "scale": 7
+      }
+    },
     {
       "id": "zen-table",
       "name": "Zen Table",
