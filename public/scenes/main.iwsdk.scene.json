@@ -298,9 +298,9 @@
       },
       "transform": {
         "position": [
-          0.36,
+          0.28,
           0.77,
-          -0.76
+          -0.79
         ],
         "rotationDeg": [
           0,
@@ -442,6 +442,43 @@
         "VisitFlower": {
           "order": 7
         }
+      }
+    },
+    {
+      "id": "zen-stream",
+      "name": "Zen Stream",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "zen-stream"
+      },
+      "transform": {
+        "position": [
+          0,
+          0.77,
+          -0.7
+        ]
+      }
+    },
+    {
+      "id": "stone-lantern",
+      "name": "Stone Lantern",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "stone-lantern"
+      },
+      "transform": {
+        "position": [
+          0.39,
+          0.77,
+          -0.74
+        ],
+        "rotationDeg": [
+          0,
+          15,
+          0
+        ]
       }
     },
     {

@@ -123,11 +123,14 @@ export class PersistenceSystem extends createSystem({
     // ?nextvisit (demos) also brings the gift, without waiting for tomorrow.
     if (this.save.lastGiftDay === today && !this.forceVisit) return;
     const b = this.bonsai.entity;
-    const planted = b?.getValue(Bonsai, 'planted') ?? false;
+    if (!b) return; // not loaded yet: keep today's gift for when it is
+    const planted = b.getValue(Bonsai, 'planted') ?? false;
     this.save.lastGiftDay = today;
     this.lastKey = '';
-    if (!b || !planted || !this.returning) return;
+    if (!planted || !this.returning) return;
     b.setValue(Bonsai, 'xp', (b.getValue(Bonsai, 'xp') ?? 0) + XP.dailyGift);
+    // A new day always brings something to tend, even soon after the last visit.
+    this.regrow();
     this.dailyGift = true;
   }
 

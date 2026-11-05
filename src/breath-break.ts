@@ -17,6 +17,7 @@ import { EntranceSystem } from './entrance.js';
 import { AssistHeld, Bonsai, BreathOrb, PruningShears, WateringCan } from './garden-components.js';
 import type { LineId } from './guide.js';
 import { MeditationSystem } from './meditation.js';
+import { isUnlocked } from './save/growth-levels.js';
 import { PruningSystem } from './pruning.js';
 
 /** Seconds of care between breaks: a random wait in this range, so they never feel scheduled. */
@@ -246,7 +247,9 @@ export class BreathBreakSystem extends createSystem({
     this.inviteLine = null;
     this.state = 'session';
     const pace = this.comfort?.settings.breathPace ?? 'medium';
-    this.meditation?.start('break', withPace(breakPatternFor(stage), pace));
+    const xp = this.bonsaiRef.entity?.getValue(Bonsai, 'xp') ?? 0;
+    const pattern = breakPatternFor(stage, isUnlocked(xp, 'deepBreath'), this.meditation?.breaksCompleted ?? 0);
+    this.meditation?.start('break', withPace(pattern, pace));
     this.entrance?.dimTo(DIM_LEVEL);
     this.placeInFront();
     this.shownWord = '';

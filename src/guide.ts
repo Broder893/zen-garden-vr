@@ -96,6 +96,10 @@ export const LINES = {
   // Levels (src/save/growth-levels.ts).
   dailyGift: 'A daily gift: your tree grew stronger overnight.',
   levelUp: 'Your garden reached a new level.',
+  levelPot: 'Level 6! Your tree has a new glazed pot.',
+  levelLantern: 'Level 7! A stone lantern now glows by your tree.',
+  levelStream: 'Level 8! A little stream runs through the sand.',
+  levelBreath: 'Level 9! A new deep breath joins your breaks.',
 } as const;
 export type LineId = keyof typeof LINES;
 
@@ -122,6 +126,9 @@ const DWELL: Partial<Record<LineId, LineId>> = {
   meditateHint: 'meditateHintDwell',
   meditatePaused: 'meditatePausedDwell',
 };
+const NO_SHOOTS: string[] = [];
+/** What each level past the bloom brings (src/unlocks.ts shows it). */
+const LEVEL_LINES: Record<number, LineId> = { 6: 'levelPot', 7: 'levelLantern', 8: 'levelStream', 9: 'levelBreath' };
 /** Levels 1-5 are the tree's stages, announced by their own growth lines. */
 const STAGE_LEVELS = 5;
 /** Seconds on the same task before the clearer help line appears. */
@@ -441,7 +448,9 @@ export class GuideSystem extends createSystem({
     this.lastStage = stage;
     // Levels past the bloom (6+) have no stage of their own: announce them here.
     const level = levelFor(bonsai.getValue(Bonsai, 'xp') ?? 0).level;
-    if (this.lastLevel >= 0 && level > this.lastLevel && level > STAGE_LEVELS) this.showEvent('levelUp', EVENT_SECONDS + 1);
+    if (this.lastLevel >= 0 && level > this.lastLevel && level > STAGE_LEVELS) {
+      this.showEvent(LEVEL_LINES[level] ?? 'levelUp', EVENT_SECONDS + 1);
+    }
     this.lastLevel = level;
     const cuts = this.pruning?.cuts ?? 0;
     if (cuts !== this.lastCuts && this.eventLeft <= 0) this.showEvent('snip', SNIP_SECONDS);
@@ -459,7 +468,7 @@ export class GuideSystem extends createSystem({
     const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
     const canHandsFree = this.queries.assistedCans.entities.size > 0;
     const shearsHandsFree = this.queries.assistedShears.entities.size > 0;
-    const shoots = SHOOTS_BY_STAGE[stage] ?? [];
+    const shoots = SHOOTS_BY_STAGE[stage] ?? NO_SHOOTS;
     const mask = bonsai.getValue(Bonsai, 'prunedMask') ?? 0;
     let nextShoot = -1;
     for (let i = 0; i < shoots.length && nextShoot < 0; i++) {

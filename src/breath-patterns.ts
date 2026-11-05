@@ -15,7 +15,7 @@ export interface BreathPattern {
   breaths: number;
 }
 
-/** The three rhythms of the short breathing breaks, gentlest first. */
+/** The rhythms of the short breathing breaks, gentlest first. */
 export const BREAK_PATTERNS = {
   /** In 4, out 6: a longer out-breath, the easiest start. */
   simple: { name: 'simple', inhale: 4, holdIn: 0, exhale: 6, holdOut: 0, breaths: 3 },
@@ -23,11 +23,19 @@ export const BREAK_PATTERNS = {
   box: { name: 'box', inhale: 4, holdIn: 4, exhale: 4, holdOut: 4, breaths: 3 },
   /** In 5, hold 2, out 8: long and slow. */
   long: { name: 'long', inhale: 5, holdIn: 2, exhale: 8, holdOut: 0, breaths: 4 },
+  /** In 4, hold 7, out 8: the deep breath unlocked at level 9. */
+  deep: { name: 'deep', inhale: 4, holdIn: 7, exhale: 8, holdOut: 0, breaths: 3 },
 } as const satisfies Record<string, BreathPattern>;
 
-/** A bigger tree has learnt a deeper rhythm: the pattern follows the bonsai's stage. */
-export function breakPatternFor(stage: number): BreathPattern {
-  if (stage >= BonsaiStage.Blooming) return BREAK_PATTERNS.long;
+/**
+ * A bigger tree has learnt a deeper rhythm: the pattern follows the bonsai's
+ * stage. Once the deep breath is unlocked, a blooming tree alternates it with
+ * the long one (`breakIndex` = breaks finished so far).
+ */
+export function breakPatternFor(stage: number, deepUnlocked = false, breakIndex = 0): BreathPattern {
+  if (stage >= BonsaiStage.Blooming) {
+    return deepUnlocked && breakIndex % 2 === 0 ? BREAK_PATTERNS.deep : BREAK_PATTERNS.long;
+  }
   if (stage >= BonsaiStage.Mature) return BREAK_PATTERNS.box;
   return BREAK_PATTERNS.simple;
 }

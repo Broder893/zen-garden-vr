@@ -1,5 +1,11 @@
 import { BonsaiStage } from '../garden-components.js';
-import { xpForStage } from './growth-levels.js';
+import { XP, xpForStage } from './growth-levels.js';
+
+function bitCount(mask: number): number {
+  let n = 0;
+  for (let m = mask; m; m &= m - 1) n++;
+  return n;
+}
 
 /**
  * The garden's saved state and its storage in localStorage.
@@ -95,15 +101,23 @@ export function parseSave(raw: string): GardenSave | null {
     typeof x === 'number' && Number.isFinite(x) ? Math.min(max, Math.max(min, Math.round(x))) : min;
   const planted = d.planted === true;
   const stage = planted ? clampInt(d.stage, 0, BonsaiStage.Blooming) : 0;
-  // Saves from before experience existed start at their stage's threshold.
-  const xp = typeof d.xp === 'number' ? clampInt(d.xp, 0, 1e7) : planted ? xpForStage(stage) : 0;
+  const prunedMask = clampInt(d.prunedMask, 0, 0xff);
+  const water = typeof d.water === 'number' && Number.isFinite(d.water) ? Math.min(1, Math.max(0, d.water)) : 0;
+  // Saves from before experience existed start at their stage's threshold,
+  // plus the care already given in that stage (so its growth still adds up).
+  const xp =
+    typeof d.xp === 'number'
+      ? clampInt(d.xp, 0, 1e7)
+      : planted
+        ? xpForStage(stage) + bitCount(prunedMask) * XP.cut + (water >= 1 ? XP.waterFull : 0)
+        : 0;
   return {
     planted,
     stage,
     xp: planted ? Math.max(xp, xpForStage(stage)) : 0,
     lastGiftDay: clampInt(d.lastGiftDay, 0, 99991231),
-    water: typeof d.water === 'number' && Number.isFinite(d.water) ? Math.min(1, Math.max(0, d.water)) : 0,
-    prunedMask: clampInt(d.prunedMask, 0, 0xff),
+    water,
+    prunedMask,
     visits: clampInt(d.visits, 0, 1e6),
     meditations: clampInt(d.meditations, 0, 1e6),
     // Older saves have no breaks yet: they start from 0.

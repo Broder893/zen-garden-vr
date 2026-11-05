@@ -103,8 +103,12 @@ export class BonsaiGrowthSystem extends createSystem({
       // A new stage needs its own care; the bloom arrives fully tended
       // (its shoots grow back, and the soil dries, on the next visit).
       const bloom = stage >= BonsaiStage.Blooming;
+      const newMask = bloom ? (1 << MATURE_SHOOTS.length) - 1 : 0;
       entity.setValue(Bonsai, 'water', bloom ? 1 : 0);
-      entity.setValue(Bonsai, 'prunedMask', bloom ? (1 << MATURE_SHOOTS.length) - 1 : 0);
+      entity.setValue(Bonsai, 'prunedMask', newMask);
+      // This tending is a gift of the new stage, not the player's care: no XP for it.
+      this.lastMask = newMask;
+      this.waterRewarded = bloom;
     }
     const water = entity.getValue(Bonsai, 'water') ?? 0;
     const mask = entity.getValue(Bonsai, 'prunedMask') ?? 0;

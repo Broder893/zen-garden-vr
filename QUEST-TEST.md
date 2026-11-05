@@ -93,7 +93,9 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] Enter VR: the tree is **as you left it**, the firefly says "Welcome back…".
 - [ ] To see the gift without waiting 3 hours, open:
       `https://broder893.github.io/zen-garden-vr/?nextvisit`
-      → entering VR, once the light comes up, a **new flower** grows in the sand and the firefly announces it.
+      → entering VR, once the light comes up, a **new flower** grows in the sand and the firefly announces it, then "A daily gift: your tree grew stronger overnight." (+20 XP).
+- [ ] On that return the soil is dry and glowing shoots have grown back: trim and water them. The **level badge** (front-right corner) flashes "+5 XP", "+10 XP" and its bar fills.
+- [ ] Keep coming back (or keep caring): at level 6 the pot turns to a celadon glaze, at 7 a stone lantern appears behind the can, at 8 a stream runs behind the tree, at 9 the breathing breaks gain a deep 4-7-8 breath. Each is announced and appears with sparkles.
 
 ## 8. When you're done
 

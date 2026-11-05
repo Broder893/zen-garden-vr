@@ -32,8 +32,13 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   hand (left or right: both tools move to that side) and **hold to select**, which
   replaces every pinch with a hand held still beside the object (or a steady look at the
   seed or stone). Settings are saved separately from the garden.
-- **Come back.** The garden is saved on the device. Every return visit (after a few
-  hours away) grows a new flower in the sand, up to seven.
+- **Come back and level up.** Care earns experience (plant 5, full watering 10, each
+  trimmed shoot 5, a breathing session 15, a breathing break 10, a daily gift 20). Levels
+  1-5 are the tree's stages; then come a glazed pot (6), a stone lantern (7), a stream
+  in the sand (8) and a deep 4-7-8 breath for the breaks (9). A badge by the table's
+  front corner shows the level and progress. The garden is saved on the device; each
+  return visit (after a few hours) the soil dries and shoots grow back, the first visit
+  of the day brings a gift, and a new flower grows in the sand, up to seven.
 
 ## Hand interactions
 
@@ -59,7 +64,8 @@ never required.
 
 - [IWSDK](https://iwsdk.dev) (Immersive Web SDK) on WebXR and Three.js, TypeScript, Vite.
 - **ECS systems**, one job each: watering, pruning, growth, guide, meditation, audio,
-  saving, entrance, visit flowers, comfort settings, hold-to-select, breathing breaks (`src/*.ts`,
+  saving, entrance, visit flowers, comfort settings, hold-to-select, breathing breaks,
+  levels and unlocks (`src/*.ts`,
   registered in `src/index.ts`).
 - **Procedural models** (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. The bonsai merges its parts per material: the

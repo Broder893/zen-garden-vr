@@ -35,12 +35,12 @@ Zen Garden is that ritual in a headset. A little garden sits on a table in front
 
 ### What it does
 
-- **A first five minutes that teaches itself.** A firefly guide flies to whatever matters next and says it in one short sentence, spoken and subtitled. Beside the object, a ghost gesture drawn in light acts the motion out (a pinch, a tilt). If you seem stuck, the line gets clearer; after a pause, the firefly welcomes you back. The seed sprouts within seconds and the tree first grows within a minute.
+- **A first five minutes that teaches itself.** A firefly guide flies to whatever matters next and says it in one short sentence, spoken and subtitled. Beside the object, a ghost gesture drawn in light acts the motion out (a pinch, a tilt). The seed sprouts within seconds and the tree first grows within a minute.
 - **A tree that needs you.** It grows only when watered and trimmed; each stage arrives with sparkles and music.
 - **Time to breathe.** Pinch the glowing stone for a guided session: an orb of light grows as you breathe in and shrinks as you breathe out, while the music breathes with you.
-- **Little breaks that find you.** Every few minutes of care (never while you hold a tool) the firefly invites a short pause. Show an open hand to say "not now". Otherwise the garden dims, a light in front of your eyes guides three or four breaths with a card that names each step, and the tree gets a drink of water as a thank-you. The rhythm grows with the tree, from a simple 4-in 6-out to box breathing.
+- **Little breaks that find you.** Every few minutes of care (never while you hold a tool) the firefly invites a short pause. Show an open hand to say "not now". Otherwise the garden dims, a light in front of your eyes guides three or four breaths with a card that names each step, and the tree gets a drink of water as a thank-you.
 - **Comfortable for more bodies.** A small Comfort panel changes the experience at any time and remembers your choice: **hold to select** (no pinch: keep a hand still by an object, or look at the seed or stone), **one hand** (both tools move to that side), **high contrast**, **large text** and **breathing pace**. Subtitles are always on.
-- **A reason to come back.** The garden is saved on the device, and every return visit grows a new flower in the sand.
+- **A reason to come back.** Every bit of care earns experience, and the garden levels up: the tree's stages first, then a glazed pot, a stone lantern, a little stream and a new deep breath. Each return the soil has dried and new shoots wait to be trimmed, the first visit of the day brings a gift, and a new flower grows in the sand.
 
 ### How we built it
 
