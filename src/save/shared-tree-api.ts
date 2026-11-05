@@ -26,8 +26,8 @@ export interface SharedLocal {
   cache: TreeState | null;
 }
 
-/** The published service (server/shared-tree/README.md); empty until it is deployed. */
-const SHARED_TREE_DEFAULT_URL = '';
+/** The published service (server/shared-tree/README.md). */
+const SHARED_TREE_DEFAULT_URL = 'https://zen-shared-tree.zen-shared-tree.workers.dev';
 /** Where the service lives (VITE_SHARED_TREE_URL overrides). Empty: the shared tree stays offline. */
 export const SHARED_TREE_URL: string = (import.meta.env.VITE_SHARED_TREE_URL ?? SHARED_TREE_DEFAULT_URL).replace(/\/+$/, '');
 const TIMEOUT_MS = 5000;
