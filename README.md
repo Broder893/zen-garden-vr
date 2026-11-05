@@ -17,8 +17,10 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   80 seconds: an orb of light grows as you breathe in and shrinks as you breathe out.
   Pinch again to pause.
 - **A guide, not a manual.** A firefly flies to whatever matters next and says it in
-  one short sentence, spoken and subtitled in English. It stays within your view and,
-  once the tree blooms, follows your hand.
+  one short sentence, spoken and subtitled in English. A ghost gesture drawn in light
+  shows the motion (a pinch, a tilt); a clearer line follows if you seem stuck, and the
+  firefly welcomes you back after a pause. It stays within your view and, once the tree
+  blooms, follows your hand.
 - **Come back.** The garden is saved on the device. Every return visit (after a few
   hours away) grows a new flower in the sand, up to seven.
 
@@ -64,6 +66,11 @@ npm run build      # production build in dist/
 
 Every push to `main` is built and published to GitHub Pages by
 `.github/workflows/deploy.yml`.
+
+In development, `FirstMomentsSystem` logs the seconds from entering VR to each reward
+(`[first-moments] planted at 10.2 s`). A scripted first visit: planted 10 s, first
+growth 21 s, mature 49 s, bloom 76 s; a first-time player takes longer, but the
+first reward (the sprout) still comes within the first minute.
 
 Address options for demos: `?fresh` starts a new garden, `?nextvisit` counts the
 next VR entry as a return visit without waiting. Both are removed from the address

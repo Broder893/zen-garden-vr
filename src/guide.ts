@@ -18,6 +18,7 @@ import {
   BonsaiStage,
   BreathOrb,
   FireflyGuide,
+  MeditationStone,
   PruningShears,
   Seed,
   WateringCan,
@@ -28,6 +29,7 @@ import { PruningSystem } from './pruning.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { EntranceSystem } from './entrance.js';
 import { WateringSystem } from './watering.js';
+import { GestureHint, GestureKind } from './effects/gesture-hint.js';
 
 /** Firefly moods: each tints the glow so the task reads before the words do. */
 const MOOD = {
@@ -65,8 +67,28 @@ export const LINES = {
   breatheNotice: 'Breathe in... notice the cool air.',
   meditatePaused: 'Paused. Pinch the stone to continue.',
   meditateDone: 'Well done. Come back to breathe any time.',
+  resumed: 'Welcome back. Let us carry on.',
+  // Clearer versions, shown when a task has waited a while (see HELP).
+  plantSeedHelp: 'Reach out to the seed, then touch thumb to finger.',
+  pickCanHelp: 'Move your hand to the can, then pinch to hold it.',
+  tiltCanHelp: 'Turn your wrist so the spout points down.',
+  pickShearsHelp: 'Move your hand to the shears, then pinch them.',
+  touchShootHelp: 'Bring the blade tips right onto the glowing shoot.',
 } as const;
 export type LineId = keyof typeof LINES;
+
+/** A task line replaced by a clearer one once the player has been on it a while. */
+const HELP: Partial<Record<LineId, LineId>> = {
+  plantSeed: 'plantSeedHelp',
+  pickCan: 'pickCanHelp',
+  tiltCan: 'tiltCanHelp',
+  pickShears: 'pickShearsHelp',
+  touchShoot: 'touchShootHelp',
+};
+/** Seconds on the same task before the clearer help line appears. */
+const STUCK_SECONDS = 15;
+/** Seconds before the ghost pinch appears, so players who already know just act. */
+const PINCH_HINT_DELAY = 1.5;
 
 const CUE_LINES: Record<Exclude<MeditationCue, null>, LineId> = {
   intro: 'breatheIntro',
@@ -106,9 +128,19 @@ export class GuideSystem extends createSystem({
   shears: { required: [PruningShears] },
   heldShears: { required: [PruningShears, Grabbed] },
   orbs: { required: [BreathOrb] },
+  stones: { required: [MeditationStone] },
 }) {
   /** The task line chosen this frame (an event line may be showing instead; see shownLine). */
   line: LineId = 'plantSeed';
+  /** The task the player is on (the line before any help swap). */
+  task: LineId = 'plantSeed';
+  /** Seconds spent on the current task while in view (not while away). */
+  taskTime = 0;
+  private lastTask: LineId | null = null;
+  private away = false;
+  private hint!: GestureHint;
+  private hintKind: GestureKind | null = null;
+  private hintAt = new Vector3();
   /** The line on screen right now (task or event); the voice speaks this. */
   shownLine: LineId = 'plantSeed';
   private shownText = '';
@@ -141,6 +173,7 @@ export class GuideSystem extends createSystem({
   private canRef!: FirstEntity;
   private shearsRef!: FirstEntity;
   private orbRef!: FirstEntity;
+  private stoneRef!: FirstEntity;
   private greeted = false;
   private persistence?: PersistenceSystem;
   private entrance?: EntranceSystem;
@@ -155,6 +188,7 @@ export class GuideSystem extends createSystem({
     this.canRef = trackFirst(this.queries.cans, this.cleanupFuncs);
     this.shearsRef = trackFirst(this.queries.shears, this.cleanupFuncs);
     this.orbRef = trackFirst(this.queries.orbs, this.cleanupFuncs);
+    this.stoneRef = trackFirst(this.queries.stones, this.cleanupFuncs);
     this.meditation = this.world.getSystem(MeditationSystem);
     this.persistence = this.world.getSystem(PersistenceSystem);
     this.entrance = this.world.getSystem(EntranceSystem);
@@ -179,9 +213,22 @@ export class GuideSystem extends createSystem({
       if (seed.object3D) seed.object3D.visible = false;
       this.showEvent('planted', EVENT_SECONDS);
     };
+    this.hint = new GestureHint();
+    this.world.createTransformEntity(this.hint.root);
     this.cleanupFuncs.push(
       this.queries.guide.subscribe('qualify', bindGuide),
       this.queries.seedPinched.subscribe('qualify', plant),
+      this.world.visibilityState.subscribe((state) => {
+        // Headset off, system menu or exit: on return, reorient the player once.
+        if (state !== VisibilityState.Visible) {
+          if (this.greeted) this.away = true;
+          return;
+        }
+        if (!this.away) return;
+        this.away = false;
+        this.taskTime = 0;
+        if (!this.meditation?.active) this.showEvent('resumed', EVENT_SECONDS);
+      }),
     );
     for (const e of this.queries.guide.entities) bindGuide(e);
   }
@@ -220,14 +267,78 @@ export class GuideSystem extends createSystem({
       mood = 'calm';
       this.eventLeft = 0;
       this.line = CUE_LINES[cue];
+      this.lastTask = null;
       this.targetNextToOrb();
       this.setLine(this.line);
     } else {
       mood = this.chooseTask(bonsai);
+      this.trackTask(inVR ? delta : 0);
       this.setLine(this.eventLeft > 0 && this.event ? this.event : this.line);
     }
     this.moveFirefly(delta, mood);
+    this.updateHint(delta, cue !== null);
     this.billboardPanel();
+  }
+
+  /** Times the current task and swaps in its clearer help line once the player seems stuck. */
+  private trackTask(delta: number): void {
+    if (this.task !== this.lastTask) {
+      this.lastTask = this.task;
+      this.taskTime = 0;
+    } else this.taskTime += delta;
+    const help = HELP[this.task];
+    this.line = help && this.taskTime >= STUCK_SECONDS ? help : this.task;
+  }
+
+  /** Acts out the gesture for the current task in light, next to its object. */
+  private updateHint(delta: number, inSession: boolean): void {
+    let kind: GestureKind | null = null;
+    let obj: Object3D | undefined;
+    let lift = 0.05;
+    if (!inSession && !(this.eventLeft > 0)) {
+      switch (this.task) {
+        case 'plantSeed':
+          obj = this.seedRef.entity?.object3D;
+          kind = 'pinch';
+          break;
+        case 'pickCan':
+          obj = this.canRef.entity?.object3D;
+          kind = 'pinch';
+          lift = 0.13;
+          break;
+        case 'pickShears':
+          obj = this.shearsRef.entity?.object3D;
+          kind = 'pinch';
+          break;
+        case 'tiltCan':
+          obj = this.canRef.entity?.object3D;
+          kind = 'tilt';
+          lift = 0.14;
+          break;
+        case 'rest':
+          // Until the player has tried it, show how to start breathing.
+          if (!this.persistence?.hasMeditated) {
+            obj = this.stoneRef.entity?.object3D;
+            kind = 'pinch';
+            lift = 0.07;
+          }
+          break;
+      }
+      if (kind === 'pinch' && this.taskTime < PINCH_HINT_DELAY) kind = null;
+    }
+    if (kind && obj) {
+      obj.getWorldPosition(this.hintAt);
+      this.hintAt.y += lift;
+    } else kind = null;
+    // Brighter once the player seems stuck.
+    const strength = this.taskTime >= STUCK_SECONDS ? 1 : 0.75;
+    this.hint.update(delta, kind, this.hintAt, this.head, this.color, strength);
+    this.hintKind = kind;
+  }
+
+  /** The gesture hint showing now (null when none): read by tests and tooling. */
+  get gestureHint(): GestureKind | null {
+    return this.hintKind;
   }
 
   private showEvent(id: LineId, seconds: number): void {
@@ -252,13 +363,13 @@ export class GuideSystem extends createSystem({
   private chooseTask(bonsai: Entity): Mood {
     const bonsaiObj = bonsai.object3D;
     if (!bonsai.getValue(Bonsai, 'planted')) {
-      this.line = 'plantSeed';
+      this.task = 'plantSeed';
       this.targetOf(this.seedRef.entity?.object3D, 0);
       return 'welcome';
     }
     const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
     if (stage >= BonsaiStage.Blooming) {
-      this.line = 'rest';
+      this.task = 'rest';
       // Nothing left to do: the firefly keeps the player company at their hand.
       if (!this.targetHand()) this.targetOf(bonsaiObj, 0.3);
       return 'bloom';
@@ -272,23 +383,23 @@ export class GuideSystem extends createSystem({
     }
     if (nextShoot >= 0) {
       if (this.queries.heldShears.entities.size === 0) {
-        this.line = 'pickShears';
+        this.task = 'pickShears';
         this.targetOf(this.shearsRef.entity?.object3D, 0.02);
       } else {
-        this.line = 'touchShoot';
+        this.task = 'touchShoot';
         this.targetOf(bonsaiObj?.getObjectByName(shoots[nextShoot])?.getObjectByName('CutPoint'), -0.05);
       }
       return 'prune';
     }
 
     if (this.queries.heldCans.entities.size === 0) {
-      this.line = 'pickCan';
+      this.task = 'pickCan';
       this.targetOf(this.canRef.entity?.object3D, 0.12);
     } else if (this.watering?.wateringBonsai) {
-      this.line = 'pouring';
+      this.task = 'pouring';
       this.targetOf(bonsaiObj, 0.18);
     } else {
-      this.line = this.watering?.pouring ? 'moveSpout' : 'tiltCan';
+      this.task = this.watering?.pouring ? 'moveSpout' : 'tiltCan';
       this.targetOf(bonsaiObj, 0.18);
     }
     return 'water';

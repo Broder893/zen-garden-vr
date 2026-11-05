@@ -3,6 +3,7 @@ import projectOptions from 'virtual:iwsdk-project';
 import { GardenAudioSystem } from './audio-system.js';
 import { BonsaiGrowthSystem } from './bonsai-growth.js';
 import { EntranceSystem } from './entrance.js';
+import { FirstMomentsSystem } from './first-moments.js';
 import { GuideSystem } from './guide.js';
 import { MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
@@ -25,5 +26,14 @@ World.create(
     .registerSystem(PersistenceSystem)
     .registerSystem(GuideSystem)
     .registerSystem(GardenAudioSystem)
-    .registerSystem(VisitFlowerSystem);
+    .registerSystem(VisitFlowerSystem)
+    .registerSystem(FirstMomentsSystem);
+  if (import.meta.env.DEV) {
+    // Dev only: lets .iwsdk-scripts/eval.mjs read live system state in tests.
+    (window as unknown as { __zen?: unknown }).__zen = {
+      guide: world.getSystem(GuideSystem),
+      moments: world.getSystem(FirstMomentsSystem),
+      meditation: world.getSystem(MeditationSystem),
+    };
+  }
 });

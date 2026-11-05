@@ -47,7 +47,7 @@ Suggested cut, about 2:50:
 | Time | From | Add as text on screen |
 | --- | --- | --- |
 | 0:00–0:08 | start of `demo-main` (lights warming up) | *Zen Garden — a pocket garden for your work breaks* |
-| 0:08–0:30 | planting | *Hands only. Pinch the glowing seed.* |
+| 0:08–0:30 | planting (keep the ghost pinch next to the seed in frame) | *Hands only. The firefly shows the gesture in light.* |
 | 0:30–1:00 | first watering, growth | *Tilt to pour. The tree grows when it's cared for.* |
 | 1:00–1:40 | pruning, watering, bloom (speed up 1.5–2× if long) | *Trim the wild shoots to shape your bonsai.* |
 | 1:40–2:15 | breathing session | *When you need a pause, breathe with the light.* |

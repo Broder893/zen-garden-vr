@@ -27,8 +27,11 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 ## 2. Tutorial: seed and water
 
 - [ ] Subtitle "Welcome. Pinch the glowing seed to plant it." readable without effort.
+- [ ] Next to the seed a small **ghost pinch** in light (two dots closing, a ring flashing) shows the gesture. Visible without effort?
+- [ ] Wait 15 seconds without doing anything: the subtitle becomes a clearer one ("Reach out to the seed, then touch thumb to finger.").
 - [ ] **Pinch the seed** (thumb + index near the glowing seed): it disappears, chime, sparkles, a sprout appears.
 - [ ] **Pinch the watering can**: it grabs on the first or second try, not after many attempts. *(Note how many tries.)*
+- [ ] While you hold the can level, a small **arc of light** next to it suggests turning it.
 - [ ] **Tilt** the can over the tree: water comes out only when you really tilt it, the sound of water starts and stops.
 - [ ] The soil darkens; after about 3 seconds of pouring the tree **grows** (sparkles, melody).
 - [ ] **Release** the can (open your hand): it slides back to its place on the table.
@@ -47,6 +50,7 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 - [ ] **Pinch the stone**: bell, the orb appears above the tree and breathes (grows 4 s, holds 2 s, shrinks 6 s).
 - [ ] The voice says "Breathe in... / Hold... / And breathe out..." **in time** with the orb.
 - [ ] **Pinch the stone again**: "Paused". Again: it resumes.
+- [ ] Press the **Meta button** while caring for the tree, then come back: the firefly says "Welcome back. Let us carry on." and the task continues.
 - [ ] Press the **Meta button** (system menu) during the meditation: **sound stops** and the session pauses. Come back: everything is quiet until you pinch the stone.
 - [ ] At the end "Well done…" and a deeper bell.
 

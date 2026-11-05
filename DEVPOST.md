@@ -35,7 +35,7 @@ Zen Garden is that ritual in a headset. A small garden sits on a table in front 
 
 ### What it does
 
-- **A first five minutes that teaches itself.** A firefly guide floats to whatever matters next and explains it in one short sentence, spoken aloud and shown as an English subtitle: pinch the seed, lift the watering can, tilt it over the tree, trim the glowing shoots.
+- **A first five minutes that teaches itself.** A firefly guide floats to whatever matters next and explains it in one short sentence, spoken aloud and shown as an English subtitle: pinch the seed, lift the watering can, tilt it over the tree, trim the glowing shoots. Beside the object, a tiny ghost gesture drawn in light acts the motion out (two fingertips pinching, a spout turning down), so you see what to do before you read it. If you seem stuck for 15 seconds, the line becomes a clearer one, and after a pause the firefly welcomes you back to where you left off. The seed sprouts in the first seconds, and in our timed run the tree first grew at 21 seconds and bloomed at 76.
 - **A tree that needs you.** The bonsai only grows when it has had its water and every overgrown shoot has been cut. Each stage arrives with sparkles and a little rising melody.
 - **A minute and a half to breathe.** Pinch the stone and an orb of light grows as you breathe in, holds, and shrinks as you breathe out, six times, while the music opens and closes with your breath. Pinch again to pause.
 - **A reason to come back.** Your garden is saved on the device. Every return visit (after a few hours away) a new flower opens in the sand, up to seven, and the firefly welcomes you back.
@@ -63,6 +63,7 @@ The experience is completable from start to finish with hands only; controllers 
 - **Touch to trim.** Holding the shears, bring the blades within 7 cm of a glowing shoot and it is cut, with a snip animation and sound. No second gesture or precise aim is needed.
 - **Pinch as a button.** Pinching the seed plants it; pinching the stone starts, pauses or resumes the breathing session. These objects are released straight away, so they act like buttons you can find with your hand.
 - **Forgiving by design.** Released tools glide back to their place on the table, so nothing is ever lost or dropped out of reach.
+- **Shown, not told.** Each pinch task gets a ghost pinch drawn in light beside the object; holding the can level shows a turning arc to say "tilt".
 - **The guide follows you.** The firefly never strays more than 35 degrees from where you are looking, leading your eye to the next task, and once the tree is in bloom it follows your hand.
 
 ## Built with
