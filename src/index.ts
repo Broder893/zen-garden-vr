@@ -8,6 +8,7 @@ import { DwellSystem } from './dwell.js';
 import { EntranceSystem } from './entrance.js';
 import { FirstMomentsSystem } from './first-moments.js';
 import { GuideSystem } from './guide.js';
+import { LevelBadgeSystem } from './level-badge.js';
 import { MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
@@ -33,6 +34,7 @@ World.create(
     .registerSystem(DwellSystem)
     .registerSystem(GardenAudioSystem)
     .registerSystem(VisitFlowerSystem)
+    .registerSystem(LevelBadgeSystem)
     .registerSystem(FirstMomentsSystem);
   if (import.meta.env.DEV) {
     // Dev only: lets .iwsdk-scripts/eval.mjs read live system state in tests.
@@ -43,6 +45,8 @@ World.create(
       comfort: world.getSystem(ComfortSystem),
       dwell: world.getSystem(DwellSystem),
       breaks: world.getSystem(BreathBreakSystem),
+      growth: world.getSystem(BonsaiGrowthSystem),
+      persistence: world.getSystem(PersistenceSystem),
     };
   }
 });

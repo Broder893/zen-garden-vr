@@ -11,6 +11,7 @@ import {
   VISIT_GAP_MS,
   visitGrowsFlower,
 } from './save/garden-save.js';
+import { dayKey, XP } from './save/growth-levels.js';
 
 /** How often the garden checks for changes to save. */
 const SAVE_EVERY_SECONDS = 2;
@@ -41,6 +42,8 @@ export class PersistenceSystem extends createSystem({
   private forceVisit = false;
   /** True when entering VR this time counted as a new visit. */
   newVisit = false;
+  /** True when this visit brought the daily gift (first visit of the day, tree planted). */
+  dailyGift = false;
   /** Storage refused a write: stop trying, the garden just runs unsaved. */
   private blocked = false;
   private meditation?: MeditationSystem;
@@ -62,6 +65,7 @@ export class PersistenceSystem extends createSystem({
       e.setValue(Bonsai, 'stage', this.save.stage);
       e.setValue(Bonsai, 'water', this.save.water);
       e.setValue(Bonsai, 'prunedMask', this.save.prunedMask);
+      e.setValue(Bonsai, 'xp', this.save.xp);
     };
     const hideSeed = (e: Entity) => {
       // Already planted: the guide disposes hidden seeds.
@@ -82,9 +86,11 @@ export class PersistenceSystem extends createSystem({
             this.newVisit = true;
             this.save.visits += 1;
             this.save.lastVisitAt = now;
+            this.regrow();
             this.lastKey = ''; // lastVisitAt is not in the change key: force a write
-            flush();
           }
+          this.giveDailyGift(now);
+          flush();
         }
         if (state === VisibilityState.Hidden || state === VisibilityState.VisibleBlurred) flush();
       }),
@@ -98,6 +104,31 @@ export class PersistenceSystem extends createSystem({
     if (this.sinceCheck < SAVE_EVERY_SECONDS) return;
     this.sinceCheck = 0;
     this.saveIfChanged();
+  }
+
+  /**
+   * Time away has passed: the soil has dried and the shoots have grown back,
+   * so a returning player always has something to tend (and XP to earn).
+   */
+  private regrow(): void {
+    const b = this.bonsai.entity;
+    if (!b || !(b.getValue(Bonsai, 'planted') ?? false)) return;
+    b.setValue(Bonsai, 'water', 0);
+    b.setValue(Bonsai, 'prunedMask', 0);
+  }
+
+  /** First entry of the day with a planted tree: a small XP gift. The day of planting starts the count. */
+  private giveDailyGift(now: number): void {
+    const today = dayKey(now);
+    // ?nextvisit (demos) also brings the gift, without waiting for tomorrow.
+    if (this.save.lastGiftDay === today && !this.forceVisit) return;
+    const b = this.bonsai.entity;
+    const planted = b?.getValue(Bonsai, 'planted') ?? false;
+    this.save.lastGiftDay = today;
+    this.lastKey = '';
+    if (!b || !planted || !this.returning) return;
+    b.setValue(Bonsai, 'xp', (b.getValue(Bonsai, 'xp') ?? 0) + XP.dailyGift);
+    this.dailyGift = true;
   }
 
   /** True when this visit is the one that grows a new flower. */
@@ -122,10 +153,11 @@ export class PersistenceSystem extends createSystem({
       // Floor, never round: a reload must not top the water up to "full".
       s.water = Math.floor((b.getValue(Bonsai, 'water') ?? 0) * 100) / 100;
       s.prunedMask = b.getValue(Bonsai, 'prunedMask') ?? 0;
+      s.xp = b.getValue(Bonsai, 'xp') ?? 0;
     }
     s.meditations = this.baseMeditations + (this.meditation?.completed ?? 0);
     s.breaks = this.baseBreaks + (this.meditation?.breaksCompleted ?? 0);
-    const key = `${s.planted}|${s.stage}|${s.water}|${s.prunedMask}|${s.visits}|${s.meditations}|${s.breaks}`;
+    const key = `${s.planted}|${s.stage}|${s.water}|${s.prunedMask}|${s.visits}|${s.meditations}|${s.breaks}|${s.xp}`;
     if (key === this.lastKey) return;
     s.savedAt = Date.now();
     this.lastKey = key;

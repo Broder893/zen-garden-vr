@@ -3,12 +3,17 @@ import { createComponent, Types } from '@iwsdk/core';
 /** Growth stages of the bonsai, in order. */
 export const BonsaiStage = { Sprout: 0, Young: 1, Mature: 2, Blooming: 3 } as const;
 
-/** The bonsai the player cares for. Water and prunedMask reset at each new stage. */
+/**
+ * The bonsai the player cares for. Care earns `xp`, and xp sets the stage
+ * (see src/save/growth-levels.ts). Water and prunedMask reset at each new
+ * stage and on each return visit.
+ */
 export const Bonsai = createComponent('Bonsai', {
   planted: { type: Types.Boolean, default: false, label: 'Seed planted' },
   stage: { type: Types.Int8, default: 0, min: 0, max: 3, label: 'Stage (0 sprout .. 3 blooming)' },
   water: { type: Types.Float32, default: 0, min: 0, max: 1, label: 'Water for this stage (0..1)' },
   prunedMask: { type: Types.Int32, default: 0, label: 'Bitmask of shoots cut this stage' },
+  xp: { type: Types.Int32, default: 0, min: 0, label: 'Experience from care (sets stage and level)' },
 });
 
 /** Tag: a grabbable watering can. Pours when tilted spout-down. */

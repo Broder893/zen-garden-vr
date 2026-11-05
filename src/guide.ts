@@ -30,6 +30,7 @@ import { PruningSystem } from './pruning.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { BreathBreakSystem } from './breath-break.js';
 import { ComfortSystem } from './comfort.js';
+import { levelFor } from './save/growth-levels.js';
 import { EntranceSystem } from './entrance.js';
 import { WateringSystem } from './watering.js';
 import { GestureHint, GestureKind } from './effects/gesture-hint.js';
@@ -92,6 +93,9 @@ export const LINES = {
   breakSkip: 'Not now? Show me an open hand.',
   breakLater: 'Of course. We will breathe later.',
   breakDone: 'Lovely. Your tree grew a little with you.',
+  // Levels (src/save/growth-levels.ts).
+  dailyGift: 'A daily gift: your tree grew stronger overnight.',
+  levelUp: 'Your garden reached a new level.',
 } as const;
 export type LineId = keyof typeof LINES;
 
@@ -118,6 +122,8 @@ const DWELL: Partial<Record<LineId, LineId>> = {
   meditateHint: 'meditateHintDwell',
   meditatePaused: 'meditatePausedDwell',
 };
+/** Levels 1-5 are the tree's stages, announced by their own growth lines. */
+const STAGE_LEVELS = 5;
 /** Seconds on the same task before the clearer help line appears. */
 const STUCK_SECONDS = 15;
 /** Still not planted after this long: point out the hands-free option. */
@@ -212,6 +218,8 @@ export class GuideSystem extends createSystem({
   private orbRef!: FirstEntity;
   private stoneRef!: FirstEntity;
   private greeted = false;
+  private giftPending = false;
+  private lastLevel = -1;
   private persistence?: PersistenceSystem;
   private entrance?: EntranceSystem;
   private comfort?: ComfortSystem;
@@ -286,8 +294,14 @@ export class GuideSystem extends createSystem({
       const p = this.persistence;
       if (p?.newFlowerThisVisit) this.showEvent('welcomeGift', EVENT_SECONDS + 1);
       else if (p?.returning) this.showEvent('welcomeBack', EVENT_SECONDS + 1);
+      // The daily gift is announced right after the welcome.
+      this.giftPending = p?.dailyGift ?? false;
     }
     if (this.eventLeft > 0) this.eventLeft -= delta;
+    if (this.giftPending && this.eventLeft <= 0) {
+      this.giftPending = false;
+      this.showEvent('dailyGift', EVENT_SECONDS + 1);
+    }
     // After the first growth event, point out the stone once, straight after
     // the event line so no task line flashes (and gets half-spoken) in between.
     if (this.greeted && !this.hintShown && this.lastStage >= BonsaiStage.Young && this.eventLeft <= 0) {
@@ -319,7 +333,8 @@ export class GuideSystem extends createSystem({
       this.setLine(this.line);
     } else {
       mood = this.chooseTask(bonsai);
-      this.trackTask(inVR ? delta : 0);
+      // Only time on the task counts: not while away, nor while a one-off line plays.
+      this.trackTask(inVR && this.eventLeft <= 0 ? delta : 0);
       this.setLine(this.eventLeft > 0 && this.event ? this.event : this.line);
     }
     this.moveFirefly(delta, mood);
@@ -424,6 +439,10 @@ export class GuideSystem extends createSystem({
       if (stage === BonsaiStage.Blooming) this.showEvent('bloomed', EVENT_SECONDS + 2);
     }
     this.lastStage = stage;
+    // Levels past the bloom (6+) have no stage of their own: announce them here.
+    const level = levelFor(bonsai.getValue(Bonsai, 'xp') ?? 0).level;
+    if (this.lastLevel >= 0 && level > this.lastLevel && level > STAGE_LEVELS) this.showEvent('levelUp', EVENT_SECONDS + 1);
+    this.lastLevel = level;
     const cuts = this.pruning?.cuts ?? 0;
     if (cuts !== this.lastCuts && this.eventLeft <= 0) this.showEvent('snip', SNIP_SECONDS);
     this.lastCuts = cuts;
@@ -440,7 +459,15 @@ export class GuideSystem extends createSystem({
     const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
     const canHandsFree = this.queries.assistedCans.entities.size > 0;
     const shearsHandsFree = this.queries.assistedShears.entities.size > 0;
-    if (stage >= BonsaiStage.Blooming) {
+    const shoots = SHOOTS_BY_STAGE[stage] ?? [];
+    const mask = bonsai.getValue(Bonsai, 'prunedMask') ?? 0;
+    let nextShoot = -1;
+    for (let i = 0; i < shoots.length && nextShoot < 0; i++) {
+      if ((mask & (1 << i)) === 0) nextShoot = i;
+    }
+    // All tended (trimmed and watered): rest. In bloom this is the usual state
+    // until the next visit, when the soil dries and shoots grow back.
+    if (nextShoot < 0 && (bonsai.getValue(Bonsai, 'water') ?? 0) >= 1) {
       if (canHandsFree || shearsHandsFree) {
         this.task = 'putBack';
         this.targetOf((canHandsFree ? this.canRef : this.shearsRef).entity?.object3D, 0.12);
@@ -449,15 +476,9 @@ export class GuideSystem extends createSystem({
       this.task = 'rest';
       // Nothing left to do: the firefly keeps the player company at their hand.
       if (!this.targetHand()) this.targetOf(bonsaiObj, 0.3);
-      return 'bloom';
+      return stage >= BonsaiStage.Blooming ? 'bloom' : 'calm';
     }
 
-    const shoots = SHOOTS_BY_STAGE[stage] ?? [];
-    const mask = bonsai.getValue(Bonsai, 'prunedMask') ?? 0;
-    let nextShoot = -1;
-    for (let i = 0; i < shoots.length && nextShoot < 0; i++) {
-      if ((mask & (1 << i)) === 0) nextShoot = i;
-    }
     if (nextShoot >= 0) {
       if (canHandsFree) {
         this.task = 'putBack';

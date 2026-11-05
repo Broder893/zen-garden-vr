@@ -14,7 +14,7 @@ import { breakPatternFor, withPace } from './breath-patterns.js';
 import { ComfortSystem } from './comfort.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { EntranceSystem } from './entrance.js';
-import { AssistHeld, Bonsai, BonsaiStage, BreathOrb, PruningShears, WateringCan } from './garden-components.js';
+import { AssistHeld, Bonsai, BreathOrb, PruningShears, WateringCan } from './garden-components.js';
 import type { LineId } from './guide.js';
 import { MeditationSystem } from './meditation.js';
 import { PruningSystem } from './pruning.js';
@@ -276,11 +276,9 @@ export class BreathBreakSystem extends createSystem({
   }
 
   private reward(bonsai: Entity): void {
-    const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
-    if (stage < BonsaiStage.Blooming) {
-      const water = bonsai.getValue(Bonsai, 'water') ?? 0;
-      bonsai.setValue(Bonsai, 'water', Math.min(1, water + WATER_BONUS));
-    }
+    // Water helps at every stage: a full tree earns its watering XP.
+    const water = bonsai.getValue(Bonsai, 'water') ?? 0;
+    bonsai.setValue(Bonsai, 'water', Math.min(1, water + WATER_BONUS));
     this.growth?.sparkle();
   }
 

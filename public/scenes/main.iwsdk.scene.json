@@ -521,6 +521,23 @@
       }
     },
     {
+      "id": "level-badge",
+      "name": "Level Badge",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "level-badge"
+      },
+      "transform": {
+        "position": [
+          0.44,
+          0.92,
+          -0.2
+        ],
+        "scale": 0.8
+      }
+    },
+    {
       "id": "lantern-light",
       "name": "Lantern Light",
       "transform": {

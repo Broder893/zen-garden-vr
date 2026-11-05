@@ -25,4 +25,5 @@ export default defineAssets({
   'subtitle-panel': ui('subtitle.uikitml', 'Subtitle Panel'),
   'comfort-panel': ui('comfort.uikitml', 'Comfort Panel'),
   'breath-panel': ui('breath.uikitml', 'Breath Panel'),
+  'level-badge': ui('level.uikitml', 'Level Badge'),
 });

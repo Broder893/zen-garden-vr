@@ -1,4 +1,5 @@
 import { BonsaiStage } from '../garden-components.js';
+import { xpForStage } from './growth-levels.js';
 
 /**
  * The garden's saved state and its storage in localStorage.
@@ -20,6 +21,10 @@ export interface GardenSave {
   meditations: number;
   /** Breathing breaks (offered by the firefly) finished, over all visits. */
   breaks: number;
+  /** Experience from care; sets the tree's stage and the garden level. */
+  xp: number;
+  /** Local day (20261105) of the last daily gift; 0 = never. */
+  lastGiftDay: number;
   /** When the last counted visit began (ms since epoch). */
   lastVisitAt: number;
   /** When the garden was last saved (ms since epoch). */
@@ -44,7 +49,7 @@ const KEY = 'zen-garden-vr/save';
 const VERSION = 1;
 
 export function emptySave(): GardenSave {
-  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, breaks: 0, lastVisitAt: 0, savedAt: 0 };
+  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, breaks: 0, xp: 0, lastGiftDay: 0, lastVisitAt: 0, savedAt: 0 };
 }
 
 /** Reads the save; null when there is none, it is unreadable, or storage is blocked. */
@@ -89,9 +94,14 @@ export function parseSave(raw: string): GardenSave | null {
   const clampInt = (x: unknown, min: number, max: number) =>
     typeof x === 'number' && Number.isFinite(x) ? Math.min(max, Math.max(min, Math.round(x))) : min;
   const planted = d.planted === true;
+  const stage = planted ? clampInt(d.stage, 0, BonsaiStage.Blooming) : 0;
+  // Saves from before experience existed start at their stage's threshold.
+  const xp = typeof d.xp === 'number' ? clampInt(d.xp, 0, 1e7) : planted ? xpForStage(stage) : 0;
   return {
     planted,
-    stage: planted ? clampInt(d.stage, 0, BonsaiStage.Blooming) : 0,
+    stage,
+    xp: planted ? Math.max(xp, xpForStage(stage)) : 0,
+    lastGiftDay: clampInt(d.lastGiftDay, 0, 99991231),
     water: typeof d.water === 'number' && Number.isFinite(d.water) ? Math.min(1, Math.max(0, d.water)) : 0,
     prunedMask: clampInt(d.prunedMask, 0, 0xff),
     visits: clampInt(d.visits, 0, 1e6),
