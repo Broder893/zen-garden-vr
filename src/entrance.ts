@@ -29,6 +29,11 @@ export class EntranceSystem extends createSystem({
   private level: Entity | null = null;
   private iblFull = 0;
   private t = -1;
+  /** Warm-up level, 0..1 of the authored light. */
+  private warm = 1;
+  /** Extra dimming for calm moments (1 = none); eases toward dimTarget. */
+  private dim = 1;
+  private dimTarget = 1;
 
   /** True once the warm-up is far enough along for moments to be seen. */
   get lit(): boolean {
@@ -60,15 +65,31 @@ export class EntranceSystem extends createSystem({
       obj.position.set(FIREFLY_FROM.x, FIREFLY_FROM.y, FIREFLY_FROM.z);
       obj.parent?.worldToLocal(obj.position);
     }
-    this.apply(START_LEVEL);
+    this.warm = START_LEVEL;
+    this.apply(START_LEVEL * this.dim);
+  }
+
+  /** Dims the garden toward `level` (1 = normal), e.g. during a breathing break. */
+  dimTo(level: number): void {
+    this.dimTarget = level;
   }
 
   update(delta: number): void {
-    if (this.t < 0 || this.t >= WARM_UP_SECONDS) return;
-    this.t = Math.min(WARM_UP_SECONDS, this.t + delta);
-    const k = this.t / WARM_UP_SECONDS;
-    // Ease in-out so the light blooms rather than switches on.
-    this.apply(START_LEVEL + (1 - START_LEVEL) * k * k * (3 - 2 * k));
+    if (this.t < 0) return;
+    const warming = this.t < WARM_UP_SECONDS;
+    const dimming = Math.abs(this.dim - this.dimTarget) > 1e-3;
+    if (!warming && !dimming) return;
+    if (warming) {
+      this.t = Math.min(WARM_UP_SECONDS, this.t + delta);
+      const k = this.t / WARM_UP_SECONDS;
+      // Ease in-out so the light blooms rather than switches on.
+      this.warm = START_LEVEL + (1 - START_LEVEL) * k * k * (3 - 2 * k);
+    }
+    if (dimming) {
+      this.dim += (this.dimTarget - this.dim) * (1 - Math.exp(-1.5 * delta));
+      if (Math.abs(this.dim - this.dimTarget) <= 1e-3) this.dim = this.dimTarget;
+    }
+    this.apply(this.warm * this.dim);
   }
 
   private apply(level: number): void {

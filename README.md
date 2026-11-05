@@ -16,6 +16,12 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
 - **Breathe.** Pinch the meditation stone for a guided breathing session of about
   80 seconds: an orb of light grows as you breathe in and shrinks as you breathe out.
   Pinch again to pause.
+- **Breathing breaks.** Every two to four minutes of care, the firefly invites a short
+  pause (never while a tool is in hand, never twice without care in between). Hold up an
+  open hand, palm out, to skip it. Otherwise the garden dims and a light in front of you
+  breathes with you, with a card naming each step and counting 3-4 breaths; the tree
+  gets water as a reward. The rhythm follows the tree: simple (4 in, 6 out), box
+  (4-4-4-4) or long and slow (5-2-8).
 - **A guide, not a manual.** A firefly flies to whatever matters next and says it in
   one short sentence, spoken and subtitled in English. A ghost gesture drawn in light
   shows the motion (a pinch, a tilt); a clearer line follows if you seem stuck, and the
@@ -39,6 +45,7 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
 | Pinch the seed / the stone | Plants the seed / starts, pauses, resumes breathing |
 | Open the hand | Releases a tool; it glides back to its place on the table |
 | Poke a button | Changes a Comfort setting |
+| Open hand up, palm out | Skips a breathing break ("not now") |
 
 With **hold to select** on: keep a hand still by an object for 1.2 s (a ring of light
 fills) to plant, pick up or start breathing; look at the seed or stone for 2 s for the
@@ -52,7 +59,7 @@ never required.
 
 - [IWSDK](https://iwsdk.dev) (Immersive Web SDK) on WebXR and Three.js, TypeScript, Vite.
 - **ECS systems**, one job each: watering, pruning, growth, guide, meditation, audio,
-  saving, entrance, visit flowers, comfort settings, hold-to-select (`src/*.ts`,
+  saving, entrance, visit flowers, comfort settings, hold-to-select, breathing breaks (`src/*.ts`,
   registered in `src/index.ts`).
 - **Procedural models** (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. The bonsai merges its parts per material: the

@@ -1,0 +1,32 @@
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6;
+    width: 30;
+    padding-top: 1.4;
+    padding-bottom: 1.4;
+    padding-left: 2;
+    padding-right: 2;
+    background-color: rgba(20, 17, 31, 0.7);
+    border-radius: 3;
+    border-width: 0.15;
+    border-color: #b9a8ff;
+  }
+  .word {
+    font-size: 4;
+    font-weight: medium;
+    color: #f3eeff;
+    text-align: center;
+  }
+  .count {
+    font-size: 2.4;
+    color: #cfc4ff;
+    text-align: center;
+  }
+</style>
+<div id="breath-card" class="card">
+  <span id="breath-word" class="word">Breathe in</span>
+  <span id="breath-count" class="count">Breath 1 of 3</span>
+</div>

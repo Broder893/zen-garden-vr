@@ -58,6 +58,7 @@ const HIGHLIGHT = new Color('#ffd23f');
 const HIGHLIGHT_INTENSITY = 0.4;
 const SUBTITLE_SCALE = { normal: 0.8, large: 1.2 };
 const PANEL_SCALE = { normal: 0.6, large: 0.75 };
+const BREATH_CARD_SCALE = { normal: 1, large: 1.3 };
 /** Where the tools rest for each hands setting: [x, z, yaw degrees] on the table top. */
 const TOOL_LAYOUT: Record<Hands, { can: [number, number, number]; shears: [number, number, number] }> = {
   // Matches the authored scene: can on the right, shears on the left.
@@ -101,6 +102,9 @@ export class ComfortSystem extends createSystem({
   private elements = new Map<string, UIKit.Text>();
   private subtitlePill: UIKit.Text | null = null;
   private subtitleText: UIKit.Text | null = null;
+  private breathPanel: Object3D | null = null;
+  private breathCard: UIKit.Text | null = null;
+  private breathTexts: UIKit.Text[] = [];
   private highlighted: Highlighted[] = [];
   private bound = new WeakSet<Entity>();
   private head = new Vector3();
@@ -126,6 +130,13 @@ export class ComfortSystem extends createSystem({
     this.subtitlePanel = sub ?? null;
     this.subtitlePill = sub?.getElementById<UIKit.Text>('subtitle-pill') ?? null;
     this.subtitleText = sub?.getElementById<UIKit.Text>('subtitle') ?? null;
+    const breath = this.world.getSceneObject<UIKitMLAsset>('breath-panel');
+    this.breathPanel = breath ?? null;
+    this.breathCard = breath?.getElementById<UIKit.Text>('breath-card') ?? null;
+    for (const id of ['breath-word', 'breath-count']) {
+      const el = breath?.getElementById<UIKit.Text>(id);
+      if (el) this.breathTexts.push(el);
+    }
 
     const bind = (e: Entity) => this.bindHighlight(e);
     for (const q of [this.queries.pickables, this.queries.cans, this.queries.shears, this.queries.stones]) {
@@ -208,6 +219,14 @@ export class ComfortSystem extends createSystem({
     this.subtitlePill?.setProperties({ backgroundColor: t.subtitleBg, borderColor: t.border, borderWidth: s.highContrast ? 0.35 : 0.15 });
     this.subtitleText?.setProperties({ color: t.text });
     this.subtitlePanel?.scale.setScalar(s.largeText ? SUBTITLE_SCALE.large : SUBTITLE_SCALE.normal);
+    // The breathing break card follows the same text size and contrast.
+    this.breathPanel?.scale.setScalar(s.largeText ? BREATH_CARD_SCALE.large : BREATH_CARD_SCALE.normal);
+    this.breathCard?.setProperties(
+      s.highContrast
+        ? { backgroundColor: '#000000', borderColor: t.border, borderWidth: 0.35 }
+        : { backgroundColor: 'rgba(20, 17, 31, 0.7)', borderColor: '#b9a8ff', borderWidth: 0.15 },
+    );
+    for (const el of this.breathTexts) el.setProperties({ color: s.highContrast ? '#ffffff' : '#f3eeff' });
     this.applyLayout();
     for (const h of this.highlighted) {
       if (s.highContrast) {

@@ -24,4 +24,5 @@ export default defineAssets({
   'visit-flower': createVisitFlower(),
   'subtitle-panel': ui('subtitle.uikitml', 'Subtitle Panel'),
   'comfort-panel': ui('comfort.uikitml', 'Comfort Panel'),
+  'breath-panel': ui('breath.uikitml', 'Breath Panel'),
 });

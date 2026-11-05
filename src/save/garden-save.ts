@@ -18,6 +18,8 @@ export interface GardenSave {
   visits: number;
   /** Breathing sessions finished, over all visits. */
   meditations: number;
+  /** Breathing breaks (offered by the firefly) finished, over all visits. */
+  breaks: number;
   /** When the last counted visit began (ms since epoch). */
   lastVisitAt: number;
   /** When the garden was last saved (ms since epoch). */
@@ -42,7 +44,7 @@ const KEY = 'zen-garden-vr/save';
 const VERSION = 1;
 
 export function emptySave(): GardenSave {
-  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, lastVisitAt: 0, savedAt: 0 };
+  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, breaks: 0, lastVisitAt: 0, savedAt: 0 };
 }
 
 /** Reads the save; null when there is none, it is unreadable, or storage is blocked. */
@@ -94,6 +96,8 @@ export function parseSave(raw: string): GardenSave | null {
     prunedMask: clampInt(d.prunedMask, 0, 0xff),
     visits: clampInt(d.visits, 0, 1e6),
     meditations: clampInt(d.meditations, 0, 1e6),
+    // Older saves have no breaks yet: they start from 0.
+    breaks: clampInt(d.breaks, 0, 1e6),
     lastVisitAt: clampInt(d.lastVisitAt, 0, Number.MAX_SAFE_INTEGER),
     savedAt: clampInt(d.savedAt, 0, Number.MAX_SAFE_INTEGER),
   };

@@ -115,6 +115,16 @@ export class BonsaiGrowthSystem extends createSystem({
     this.sparkles.burst(this.burstAt, stage === BonsaiStage.Blooming ? 40 : 24, stage === BonsaiStage.Sprout ? 0.05 : 0.12);
   }
 
+  /** A small burst of sparkles above the tree (a reward from another system). */
+  sparkle(): void {
+    for (const e of this.queries.bonsai.entities) {
+      e.object3D?.getWorldPosition(this.burstAt);
+      this.burstAt.y += 0.16;
+      this.sparkles.burst(this.burstAt, 18, 0.1);
+      return;
+    }
+  }
+
   /** World-space shoot objects still to be cut at this stage (for PruningSystem). */
   getShoot(name: string): Object3D | undefined {
     return this.parts.get(name);

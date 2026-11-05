@@ -171,6 +171,8 @@ export class GardenAudioSystem extends createSystem({
     const line = this.guide?.shownLine;
     if (!line || line === this.lastLine || !this.engine.running) return;
     this.lastLine = line;
+    // A soft high chime announces a breathing break before the words.
+    if (line === 'breakInvite') this.engine.musicChime(SCALE[4], 0.05);
     const last = this.spokenAt.get(line);
     if (!ALWAYS_SPOKEN.has(line) && last !== undefined && this.time - last < REPEAT_SECONDS) return;
     this.spokenAt.set(line, this.time);

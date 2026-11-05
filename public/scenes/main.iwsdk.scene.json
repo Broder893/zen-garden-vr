@@ -504,6 +504,23 @@
       }
     },
     {
+      "id": "breath-panel",
+      "name": "Breath Panel",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "breath-panel"
+      },
+      "transform": {
+        "position": [
+          0,
+          1.05,
+          -0.7
+        ],
+        "scale": 1.0
+      }
+    },
+    {
       "id": "lantern-light",
       "name": "Lantern Light",
       "transform": {

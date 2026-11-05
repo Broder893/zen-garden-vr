@@ -76,6 +76,26 @@ comfort_clip() {
   rest_left
 }
 
+# A breathing break, offered at once (dev builds expose __zen.breaks.inviteNow).
+# With a young tree the rhythm is the simple one: about 45 s in all.
+break_clip() {
+  say "A breathing break"
+  look '{"x":0,"y":0.95,"z":-0.6}'
+  rec_start
+  js '__zen.breaks.inviteNow()' >/dev/null
+  pause 46
+  rec_stop 09-breathing-break
+}
+
+if [ "${1:-}" = "break" ]; then
+  # Only the breathing break clip: npm run demo:record -- break
+  goto ''
+  enter
+  seat
+  break_clip
+  exit 0
+fi
+
 if [ "${1:-}" = "comfort" ]; then
   # Only the accessibility clip: npm run demo:record -- comfort
   goto ''
@@ -93,6 +113,7 @@ enter
 seat
 rec_start; pause 5; play 1-seed; pause 3; rec_stop 01-arrive-and-plant
 rec_start; play 2-water; pause 5; rec_stop 02-water-and-grow
+break_clip
 rec_start; play 3-prune-young; pause 1; play 2-water; pause 4; rec_stop 03-prune-and-grow
 rec_start; play 4-prune-mature; pause 1; play 2-water; pause 5; rec_stop 04-prune-and-bloom
 
@@ -118,4 +139,4 @@ look '{"x":0,"y":0.95,"z":-0.6}'
 pause 3
 rec_stop 07-return-new-flower
 
-say "Done. Clips are in artifacts/ (01- to 08-*.webm)."
+say "Done. Clips are in artifacts/ (01- to 09-*.webm)."

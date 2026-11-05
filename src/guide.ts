@@ -28,6 +28,7 @@ import { MeditationCue, MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
+import { BreathBreakSystem } from './breath-break.js';
 import { ComfortSystem } from './comfort.js';
 import { EntranceSystem } from './entrance.js';
 import { WateringSystem } from './watering.js';
@@ -86,6 +87,11 @@ export const LINES = {
   meditatePausedDwell: 'Paused. Look at the stone to continue.',
   putBack: 'Lower the tool to the table to let it go.',
   comfortHint: 'No pinch? Poke Comfort, then Hold to select.',
+  // Breathing breaks during care (BreathBreakSystem).
+  breakInvite: 'Let us pause a moment to breathe together.',
+  breakSkip: 'Not now? Show me an open hand.',
+  breakLater: 'Of course. We will breathe later.',
+  breakDone: 'Lovely. Your tree grew a little with you.',
 } as const;
 export type LineId = keyof typeof LINES;
 
@@ -209,6 +215,7 @@ export class GuideSystem extends createSystem({
   private persistence?: PersistenceSystem;
   private entrance?: EntranceSystem;
   private comfort?: ComfortSystem;
+  private breathBreak?: BreathBreakSystem;
 
   init(): void {
     this.watering = this.world.getSystem(WateringSystem);
@@ -225,6 +232,8 @@ export class GuideSystem extends createSystem({
     this.persistence = this.world.getSystem(PersistenceSystem);
     this.entrance = this.world.getSystem(EntranceSystem);
     this.comfort = this.world.getSystem(ComfortSystem);
+    this.breathBreak = this.world.getSystem(BreathBreakSystem);
+    this.breathBreak?.attachGuide(this);
 
     const panel = this.world.getSceneObject<UIKitMLAsset>('subtitle-panel');
     this.panel = panel ?? null;
@@ -289,12 +298,22 @@ export class GuideSystem extends createSystem({
       }
     }
     const cue = this.meditation?.cue ?? null;
+    const invite = this.breathBreak?.inviteLine ?? null;
     let mood: Mood;
-    if (cue) {
+    if (invite && !cue) {
+      // A breathing break is on offer: the firefly comes close, calm, and asks.
+      mood = 'calm';
+      this.eventLeft = 0;
+      this.lastTask = null;
+      this.target.copy(this.breathBreak!.invitePoint);
+      this.target.y -= this.guideRef.entity?.getValue(FireflyGuide, 'hoverHeight') ?? 0.1;
+      this.setLine(invite);
+    } else if (cue) {
       // A breathing session owns the voice and the firefly until it ends.
       mood = 'calm';
       this.eventLeft = 0;
-      this.line = CUE_LINES[cue];
+      // A break ends with its own line: the tree's reward.
+      this.line = cue === 'done' && this.meditation?.kind === 'break' ? 'breakDone' : CUE_LINES[cue];
       this.lastTask = null;
       this.targetNextToOrb();
       this.setLine(this.line);
@@ -304,7 +323,7 @@ export class GuideSystem extends createSystem({
       this.setLine(this.eventLeft > 0 && this.event ? this.event : this.line);
     }
     this.moveFirefly(delta, mood);
-    this.updateHint(delta, cue !== null);
+    this.updateHint(delta, cue !== null || invite !== null);
     this.billboardPanel();
   }
 
@@ -386,7 +405,13 @@ export class GuideSystem extends createSystem({
     return this.hintKind;
   }
 
-  private showEvent(id: LineId, seconds: number): void {
+  /** True while a one-off line (planted, grew, welcome...) is showing. */
+  get busy(): boolean {
+    return this.eventLeft > 0;
+  }
+
+  /** Shows a one-off line for `seconds`, then the current task line returns. */
+  showEvent(id: LineId, seconds: number): void {
     this.event = id;
     this.eventLeft = seconds;
   }

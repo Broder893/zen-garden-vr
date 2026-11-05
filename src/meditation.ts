@@ -7,11 +7,17 @@ import {
   MeshStandardMaterial,
   VisibilityState,
 } from '@iwsdk/core';
+import { BreathPattern } from './breath-patterns.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { BreathOrb, MeditationStone } from './garden-components.js';
 
-/** Where a session is. `idle` = no session. Pausing is a separate flag that keeps the phase. */
-export type MeditationPhase = 'idle' | 'intro' | 'in' | 'hold' | 'out' | 'outro';
+/**
+ * Where a session is. `idle` = no session; `hold` follows the inhale, `rest`
+ * (a hold on empty lungs) follows the exhale. Pausing is a separate flag.
+ */
+export type MeditationPhase = 'idle' | 'intro' | 'in' | 'hold' | 'out' | 'rest' | 'outro';
+/** `stone`: the player's own session from the stone. `break`: a short pause the firefly offered. */
+export type SessionKind = 'stone' | 'break';
 
 /** What the guide should say right now about meditation (null = nothing). */
 export type MeditationCue =
@@ -36,6 +42,8 @@ const SOFTEN_BREATH = 1;
 const NOTICE_BREATH = 3;
 const ORB_SMALL = 0.6;
 const ORB_LARGE = 1.45;
+/** A break's light floats right in front of the eyes: drawn bigger than the stone's. */
+const BREAK_ORB_SCALE = 1.5;
 
 const smooth = (x: number) => x * x * (3 - 2 * x);
 
@@ -54,8 +62,13 @@ export class MeditationSystem extends createSystem({
   paused = false;
   /** 0-based index of the current breath. */
   breath = 0;
-  /** Sessions finished since load (PersistenceSystem adds earlier visits). */
+  /** Stone sessions finished since load (PersistenceSystem adds earlier visits). */
   completed = 0;
+  /** Breathing breaks finished since load. */
+  breaksCompleted = 0;
+  kind: SessionKind = 'stone';
+  /** The rhythm of the current (or last) session. */
+  pattern: BreathPattern = { name: 'stone', inhale: 4, holdIn: 2, exhale: 6, holdOut: 0, breaths: 6 };
   /** Current breath size, 0 (empty) .. 1 (full); drives orb and ring. */
   fullness = 0;
   private phaseTime = 0;
@@ -85,9 +98,11 @@ export class MeditationSystem extends createSystem({
       case 'outro':
         return 'done';
       case 'in':
-        return this.breath === NOTICE_BREATH ? 'notice' : 'in';
+        return this.kind === 'stone' && this.breath === NOTICE_BREATH ? 'notice' : 'in';
       case 'out':
-        return this.breath === SOFTEN_BREATH ? 'soften' : 'out';
+        return this.kind === 'stone' && this.breath === SOFTEN_BREATH ? 'soften' : 'out';
+      case 'rest':
+        return 'hold';
       default:
         return this.phase;
     }
@@ -139,15 +154,31 @@ export class MeditationSystem extends createSystem({
     this.grab?.forceRelease(stone);
     if (this.cooldown > 0) return;
     this.cooldown = PINCH_COOLDOWN;
-    if (this.phase === 'idle' || this.phase === 'outro') this.start();
+    if (this.phase === 'idle' || this.phase === 'outro') this.start('stone', this.stonePattern());
     else this.paused = !this.paused;
   }
 
-  private start(): void {
+  /** Starts a session (replacing any in progress). */
+  start(kind: SessionKind, pattern: BreathPattern): void {
+    this.kind = kind;
+    this.pattern = pattern;
     this.phase = 'intro';
     this.phaseTime = 0;
     this.breath = 0;
     this.paused = false;
+  }
+
+  /** The stone's rhythm, as set on its component (the Comfort pace writes it). */
+  private stonePattern(): BreathPattern {
+    const stone = this.stone.entity;
+    return {
+      name: 'stone',
+      inhale: stone?.getValue(MeditationStone, 'inhaleSeconds') ?? 4,
+      holdIn: stone?.getValue(MeditationStone, 'holdSeconds') ?? 2,
+      exhale: stone?.getValue(MeditationStone, 'exhaleSeconds') ?? 6,
+      holdOut: 0,
+      breaths: stone?.getValue(MeditationStone, 'breaths') ?? 6,
+    };
   }
 
   update(delta: number): void {
@@ -165,13 +196,8 @@ export class MeditationSystem extends createSystem({
   }
 
   private advance(delta: number): void {
-    const stone = this.stone.entity;
-    if (!stone) return;
     this.phaseTime += delta;
-    const inhale = stone.getValue(MeditationStone, 'inhaleSeconds') ?? 4;
-    const hold = stone.getValue(MeditationStone, 'holdSeconds') ?? 2;
-    const exhale = stone.getValue(MeditationStone, 'exhaleSeconds') ?? 6;
-    const breaths = stone.getValue(MeditationStone, 'breaths') ?? 6;
+    const { inhale, holdIn: hold, exhale, holdOut, breaths } = this.pattern;
 
     switch (this.phase) {
       case 'intro':
@@ -189,18 +215,27 @@ export class MeditationSystem extends createSystem({
       case 'out':
         this.fullness = 1 - smooth(Math.min(1, this.phaseTime / exhale));
         if (this.phaseTime >= exhale) {
-          this.breath++;
-          if (this.breath >= breaths) {
-            this.completed++;
-            this.next('outro');
-          } else this.next('in');
+          if (holdOut > 0) this.next('rest');
+          else this.endBreath(breaths);
         }
+        break;
+      case 'rest':
+        this.fullness = 0;
+        if (this.phaseTime >= holdOut) this.endBreath(breaths);
         break;
       case 'outro':
         this.fullness = 0;
         if (this.phaseTime >= OUTRO_SECONDS) this.next('idle');
         break;
     }
+  }
+
+  private endBreath(breaths: number): void {
+    this.breath++;
+    if (this.breath < breaths) return this.next('in');
+    if (this.kind === 'stone') this.completed++;
+    else this.breaksCompleted++;
+    this.next('outro');
   }
 
   private next(phase: MeditationPhase): void {
@@ -216,7 +251,8 @@ export class MeditationSystem extends createSystem({
     if (orb) {
       orb.visible = this.orbFade > 0.01;
       const pausedDim = this.paused ? 0.5 : 1;
-      orb.scale.setScalar(ORB_SMALL + (ORB_LARGE - ORB_SMALL) * this.fullness);
+      const size = this.kind === 'break' ? BREAK_ORB_SCALE : 1;
+      orb.scale.setScalar(size * (ORB_SMALL + (ORB_LARGE - ORB_SMALL) * this.fullness));
       for (let i = 0; i < this.orbMats.length; i++) {
         this.orbMats[i].opacity = this.orbBaseOpacity[i] * this.orbFade * pausedDim;
       }

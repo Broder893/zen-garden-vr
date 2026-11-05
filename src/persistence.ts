@@ -34,6 +34,7 @@ export class PersistenceSystem extends createSystem({
   private restored = new WeakSet<Entity>();
   private bonsai!: FirstEntity;
   private baseMeditations = 0;
+  private baseBreaks = 0;
   private sinceCheck = 0;
   private lastKey = '';
   private visitCounted = false;
@@ -50,6 +51,7 @@ export class PersistenceSystem extends createSystem({
     this.save = loaded ?? emptySave();
     this.returning = loaded?.planted ?? false;
     this.baseMeditations = this.save.meditations;
+    this.baseBreaks = this.save.breaks;
     this.meditation = this.world.getSystem(MeditationSystem);
 
     this.bonsai = trackFirst(this.queries.bonsai, this.cleanupFuncs);
@@ -122,7 +124,8 @@ export class PersistenceSystem extends createSystem({
       s.prunedMask = b.getValue(Bonsai, 'prunedMask') ?? 0;
     }
     s.meditations = this.baseMeditations + (this.meditation?.completed ?? 0);
-    const key = `${s.planted}|${s.stage}|${s.water}|${s.prunedMask}|${s.visits}|${s.meditations}`;
+    s.breaks = this.baseBreaks + (this.meditation?.breaksCompleted ?? 0);
+    const key = `${s.planted}|${s.stage}|${s.water}|${s.prunedMask}|${s.visits}|${s.meditations}|${s.breaks}`;
     if (key === this.lastKey) return;
     s.savedAt = Date.now();
     this.lastKey = key;

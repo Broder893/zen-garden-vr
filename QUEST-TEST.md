@@ -54,6 +54,15 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 - [ ] Press the **Meta button** (system menu) during the meditation: **sound stops** and the session pauses. Come back: everything is quiet until you pinch the stone.
 - [ ] At the end "Well done…" and a deeper bell.
 
+## 4b. Breathing breaks
+
+The first break comes after 2 to 4 minutes of care (watering, cutting). To see one sooner, just keep caring for the tree.
+
+- [ ] The firefly comes close, a soft chime, and "Let us pause a moment to breathe together." It never happens while you hold the can or shears.
+- [ ] Do nothing: the garden dims, a light appears **in front of your eyes**, with a card *Breathe in / Hold / Breathe out* and "Breath 1 of 3". Comfortable distance? Readable?
+- [ ] At the end: "Lovely. Your tree grew a little with you.", the light comes back, sparkles on the tree.
+- [ ] Next break: hold an **open hand up in front of you, palm out** ("stop") for half a second: "Of course. We will breathe later." Does it recognise the gesture on the first try? Does it ever trigger by accident while caring for the tree?
+
 ## 5. Comfort panel (accessibility)
 
 - [ ] At the front-left corner of the table there is a small **Comfort** button. Poke it with a fingertip: the settings open; poke **Done** to close.
