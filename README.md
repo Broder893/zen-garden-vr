@@ -13,6 +13,13 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
 - **Plant and grow.** Pinch the glowing seed, water the sprout by tilting the can over
   it, and trim the glowing overgrown shoots with the shears. The bonsai grows through
   four stages (sprout, young, mature, in bloom).
+- **Careful care.** The tree can be stressed, never lost. Pouring on a tree that already
+  has its water pools in the pot (a glossy puddle) and stresses it; cutting a healthy
+  (not glowing) branch leaves a stump and stresses it; about three wrong cuts wilt it. A
+  stressed or wilted tree sinks, leans and fades, the lantern light cools, and the firefly
+  says so gently, with a soft tone. It recovers with time, and six times faster while you
+  breathe; a finished breathing session leaves it well. No experience, level or stage is
+  ever lost, and nothing goes wrong before the first growth of a first visit.
 - **Breathe.** Pinch the meditation stone for a guided breathing session of about
   80 seconds: an orb of light grows as you breathe in and shrinks as you breathe out.
   Pinch again to pause.

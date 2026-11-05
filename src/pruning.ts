@@ -47,6 +47,7 @@ export class PruningSystem extends createSystem({
   wrongCuts = 0;
   /** Bit i set once the blades have been away from healthy branch i. */
   private armedHealthy = 0;
+  private lastStumps = 0;
   private health?: HealthSystem;
 
   init(): void {
@@ -100,11 +101,15 @@ export class PruningSystem extends createSystem({
       const healthy = HEALTHY_BY_STAGE[stage] ?? NO_HEALTHY;
       if (healthy.length > 0) {
         let stumps = bonsai.getValue(Bonsai, 'stumpMask') ?? 0;
+        // Stumps grew back (a new visit): the blades must leave and come back again.
+        if (stumps === 0 && this.lastStumps !== 0) this.armedHealthy = 0;
+        this.lastStumps = stumps;
         const before = stumps;
         for (const shears of this.queries.held.entities) stumps = this.wrongCut(shears, healthy, stumps, shoots, mask);
         for (const shears of this.queries.assisted.entities) stumps = this.wrongCut(shears, healthy, stumps, shoots, mask);
         if (stumps !== before) {
           bonsai.setValue(Bonsai, 'stumpMask', stumps);
+          this.lastStumps = stumps;
           // Never a game over: some stress, which time or a breath takes away.
           this.health ??= this.world.getSystem(HealthSystem);
           if (this.health?.mistakesShow ?? true) {
@@ -142,7 +147,8 @@ export class PruningSystem extends createSystem({
   /** Cuts a healthy branch the blade tip deliberately reaches (see HEALTHY_RADIUS). */
   private wrongCut(shears: Entity, healthy: string[], stumps: number, shoots: string[], mask: number): number {
     const p = this.parts.get(shears.index);
-    if (!p) return stumps;
+    // Just snipped a glowing shoot: these blades cut nothing else this moment.
+    if (!p || p.snip < SNIP_SECONDS) return stumps;
     p.tip.getWorldPosition(this.tipPos);
     // A glowing shoot within reach always wins: the blades are there for it.
     const radius = shears.getValue(PruningShears, 'cutRadius') ?? 0.07;

@@ -56,6 +56,7 @@ Suggested cut, about 2:50:
 | 0:30–1:00 | first watering, growth | *Tilt to pour. The tree grows when it's cared for.* |
 | 1:00–1:40 | pruning, watering, bloom (speed up 1.5–2× if long) | *Trim the wild shoots to shape your bonsai.* |
 | 1:40–2:05 | `09-breathing-break` (the invitation, then one or two breaths in front of the eyes) | *Every few minutes, the firefly offers a short break. An open hand says "not now".* |
+| (short, optional) | a wilted tree (overwater or a wrong cut) recovering during a breathing break | *Mistakes show, but the tree never dies. Breathing with it brings it back.* |
 | 2:05–2:25 | `08-comfort-hold-to-select` (speed up the pokes, keep the can pouring by itself) | *No pinch? Hold to select. Also: one hand, high contrast, large text, breathing pace.* |
 | 2:25–2:40 | `07-return-new-flower`: the new flower, the daily gift, the level badge (the firefly-follows-hand clip 06 is a spare) | *Come back tomorrow: care earns levels. A glazed pot, a lantern, a stream...* |
 | 2:40–2:50 | last frame held | *Hands only · Seated · 5–10 minutes · Built with IWSDK* + `broder893.github.io/zen-garden-vr` |

@@ -36,9 +36,9 @@ Zen Garden is that ritual in a headset. A little garden sits on a table in front
 ### What it does
 
 - **A first five minutes that teaches itself.** A firefly guide flies to whatever matters next and says it in one short sentence, spoken and subtitled. Beside the object, a ghost gesture drawn in light acts the motion out (a pinch, a tilt). The seed sprouts within seconds and the tree first grows within a minute.
-- **A tree that needs you.** It grows only when watered and trimmed; each stage arrives with sparkles and music.
-- **Time to breathe.** Pinch the glowing stone for a guided session: an orb of light grows as you breathe in and shrinks as you breathe out, while the music breathes with you.
-- **Little breaks that find you.** Every few minutes of care (never while you hold a tool) the firefly invites a short pause. Show an open hand to say "not now". Otherwise the garden dims, a light in front of your eyes guides three or four breaths with a card that names each step, and the tree gets a drink of water as a thank-you.
+- **A tree that needs you, and forgives.** It grows only when watered and trimmed. Careful care matters: too much water pools in the pot and cutting a healthy branch leaves a stump, and the tree droops, fades and leans. It never dies and you lose nothing: the firefly suggests waiting, or breathing with your tree, which brings it back fastest.
+- **Time to breathe.** Pinch the glowing stone: an orb of light grows as you breathe in and shrinks as you breathe out.
+- **Little breaks that find you.** Every few minutes of care (never while you hold a tool) the firefly invites a short pause. Show an open hand to say "not now". Otherwise the garden dims and a light in front of your eyes guides a few breaths; the tree gets water as a thank-you.
 - **Comfortable for more bodies.** A Comfort panel offers **hold to select** (no pinch: keep a hand still by an object, or look at it), **one hand**, **high contrast**, **large text** and **breathing pace**. Subtitles are always on.
 - **A garden to sit in.** Around the table lies a raked sand garden at sunset. Rake the table's sand with your fingertips; your patterns stay for next time.
 - **A reason to come back.** Every bit of care earns experience, and the garden levels up: the tree's stages first, then a glazed pot, a stone lantern, a little stream and a new deep breath. Each return the soil has dried and new shoots wait to be trimmed, the first visit of the day brings a gift, and a new flower grows in the sand.
@@ -47,7 +47,7 @@ Zen Garden is that ritual in a headset. A little garden sits on a table in front
 
 Zen Garden is a WebXR app built with Meta's Immersive Web SDK (IWSDK) and Three.js: it opens from a link in the Quest browser, nothing to install. The logic is a set of small ECS systems, each with one job.
 
-Everything is original and made in code. Models are procedural and merged per material: about 75 draw calls per eye. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved in localStorage with validation, so a blocked or corrupted save simply starts a fresh garden.
+Everything is original and made in code. Models are procedural and merged per material: about 75 draw calls per eye. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved locally with a versioned, validated format.
 
 We had no headset, so everything was built and tested in IWER, IWSDK's WebXR emulator, with scripted hands playing every step.
 

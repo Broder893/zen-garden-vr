@@ -55,6 +55,11 @@ export class WateringSystem extends createSystem({
   wateringBonsai = false;
   /** True while pouring onto a tree that already has all its water (too much). */
   overflowing = false;
+  /**
+   * The player filled this water by pouring. Only then is more "too much": water
+   * given as a gift (a blooming tree, a breathing break) never starts overwatering.
+   */
+  private filledByPouring = false;
 
   init(): void {
     this.bonsai = trackFirst(this.queries.bonsai, this.cleanupFuncs);
@@ -90,7 +95,9 @@ export class WateringSystem extends createSystem({
       if (stage !== this.lastStage) {
         this.lastStage = stage;
         this.stageAge = 0;
+        this.filledByPouring = false;
       }
+      if ((bonsai?.getValue(Bonsai, 'water') ?? 0) < 1) this.filledByPouring = false;
       this.stageAge += delta;
     }
     this.pouring = false;
@@ -121,8 +128,11 @@ export class WateringSystem extends createSystem({
     if (dx * dx + dz * dz > REACH * REACH || this.tip.y < this.target.y) return;
     this.wateringBonsai = true;
     const water = bonsai.getValue(Bonsai, 'water') ?? 0;
-    if (water < 1 && this.stageAge >= GRACE_SECONDS) bonsai.setValue(Bonsai, 'water', Math.min(1, water + delta / FILL_SECONDS));
-    else if (water >= 1 && this.stageAge >= GRACE_SECONDS) {
+    if (water < 1 && this.stageAge >= GRACE_SECONDS) {
+      const next = Math.min(1, water + delta / FILL_SECONDS);
+      bonsai.setValue(Bonsai, 'water', next);
+      if (next >= 1) this.filledByPouring = true;
+    } else if (water >= 1 && this.filledByPouring && this.stageAge >= GRACE_SECONDS) {
       // Already full: the excess pools (no experience for it); HealthSystem drains it and shows the stress.
       this.overflowing = true;
       const over = bonsai.getValue(Bonsai, 'overwater') ?? 0;

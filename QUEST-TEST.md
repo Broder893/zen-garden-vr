@@ -54,6 +54,15 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 - [ ] Press the **Meta button** (system menu) during the meditation: **sound stops** and the session pauses. Come back: everything is quiet until you pinch the stone.
 - [ ] At the end "Well done…" and a deeper bell.
 
+## 4a. Careful care (the tree wilts, never dies)
+
+- [ ] After the first growth, keep pouring on the tree once it is full: "That is plenty of water. Let it rest a moment.", a dark glossy puddle in the pot; keep going and the tree sinks, leans and its leaves fade, with a soft low tone.
+- [ ] Put the can down and wait: "Too much water. Let the soil drain a little." In a minute or two the tree is well again ("Your tree is feeling better.", a light rising tone).
+- [ ] With the shears, touch one of the dark green, **not glowing** branches: a stump stays, "That branch was healthy. Trim only the glowing shoots." Was it ever cut by accident while trimming the glowing ones?
+- [ ] Wilt the tree, then pinch the stone (or accept the firefly's "Your tree is tense. Let us breathe together."): during the breaths it recovers, and at the end it is well.
+- [ ] A first-time player who makes no mistakes never sees anything negative.
+- [ ] Old save: on a device that ran the app before this version, the garden loads with the same level and flowers and a healthy tree.
+
 ## 4b. Breathing breaks
 
 The first break comes after 2 to 4 minutes of care (watering, cutting). To see one sooner, just keep caring for the tree.
