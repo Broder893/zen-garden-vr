@@ -39,8 +39,11 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   hand (left or right: both tools move to that side) and **hold to select**, which
   replaces every pinch with a hand held still beside the object (or a steady look at the
   seed or stone). Settings are saved separately from the garden.
-- **A zen garden around you.** The table stands in a raked sand garden at sunset, with
-  mossy rocks, a bamboo fence and a stone lantern. The table's own sand starts raked in
+- **A zen garden around you.** The table stands in a raked sand garden with mossy rocks,
+  a bamboo fence and a stone lantern. It follows the real clock (clear day 8-17, golden
+  sunset 6-8 and 17-20, night with fireflies) and the season (spring blossoms, summer
+  green, red autumn leaves, cool winter green). Now and then a gentle rain waters the tree
+  or a breeze sways it and dries the soil, each with its own sound. The table's own sand starts raked in
   lines and rings; **touch it with your fingertips and drag** to draw grooves (three
   fingers make a little rake). Your patterns are saved for the next visit.
 - **Come back and level up.** Care earns experience (plant 5, full watering 10, each
@@ -110,8 +113,9 @@ growth 21 s, mature 49 s, bloom 76 s; a first-time player takes longer, but the
 first reward (the sprout) still comes within the first minute.
 
 Address options for demos: `?fresh` starts a new garden, `?nextvisit` counts the
-next VR entry as a return visit without waiting. Both are removed from the address
-right after use.
+next VR entry as a return visit without waiting (both are removed from the address
+right after use); `?season=spring|summer|autumn|winter`, `?time=day|sunset|night` and
+`?weather=rain|breeze` force the atmosphere.
 
 ## Credits
 

@@ -10,7 +10,9 @@ import {
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { Bonsai, BonsaiStage } from './garden-components.js';
 import type { LineId } from './guide.js';
+import { BreathBreakSystem } from './breath-break.js';
 import { HealthSystem } from './health.js';
+import { MeditationSystem } from './meditation.js';
 import { overridesFrom, Weather } from './save/atmosphere.js';
 
 /** A first shower or breeze comes after this much time with a planted tree (seconds). */
@@ -57,7 +59,9 @@ export class WeatherSystem extends createSystem({
   private time = 0;
   private bonsai!: FirstEntity;
   private health?: HealthSystem;
-  private guide?: { showEvent(id: LineId, seconds: number): void };
+  private guide?: { showEvent(id: LineId, seconds: number): void; readonly busy: boolean };
+  private meditation?: MeditationSystem;
+  private breaks?: BreathBreakSystem;
   private drops!: InstancedMesh;
   private pos = new Float32Array(DROPS * 3);
   private m = new Matrix4();
@@ -80,12 +84,14 @@ export class WeatherSystem extends createSystem({
   }
 
   /** The guide registers itself (it is created after this system). */
-  attachGuide(guide: { showEvent(id: LineId, seconds: number): void }): void {
+  attachGuide(guide: { showEvent(id: LineId, seconds: number): void; readonly busy: boolean }): void {
     this.guide = guide;
   }
 
   update(delta: number): void {
     this.health ??= this.world.getSystem(HealthSystem);
+    this.meditation ??= this.world.getSystem(MeditationSystem);
+    this.breaks ??= this.world.getSystem(BreathBreakSystem);
     const b = this.bonsai.entity;
     const visible = this.world.visibilityState.peek() === VisibilityState.Visible;
     if (visible && b && (b.getValue(Bonsai, 'planted') ?? false)) this.advance(delta, b);
@@ -105,7 +111,8 @@ export class WeatherSystem extends createSystem({
   private advance(delta: number, b: NonNullable<FirstEntity['entity']>): void {
     if (this.weather === 'clear') {
       this.wait -= delta;
-      if (this.wait > 0) return;
+      // Never interrupt: wait until the firefly is free and no breathing is under way.
+      if (this.wait > 0 || this.guide?.busy || this.meditation?.active || this.breaks?.inviteLine) return;
       this.weather = this.forced ?? (Math.random() < 0.5 ? 'rain' : 'breeze');
       this.left = rand(DURATION_MIN, DURATION_MAX);
       this.guide?.showEvent(this.weather === 'rain' ? 'rainStarts' : 'breezeStarts', 4);

@@ -50,6 +50,7 @@ Suggested cut, about 2:50:
 
 | Time | From | Add as text on screen |
 | --- | --- | --- |
+| (montage, optional) | the same garden by day, sunset and night (`?time=`), autumn leaves, a shower (`?weather=rain`) | *A garden that follows your day and the seasons.* |
 | (opening, optional) | look around the garden at sunset, then fingertips raking the sand | *A pocket zen garden for your work breaks* |
 | 0:00–0:08 | start of `demo-main` (lights warming up) | *Zen Garden — a pocket garden for your work breaks* |
 | 0:08–0:30 | planting (keep the ghost pinch next to the seed in frame) | *Hands only. The firefly shows the gesture in light.* |

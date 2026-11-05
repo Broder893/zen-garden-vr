@@ -72,6 +72,14 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] At the end: "Lovely. Your tree grew a little with you.", the light comes back, sparkles on the tree.
 - [ ] Next break: hold an **open hand up in front of you, palm out** ("stop") for half a second: "Of course. We will breathe later." Does it recognise the gesture on the first try? Does it ever trigger by accident while caring for the tree?
 
+## 4d. Atmosphere
+
+- [ ] The sky matches the time of day (day 8-17, sunset 6-8 and 17-20, night otherwise); at night fireflies drift around the garden. Comfortable brightness by day?
+- [ ] The tree's colours match the season (in November: red autumn leaves).
+- [ ] Open `...?weather=rain`: after a few seconds rain falls, you hear it, the firefly says "A gentle rain. It is watering your tree." and the soil darkens.
+- [ ] Open `...?weather=breeze`: the tree sways gently, wind in the bamboo. No discomfort?
+- [ ] Frame rate at night with rain (the busiest moment): smooth?
+
 ## 4c. Garden and sand rake
 
 - [ ] Look around: raked sand garden at sunset, three mossy rocks, a bamboo fence behind, a large stone lantern. Pleasant, not too dark or too bright?

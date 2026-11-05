@@ -35,12 +35,12 @@ Zen Garden is that ritual in a headset. A little garden sits on a table in front
 
 ### What it does
 
-- **A first five minutes that teaches itself.** A firefly guide flies to whatever matters next and says it in one short sentence, spoken and subtitled. Beside the object, a ghost gesture drawn in light acts the motion out (a pinch, a tilt). The seed sprouts within seconds and the tree first grows within a minute.
+- **A first five minutes that teaches itself.** A firefly guide flies to whatever matters next and says it in one short sentence, spoken and subtitled. A ghost gesture drawn in light acts the motion out. The tree first grows within a minute.
 - **A tree that needs you, and forgives.** It grows only when watered and trimmed. Careful care matters: too much water pools in the pot and cutting a healthy branch leaves a stump, and the tree droops, fades and leans. It never dies and you lose nothing: the firefly suggests waiting, or breathing with your tree, which brings it back fastest.
 - **Time to breathe.** Pinch the glowing stone: an orb of light grows as you breathe in and shrinks as you breathe out.
 - **Little breaks that find you.** Every few minutes of care (never while you hold a tool) the firefly invites a short pause. Show an open hand to say "not now". Otherwise the garden dims and a light in front of your eyes guides a few breaths; the tree gets water as a thank-you.
 - **Comfortable for more bodies.** A Comfort panel offers **hold to select** (no pinch: keep a hand still by an object, or look at it), **one hand**, **high contrast**, **large text** and **breathing pace**. Subtitles are always on.
-- **A garden to sit in.** Around the table lies a raked sand garden at sunset. Rake the table's sand with your fingertips; your patterns stay for next time.
+- **A garden that lives with your day.** The raked garden around you follows the real clock and season: day, sunset, a night of fireflies, red autumn leaves. Sometimes a rain waters your tree. Rake the table's sand with your fingertips; your patterns stay.
 - **A reason to come back.** Every bit of care earns experience, and the garden levels up: the tree's stages first, then a glazed pot, a stone lantern, a little stream and a new deep breath. Each return the soil has dried and new shoots wait to be trimmed, the first visit of the day brings a gift, and a new flower grows in the sand.
 
 ### How we built it
@@ -53,7 +53,7 @@ We had no headset, so everything was built and tested in IWER, IWSDK's WebXR emu
 
 ### What's next
 
-Tuning on real Quest hardware, more plants, unlocks as the tree levels up, a day and night cycle, and more languages.
+Tuning on real Quest hardware, more plants, a garden shared by everyone who visits, and more languages.
 
 ---
 

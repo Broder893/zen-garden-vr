@@ -105,7 +105,12 @@ export class DayNightSystem extends createSystem({}) {
     }
     this.targetFlies = Math.round(FIREFLIES[this.time] * (1 - k) + FIREFLIES[other] * k);
     const level = this.level;
-    if (!level) return;
+    if (!level || !level.hasComponent(DomeGradient)) {
+      // The level is not ready yet: try again next frame, not in 30 s.
+      this.level = null;
+      this.sinceCheck = RECHECK_SECONDS;
+      return;
+    }
     for (const field of ['sky', 'equator', 'ground'] as const) {
       if (level.hasComponent(DomeGradient)) this.blendInto(level.getVectorView(DomeGradient, field), DOME[this.time][field], DOME[other][field], k);
       if (level.hasComponent(IBLGradient)) this.blendInto(level.getVectorView(IBLGradient, field), IBL[this.time][field], IBL[other][field], k);
