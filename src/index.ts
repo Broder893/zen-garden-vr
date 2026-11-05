@@ -13,6 +13,7 @@ import { HealthSystem } from './health.js';
 import { LevelBadgeSystem } from './level-badge.js';
 import { UnlocksSystem } from './unlocks.js';
 import { MeditationSystem } from './meditation.js';
+import { PerfSystem } from './perf.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
 import { RakeSystem } from './rake.js';
@@ -48,7 +49,8 @@ World.create(
     .registerSystem(VisitFlowerSystem)
     .registerSystem(LevelBadgeSystem)
     .registerSystem(UnlocksSystem)
-    .registerSystem(FirstMomentsSystem);
+    .registerSystem(FirstMomentsSystem)
+    .registerSystem(PerfSystem);
   if (import.meta.env.DEV) {
     // Dev only: lets .iwsdk-scripts/eval.mjs read live system state in tests.
     (window as unknown as { __zen?: unknown }).__zen = {
@@ -65,6 +67,7 @@ World.create(
       season: world.getSystem(SeasonSystem),
       dayNight: world.getSystem(DayNightSystem),
       weather: world.getSystem(WeatherSystem),
+      perf: world.getSystem(PerfSystem),
     };
   }
 });

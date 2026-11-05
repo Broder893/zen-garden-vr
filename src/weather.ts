@@ -13,6 +13,7 @@ import type { LineId } from './guide.js';
 import { BreathBreakSystem } from './breath-break.js';
 import { HealthSystem } from './health.js';
 import { MeditationSystem } from './meditation.js';
+import { PerfSystem } from './perf.js';
 import { overridesFrom, Weather } from './save/atmosphere.js';
 
 /** A first shower or breeze comes after this much time with a planted tree (seconds). */
@@ -57,6 +58,7 @@ export class WeatherSystem extends createSystem({
   private wait = rand(FIRST_MIN, FIRST_MAX);
   private left = 0;
   private time = 0;
+  private perf?: PerfSystem;
   private bonsai!: FirstEntity;
   private health?: HealthSystem;
   private guide?: { showEvent(id: LineId, seconds: number): void; readonly busy: boolean };
@@ -146,7 +148,8 @@ export class WeatherSystem extends createSystem({
 
   /** Falling streaks, as many as the rain is strong; they stop on the table or the ground. */
   private rain(delta: number): void {
-    const n = Math.round(this.rainLevel * DROPS);
+    this.perf ??= this.world.getSystem(PerfSystem);
+    const n = Math.round(this.rainLevel * DROPS * (this.perf?.effects ?? 1));
     this.drops.count = n;
     if (n === 0) return;
     for (let i = 0; i < n; i++) {

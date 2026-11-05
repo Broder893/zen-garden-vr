@@ -5,7 +5,7 @@
     align-items: stretch;
     justify-content: flex-end;
     width: 30;
-    height: 62;
+    height: 71;
     gap: 1;
   }
   .opener {
@@ -95,6 +95,12 @@
     <div class="row">
       <div id="dwell-off" class="btn"><span id="dwell-off-t" class="btn-text">Off</span></div>
       <div id="dwell-on" class="btn"><span id="dwell-on-t" class="btn-text">On</span></div>
+    </div>
+    <span class="label">Visual quality</span>
+    <div class="row">
+      <div id="quality-auto" class="btn"><span id="quality-auto-t" class="btn-text">Auto</span></div>
+      <div id="quality-high" class="btn"><span id="quality-high-t" class="btn-text">High</span></div>
+      <div id="quality-low" class="btn"><span id="quality-low-t" class="btn-text">Low</span></div>
     </div>
   </div>
   <div id="comfort-open" class="opener">

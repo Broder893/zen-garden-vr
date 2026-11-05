@@ -5,6 +5,8 @@
  */
 export type BreathPace = 'slow' | 'medium' | 'fast';
 export type Hands = 'both' | 'left' | 'right';
+/** Visual quality: auto lowers it by itself if the headset cannot keep its frame rate. */
+export type Quality = 'auto' | 'high' | 'low';
 
 export interface ComfortSettings {
   breathPace: BreathPace;
@@ -14,6 +16,7 @@ export interface ComfortSettings {
   hands: Hands;
   /** Hold a hand still by an object (or look at it) instead of pinching. */
   dwell: boolean;
+  quality: Quality;
 }
 
 /** Breath timings per pace, in seconds; with intro and outro a session lasts about 75-95 s. */
@@ -27,7 +30,7 @@ const KEY = 'zen-garden-vr/comfort';
 const VERSION = 1;
 
 export function defaultSettings(): ComfortSettings {
-  return { breathPace: 'medium', highContrast: false, largeText: false, hands: 'both', dwell: false };
+  return { breathPace: 'medium', highContrast: false, largeText: false, hands: 'both', dwell: false, quality: 'auto' };
 }
 
 export function loadSettings(): ComfortSettings {
@@ -66,5 +69,7 @@ export function parseSettings(raw: string): ComfortSettings {
   s.highContrast = d.highContrast === true;
   s.largeText = d.largeText === true;
   s.dwell = d.dwell === true;
+  // Added later: older stored settings simply keep the default (auto).
+  if (d.quality === 'auto' || d.quality === 'high' || d.quality === 'low') s.quality = d.quality;
   return s;
 }

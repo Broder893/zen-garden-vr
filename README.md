@@ -83,8 +83,17 @@ never required.
   levels and unlocks, the sand rake (`src/*.ts`,
   registered in `src/index.ts`).
 - **Procedural models** (`src/scene-assets/`), composed in
-  `public/scenes/main.iwsdk.scene.json`. The bonsai merges its parts per material: the
-  scene is about 80 draw calls and 14k triangles.
+  `public/scenes/main.iwsdk.scene.json`. Models merge their parts per material and
+  particles are instanced: 56-58 draw calls and about 27k triangles per eye, even at
+  night in the rain (it was about 95 before merging the tools and table).
+- **Performance and quality** (`src/perf.ts`): the Comfort panel's *Visual quality* is
+  Auto, High or Low. Low halves fireflies and raindrops, hides two background pieces
+  and lowers the XR resolution from the next session; Auto does this by itself if the
+  headset stays below 85% of its frame rate for 8 seconds. `?debug` shows fps, the
+  worst frame, draw calls and triangles behind the table.
+- **Robust without storage or speech**: if saving is blocked the garden still works
+  (it simply starts fresh next time); without speech synthesis the subtitles carry
+  the guide.
 - **Audio synthesised live** with the Web Audio API (`src/audio/`): generative music,
   water, shears, chimes, singing bowls. No audio files ship with the app.
 - **Voice** through the device's speech synthesis (Web Speech API); every line is also
@@ -115,7 +124,8 @@ first reward (the sprout) still comes within the first minute.
 Address options for demos: `?fresh` starts a new garden, `?nextvisit` counts the
 next VR entry as a return visit without waiting (both are removed from the address
 right after use); `?season=spring|summer|autumn|winter`, `?time=day|sunset|night` and
-`?weather=rain|breeze` force the atmosphere.
+`?weather=rain|breeze` force the atmosphere; `?quality=high|low` forces the visual
+quality and `?debug` shows the performance readout.
 
 ## Credits
 

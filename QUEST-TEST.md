@@ -99,6 +99,7 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
   - [ ] Lower your hand to the table: the can is let go and glides back.
   - [ ] Same with the shears, and cut a glowing shoot.
   - [ ] Note how easy it is to trigger by accident (is 1.2 s right?).
+- [ ] **Visual quality Low**: fewer fireflies at night, fewer raindrops, the rocks and the far lantern disappear. **High** brings them back; **Auto** is the default.
 - [ ] Reload the page: the settings are kept.
 
 ## 6. Comfort and fluidity
@@ -106,7 +107,8 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] Everything you need to touch is **within reach** without getting up or leaning forward a lot.
 - [ ] The subtitles are **readable** and don't cover the tree.
 - [ ] Movement is **smooth** throughout (no stutters, especially in bloom with many flowers and during the meditation).
-  *For a number: with the [OVR Metrics Tool](https://developers.meta.com/horizon/documentation/native/android/ts-ovrmetricstool/) the FPS must stay at **72 or more** (60 is the minimum).*
+  *For a quick number open `...?debug`: a readout behind the table, on the left, shows fps, the worst frame, draw calls per eye and triangles. Note the fps at night with rain (`...?debug&time=night&weather=rain`). If Auto lowered the quality, the readout says `low (auto)` and the console logs why.*
+  *For a precise number: with the [OVR Metrics Tool](https://developers.meta.com/horizon/documentation/native/android/ts-ovrmetricstool/) the FPS must stay at **72 or more** (60 is the minimum).*
 - [ ] No nausea or eye strain after 10 minutes.
 
 ## 7. Saving and returning

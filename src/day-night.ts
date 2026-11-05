@@ -10,6 +10,7 @@ import {
   SphereGeometry,
   Vector3,
 } from '@iwsdk/core';
+import { PerfSystem } from './perf.js';
 import { overridesFrom, TimeOfDay, timeOfDayFor } from './save/atmosphere.js';
 
 type RGB = [number, number, number];
@@ -49,6 +50,7 @@ export class DayNightSystem extends createSystem({}) {
   private flies!: InstancedMesh;
   private seeds = new Float32Array(MAX_FIREFLIES * 4);
   private visibleFlies = 0;
+  private perf?: PerfSystem;
   private targetFlies = 0;
   private clock = 0;
   private m = new Matrix4();
@@ -123,7 +125,9 @@ export class DayNightSystem extends createSystem({}) {
 
   /** Slow wandering and a soft blink (scale), around the garden but never close to the table. */
   private drawFlies(): void {
-    const n = Math.ceil(this.visibleFlies);
+    this.perf ??= this.world.getSystem(PerfSystem);
+    const shown = this.visibleFlies * (this.perf?.effects ?? 1);
+    const n = Math.ceil(shown);
     this.flies.count = n;
     if (n === 0) return;
     const t = this.clock;
@@ -133,7 +137,7 @@ export class DayNightSystem extends createSystem({}) {
       const rad = this.seeds[j + 1] + Math.sin(t * 0.21 + this.seeds[j + 3] * 2) * 0.25;
       this.p.set(Math.sin(ang) * rad, this.seeds[j + 2] + Math.sin(t * 0.5 + this.seeds[j + 3]) * 0.15, -0.5 - Math.cos(ang) * rad);
       // The last one fades in/out while the count changes.
-      const fade = i === n - 1 ? this.visibleFlies - (n - 1) : 1;
+      const fade = i === n - 1 ? shown - (n - 1) : 1;
       const blink = 0.35 + 0.65 * Math.max(0, Math.sin(t * 1.3 + this.seeds[j + 3] * 7));
       const s = blink * fade;
       this.m.makeScale(s, s, s).setPosition(this.p);

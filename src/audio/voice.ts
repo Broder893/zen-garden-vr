@@ -8,7 +8,9 @@ export class GuideVoice {
   private voice: SpeechSynthesisVoice | null = null;
 
   constructor() {
-    this.available = typeof window !== 'undefined' && 'speechSynthesis' in window;
+    // Some browsers have the name but no engine (null), or no utterance class.
+    this.available =
+      typeof window !== 'undefined' && !!window.speechSynthesis && typeof SpeechSynthesisUtterance === 'function';
     if (!this.available) return;
     this.pickVoice();
     window.speechSynthesis.addEventListener('voiceschanged', this.pickVoice);
@@ -25,7 +27,11 @@ export class GuideVoice {
     u.rate = 0.88;
     u.pitch = 1.05;
     u.volume = 0.9;
-    synth.speak(u);
+    try {
+      synth.speak(u);
+    } catch {
+      /* speech refused: the subtitle still carries the words */
+    }
   }
 
   /** Stops speech now (pause, session end). */
