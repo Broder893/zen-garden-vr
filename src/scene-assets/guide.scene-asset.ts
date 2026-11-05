@@ -66,7 +66,7 @@ export function createSeed(): Group {
   root.add(seed);
   const volume = new Mesh(
     new SphereGeometry(0.06, 12, 8),
-    new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
+    new MeshBasicMaterial({ visible: false }),
   );
   volume.name = 'GrabVolume';
   volume.position.y = 0.02;

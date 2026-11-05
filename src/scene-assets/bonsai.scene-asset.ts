@@ -101,6 +101,8 @@ function overgrowth(name: string, from: Vector3, to: Vector3): Group {
   const mid = from.clone().lerp(to, 0.5).add(v(0, 0.01, 0));
   g.add(limb(`${name}_Shoot`, [from, mid, to], 0.0035, 0.002, wildMat));
   g.add(pad(`${name}_Tuft`, to, v(0.02, 0.014, 0.018), wildMat));
+  // The shoot shows and hides as a whole: one draw call instead of four.
+  mergeByMaterial(g);
   const cut = new Object3D();
   cut.name = 'CutPoint';
   cut.position.copy(from.clone().lerp(to, 0.6));

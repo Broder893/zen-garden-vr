@@ -15,9 +15,14 @@ import {
   Vector3,
 } from '@iwsdk/core';
 import { alignSpan } from './lib/hardsurface.js';
+import { mergeByMaterial } from './lib/merge.js';
 
-/** Invisible, generous grab target so a loose pinch near the tool still grabs it. */
-const grabVolumeMat = new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+/**
+ * Invisible, generous grab target so a loose pinch near the tool still grabs
+ * it. `visible: false` on the material skips its draw call; the mesh still
+ * counts for grabbing and bounds.
+ */
+const grabVolumeMat = new MeshBasicMaterial({ visible: false });
 function grabVolume(radius: number, x: number, y: number, z: number): Mesh {
   const m = new Mesh(new SphereGeometry(radius, 12, 8), grabVolumeMat);
   m.name = 'GrabVolume';
@@ -92,6 +97,8 @@ export function createWateringCan(): Group {
   const tip = new Object3D();
   tip.name = 'SpoutTip';
   tip.position.set(0.148, 0.135, 0);
+  // One draw call per material instead of one per part (nothing animates them).
+  mergeByMaterial(root);
   root.add(tip);
   root.add(grabVolume(0.1, -0.01, 0.07, 0));
   return root;
@@ -135,6 +142,8 @@ export function createShears(): Group {
     loop.rotation.x = Math.PI / 2;
     loop.position.set(-0.078, 0, side * 0.03);
     pivot.add(loop);
+    // Each arm swings as one piece: merge it per material (steel, lacquer).
+    mergeByMaterial(pivot);
     root.add(pivot);
   }
   const screw = new Mesh(new CylinderGeometry(0.006, 0.006, 0.012, 14), brassMat);

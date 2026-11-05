@@ -5,6 +5,7 @@ import {
   Mesh,
   MeshStandardMaterial,
 } from '@iwsdk/core';
+import { mergeByMaterial } from './lib/merge.js';
 
 /**
  * Low wooden garden table with a sand-colored tray on top.
@@ -61,5 +62,7 @@ export function createZenTable(): Group {
       root.add(leg);
     }
   }
+  // Static: one draw call per material (wood, sand, rim) instead of ten.
+  mergeByMaterial(root);
   return root;
 }

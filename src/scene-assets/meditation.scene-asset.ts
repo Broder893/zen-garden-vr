@@ -51,7 +51,7 @@ export function createMeditationStone(): Group {
 
   const volume = new Mesh(
     new SphereGeometry(0.08, 12, 8),
-    new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
+    new MeshBasicMaterial({ visible: false }),
   );
   volume.name = 'GrabVolume';
   volume.position.y = 0.03;
