@@ -46,6 +46,10 @@ const flowerMat = new MeshStandardMaterial({
   roughness: 0.6,
   flatShading: true,
 });
+// Named so runtime systems can find them (health tints the foliage, never the prototype).
+leafMat.name = 'Leaf';
+flowerMat.name = 'Flower';
+wildMat.name = 'Wild';
 
 const padGeo = new IcosahedronGeometry(1, 1);
 const flowerGeo = new IcosahedronGeometry(0.011, 0);

@@ -8,6 +8,7 @@ import { DwellSystem } from './dwell.js';
 import { EntranceSystem } from './entrance.js';
 import { FirstMomentsSystem } from './first-moments.js';
 import { GuideSystem } from './guide.js';
+import { HealthSystem } from './health.js';
 import { LevelBadgeSystem } from './level-badge.js';
 import { UnlocksSystem } from './unlocks.js';
 import { MeditationSystem } from './meditation.js';
@@ -26,6 +27,7 @@ World.create(
     .registerSystem(WateringSystem)
     .registerSystem(PruningSystem)
     .registerSystem(BonsaiGrowthSystem)
+    .registerSystem(HealthSystem)
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
     .registerSystem(EntranceSystem)
@@ -53,6 +55,7 @@ World.create(
       growth: world.getSystem(BonsaiGrowthSystem),
       persistence: world.getSystem(PersistenceSystem),
       rake: world.getSystem(RakeSystem),
+      health: world.getSystem(HealthSystem),
     };
   }
 });

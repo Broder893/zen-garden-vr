@@ -1,6 +1,10 @@
 import { BonsaiStage } from '../garden-components.js';
 import { XP, xpForStage } from './growth-levels.js';
 
+function clamp01(x: unknown): number {
+  return typeof x === 'number' && Number.isFinite(x) ? Math.min(1, Math.max(0, x)) : 0;
+}
+
 function bitCount(mask: number): number {
   let n = 0;
   for (let m = mask; m; m &= m - 1) n++;
@@ -31,6 +35,10 @@ export interface GardenSave {
   xp: number;
   /** Local day (20261105) of the last daily gift; 0 = never. */
   lastGiftDay: number;
+  /** Health (v2): stress 0..1, excess water 0..1, healthy branches cut by mistake. */
+  stress: number;
+  overwater: number;
+  stumpMask: number;
   /** When the last counted visit began (ms since epoch). */
   lastVisitAt: number;
   /** When the garden was last saved (ms since epoch). */
@@ -52,10 +60,11 @@ export function visitGrowsFlower(visits: number): boolean {
 }
 
 const KEY = 'zen-garden-vr/save';
-const VERSION = 1;
+/** 2 added health (stress, overwater, stumpMask). Version 1 saves still load, healthy. */
+const VERSION = 2;
 
 export function emptySave(): GardenSave {
-  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, breaks: 0, xp: 0, lastGiftDay: 0, lastVisitAt: 0, savedAt: 0 };
+  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, breaks: 0, xp: 0, lastGiftDay: 0, stress: 0, overwater: 0, stumpMask: 0, lastVisitAt: 0, savedAt: 0 };
 }
 
 /** Reads the save; null when there is none, it is unreadable, or storage is blocked. */
@@ -122,7 +131,8 @@ export function parseSave(raw: string): GardenSave | null {
   }
   if (typeof data !== 'object' || data === null) return null;
   const d = data as Record<string, unknown>;
-  if (d.v !== VERSION) return null;
+  // Version 1 (before health) loads with a healthy tree and nothing else lost.
+  if (d.v !== VERSION && d.v !== 1) return null;
   const clampInt = (x: unknown, min: number, max: number) =>
     typeof x === 'number' && Number.isFinite(x) ? Math.min(max, Math.max(min, Math.round(x))) : min;
   const planted = d.planted === true;
@@ -142,6 +152,9 @@ export function parseSave(raw: string): GardenSave | null {
     stage,
     xp: planted ? Math.max(xp, xpForStage(stage)) : 0,
     lastGiftDay: clampInt(d.lastGiftDay, 0, 99991231),
+    stress: d.v === 1 ? 0 : clamp01(d.stress),
+    overwater: d.v === 1 ? 0 : clamp01(d.overwater),
+    stumpMask: d.v === 1 ? 0 : clampInt(d.stumpMask, 0, 0xff),
     water,
     prunedMask,
     visits: clampInt(d.visits, 0, 1e6),

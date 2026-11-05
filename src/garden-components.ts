@@ -14,6 +14,10 @@ export const Bonsai = createComponent('Bonsai', {
   water: { type: Types.Float32, default: 0, min: 0, max: 1, label: 'Water for this stage (0..1)' },
   prunedMask: { type: Types.Int32, default: 0, label: 'Bitmask of shoots cut this stage' },
   xp: { type: Types.Int32, default: 0, min: 0, label: 'Experience from care (sets stage and level)' },
+  // Health (src/save/plant-health.ts): errors show and are always recoverable.
+  stress: { type: Types.Float32, default: 0, min: 0, max: 1, label: 'Stress (0 healthy .. 1 wilted)' },
+  overwater: { type: Types.Float32, default: 0, min: 0, max: 1, label: 'Excess water poured on a full tree' },
+  stumpMask: { type: Types.Int32, default: 0, label: 'Bitmask of healthy branches cut by mistake' },
 });
 
 /** Tag: a grabbable watering can. Pours when tilted spout-down. */

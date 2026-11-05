@@ -12,6 +12,7 @@ import {
   visitGrowsFlower,
 } from './save/garden-save.js';
 import { dayKey, XP } from './save/growth-levels.js';
+import { NEGLECT_MS, NEGLECT_STRESS } from './save/plant-health.js';
 
 /** How often the garden checks for changes to save. */
 const SAVE_EVERY_SECONDS = 2;
@@ -36,6 +37,8 @@ export class PersistenceSystem extends createSystem({
   private bonsai!: FirstEntity;
   private baseMeditations = 0;
   private baseBreaks = 0;
+  /** When the visit before this one began (0 = none). */
+  private previousVisitAt = 0;
   private sinceCheck = 0;
   private lastKey = '';
   private visitCounted = false;
@@ -66,6 +69,9 @@ export class PersistenceSystem extends createSystem({
       e.setValue(Bonsai, 'water', this.save.water);
       e.setValue(Bonsai, 'prunedMask', this.save.prunedMask);
       e.setValue(Bonsai, 'xp', this.save.xp);
+      e.setValue(Bonsai, 'stress', this.save.stress);
+      e.setValue(Bonsai, 'overwater', this.save.overwater);
+      e.setValue(Bonsai, 'stumpMask', this.save.stumpMask);
     };
     const hideSeed = (e: Entity) => {
       // Already planted: the guide disposes hidden seeds.
@@ -84,6 +90,7 @@ export class PersistenceSystem extends createSystem({
           const now = Date.now();
           if (this.forceVisit || now - this.save.lastVisitAt >= VISIT_GAP_MS) {
             this.newVisit = true;
+            this.previousVisitAt = this.save.lastVisitAt;
             this.save.visits += 1;
             this.save.lastVisitAt = now;
             this.regrow();
@@ -115,6 +122,13 @@ export class PersistenceSystem extends createSystem({
     if (!b || !(b.getValue(Bonsai, 'planted') ?? false)) return;
     b.setValue(Bonsai, 'water', 0);
     b.setValue(Bonsai, 'prunedMask', 0);
+    // The soil has drained and cut branches have grown back.
+    b.setValue(Bonsai, 'overwater', 0);
+    b.setValue(Bonsai, 'stumpMask', 0);
+    // Long away: the tree is a little tense, and the firefly will suggest breathing with it.
+    if (this.previousVisitAt > 0 && Date.now() - this.previousVisitAt >= NEGLECT_MS) {
+      b.setValue(Bonsai, 'stress', Math.max(b.getValue(Bonsai, 'stress') ?? 0, NEGLECT_STRESS));
+    }
   }
 
   /** First entry of the day with a planted tree: a small XP gift. The day of planting starts the count. */
@@ -157,10 +171,14 @@ export class PersistenceSystem extends createSystem({
       s.water = Math.floor((b.getValue(Bonsai, 'water') ?? 0) * 100) / 100;
       s.prunedMask = b.getValue(Bonsai, 'prunedMask') ?? 0;
       s.xp = b.getValue(Bonsai, 'xp') ?? 0;
+      // Health changes smoothly: keep it to steps of 0.05 so it does not write every check.
+      s.stress = Math.round((b.getValue(Bonsai, 'stress') ?? 0) * 20) / 20;
+      s.overwater = Math.round((b.getValue(Bonsai, 'overwater') ?? 0) * 20) / 20;
+      s.stumpMask = b.getValue(Bonsai, 'stumpMask') ?? 0;
     }
     s.meditations = this.baseMeditations + (this.meditation?.completed ?? 0);
     s.breaks = this.baseBreaks + (this.meditation?.breaksCompleted ?? 0);
-    const key = `${s.planted}|${s.stage}|${s.water}|${s.prunedMask}|${s.visits}|${s.meditations}|${s.breaks}|${s.xp}`;
+    const key = `${s.planted}|${s.stage}|${s.water}|${s.prunedMask}|${s.visits}|${s.meditations}|${s.breaks}|${s.xp}|${s.stress}|${s.overwater}|${s.stumpMask}`;
     if (key === this.lastKey) return;
     s.savedAt = Date.now();
     this.lastKey = key;
