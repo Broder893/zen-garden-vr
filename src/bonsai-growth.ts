@@ -13,6 +13,14 @@ export const SHOOTS_BY_STAGE: Record<number, string[]> = {
   [BonsaiStage.Blooming]: MATURE_SHOOTS,
 };
 const ALL_SHOOTS = ['Overgrowth_Young_0', 'Overgrowth_Young_1', ...MATURE_SHOOTS];
+const MATURE_HEALTHY = ['Healthy_Mature_0', 'Healthy_Mature_1'];
+/** Healthy branches (not glowing) at each stage: cutting one is a mistake. Bit i of stumpMask = cut. */
+export const HEALTHY_BY_STAGE: Record<number, string[]> = {
+  [BonsaiStage.Young]: ['Healthy_Young_0', 'Healthy_Young_1'],
+  [BonsaiStage.Mature]: MATURE_HEALTHY,
+  [BonsaiStage.Blooming]: MATURE_HEALTHY,
+};
+const ALL_HEALTHY = ['Healthy_Young_0', 'Healthy_Young_1', ...MATURE_HEALTHY];
 
 /** Number of bits set (shoots cut in a mask). */
 function bits(mask: number): number {
@@ -45,6 +53,7 @@ export class BonsaiGrowthSystem extends createSystem({
   private soil: MeshStandardMaterial | null = null;
   /** Soil darkness shown, 0 dry .. 1 wet; follows water up fast, dries slowly. */
   private wetness = -1;
+  private shownStumps = -1;
   /** Shown puddle, 0..1 (follows overwater). */
   private puddle = 0;
   private sparkles!: Sparkles;
@@ -70,7 +79,7 @@ export class BonsaiGrowthSystem extends createSystem({
       const root = entity.object3D;
       if (!root) return;
       root.traverse((o) => {
-        if (/^(Sprout|Young|Mature|Flowers|Overgrowth_\w+_\d)$/.test(o.name)) this.parts.set(o.name, o);
+        if (/^(Sprout|Young|Mature|Flowers|Overgrowth_\w+_\d|Healthy_\w+_\d)$/.test(o.name)) this.parts.set(o.name, o);
         if (o.name === 'Soil') {
           // Own soil material so darkening it never touches another asset.
           const mesh = o as unknown as { material: MeshStandardMaterial };
@@ -91,7 +100,11 @@ export class BonsaiGrowthSystem extends createSystem({
     this.awardXp(entity);
     const planted = entity.getValue(Bonsai, 'planted') ?? false;
     if (!planted) {
-      if (this.shownStage !== -2) this.applyVisibility(-1, 0);
+      if (this.shownStage !== -2) {
+        this.applyVisibility(-1, 0);
+        this.applyStumps(-1, 0);
+        this.shownStumps = -1;
+      }
       this.shownStage = -2;
       return;
     }
@@ -109,6 +122,7 @@ export class BonsaiGrowthSystem extends createSystem({
       const newMask = bloom ? (1 << MATURE_SHOOTS.length) - 1 : 0;
       entity.setValue(Bonsai, 'water', bloom ? 1 : 0);
       entity.setValue(Bonsai, 'prunedMask', newMask);
+      entity.setValue(Bonsai, 'stumpMask', 0); // a new stage has all its branches
       // This tending is a gift of the new stage, not the player's care: no XP for it.
       this.lastMask = newMask;
       this.waterRewarded = bloom;
@@ -116,6 +130,11 @@ export class BonsaiGrowthSystem extends createSystem({
     const water = entity.getValue(Bonsai, 'water') ?? 0;
     const mask = entity.getValue(Bonsai, 'prunedMask') ?? 0;
 
+    const stumps = entity.getValue(Bonsai, 'stumpMask') ?? 0;
+    if (stumps !== this.shownStumps) {
+      this.shownStumps = stumps;
+      this.applyStumps(stage, stumps);
+    }
     if (stage !== this.shownStage || mask !== this.shownMask) {
       // -1 means first frame (restored save): show it without ceremony.
       if (stage !== this.shownStage && this.shownStage !== -1) {
@@ -123,6 +142,7 @@ export class BonsaiGrowthSystem extends createSystem({
         this.celebrate(entity, stage);
       }
       this.applyVisibility(stage, mask);
+      this.applyStumps(stage, stumps);
       this.shownStage = stage;
       this.shownMask = mask;
     }
@@ -226,6 +246,21 @@ export class BonsaiGrowthSystem extends createSystem({
     for (const n of ALL_SHOOTS) set(n, false);
     const shoots = SHOOTS_BY_STAGE[stage] ?? [];
     shoots.forEach((n, i) => set(n, (mask & (1 << i)) === 0));
+  }
+
+  /** Healthy branches of this stage show; a cut one keeps only its stump. */
+  private applyStumps(stage: number, stumps: number): void {
+    for (const n of ALL_HEALTHY) {
+      const o = this.parts.get(n);
+      if (o) o.visible = false;
+    }
+    (HEALTHY_BY_STAGE[stage] ?? []).forEach((n, i) => {
+      const o = this.parts.get(n);
+      if (!o) return;
+      o.visible = true;
+      const leafy = o.getObjectByName('Leafy');
+      if (leafy) leafy.visible = (stumps & (1 << i)) === 0;
+    });
   }
 
   private scaleStage(stage: number, s: number): void {

@@ -140,6 +140,30 @@ function createSprout(): Group {
   return g;
 }
 
+/**
+ * A healthy branch (not glowing): cutting it is a mistake. The base stays as a
+ * stump; 'Leafy' (the outer twig and its leaf pad) is hidden when it is cut.
+ * Its CutPoint sits along the twig, at least 10 cm from every glowing shoot.
+ */
+function healthyBranch(name: string, from: Vector3, to: Vector3): Group {
+  const g = new Group();
+  g.name = name;
+  const knee = from.clone().lerp(to, 0.3);
+  const bend = from.clone().lerp(to, 0.65).add(v(0, 0.006, 0));
+  g.add(limb(`${name}_Stump`, [from, knee], 0.0042, 0.0036));
+  const leafy = new Group();
+  leafy.name = 'Leafy';
+  leafy.add(limb(`${name}_Twig`, [knee, bend, to], 0.0036, 0.0022));
+  leafy.add(pad(`${name}_Pad`, to, v(0.024, 0.013, 0.021)));
+  mergeByMaterial(leafy);
+  g.add(leafy);
+  const cut = new Object3D();
+  cut.name = 'CutPoint';
+  cut.position.copy(from.clone().lerp(to, 0.6));
+  g.add(cut);
+  return g;
+}
+
 function createYoung(): Group {
   const g = new Group();
   g.name = 'Young';
@@ -203,6 +227,10 @@ export function createBonsai(): Group {
     overgrowth('Overgrowth_Mature_0', v(-0.07, 0.195, 0.02), v(-0.125, 0.27, 0.06)),
     overgrowth('Overgrowth_Mature_1', v(0.085, 0.155, 0), v(0.15, 0.21, 0.05)),
     overgrowth('Overgrowth_Mature_2', v(0.02, 0.285, 0.01), v(0.05, 0.36, 0.04)),
+    healthyBranch('Healthy_Young_0', v(-0.002, 0.115, 0), v(-0.05, 0.12, -0.05)),
+    healthyBranch('Healthy_Young_1', v(0, 0.08, 0.005), v(-0.045, 0.075, 0.05)),
+    healthyBranch('Healthy_Mature_0', v(0.005, 0.2, -0.005), v(-0.045, 0.225, -0.06)),
+    healthyBranch('Healthy_Mature_1', v(0.016, 0.1, 0.005), v(0.035, 0.085, 0.065)),
   );
   return root;
 }

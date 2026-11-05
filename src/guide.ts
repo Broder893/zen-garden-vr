@@ -104,6 +104,7 @@ export const LINES = {
   tenseBreathe: 'Your tree looks tense. Breathe with it at the stone.',
   tenseBreatheDwell: 'Your tree looks tense. Look at the stone to breathe.',
   recovered: 'Your tree is feeling better.',
+  wrongCut: 'That branch was healthy. Trim only the glowing shoots.',
   breakInviteTense: 'Your tree is tense. Let us breathe together.',
   levelPot: 'Level 6! Your tree has a new glazed pot.',
   levelLantern: 'Level 7! A stone lantern now glows by your tree.',
@@ -239,6 +240,7 @@ export class GuideSystem extends createSystem({
   private greeted = false;
   private giftPending = false;
   private overflowWarned = false;
+  private lastWrongCuts = 0;
   private lastHealth: HealthState = Health.Healthy;
   private health?: HealthSystem;
   private lastLevel = -1;
@@ -482,6 +484,10 @@ export class GuideSystem extends createSystem({
     const health = this.health?.state ?? Health.Healthy;
     if (health === Health.Healthy && this.lastHealth !== Health.Healthy) this.showEvent('recovered', EVENT_SECONDS);
     this.lastHealth = health;
+    // A healthy branch cut: no blame, just what to cut instead (it grows back next visit).
+    const wrong = this.pruning?.wrongCuts ?? 0;
+    if (wrong !== this.lastWrongCuts) this.showEvent('wrongCut', EVENT_SECONDS + 1);
+    this.lastWrongCuts = wrong;
     const cuts = this.pruning?.cuts ?? 0;
     if (cuts !== this.lastCuts && this.eventLeft <= 0) this.showEvent('snip', SNIP_SECONDS);
     this.lastCuts = cuts;

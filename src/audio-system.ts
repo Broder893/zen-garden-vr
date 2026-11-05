@@ -51,6 +51,7 @@ export class GardenAudioSystem extends createSystem({
   private bonsai!: FirstEntity;
   // Last seen garden state; null until the first frame so restored saves stay silent.
   private lastCuts: number | null = null;
+  private lastWrongCuts = 0;
   private lastStage: number | null = null;
   private lastPlanted: boolean | null = null;
   private lastPhase: MeditationPhase = 'idle';
@@ -141,6 +142,14 @@ export class GardenAudioSystem extends createSystem({
       log('snip');
     }
     this.lastCuts = cuts;
+    // A wrong cut: the snip, then a soft low note (heard, not only seen).
+    const wrong = this.pruning?.wrongCuts ?? 0;
+    if (wrong > this.lastWrongCuts) {
+      this.engine.snip();
+      this.engine.chime(SCALE[0] / 2, 0.25, 0.1, 2.2);
+      log('wrong cut');
+    }
+    this.lastWrongCuts = wrong;
 
     const bonsai = this.bonsai.entity;
     if (!bonsai) return;
