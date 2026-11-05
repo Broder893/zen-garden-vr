@@ -16,7 +16,7 @@ export interface ComfortSettings {
   dwell: boolean;
 }
 
-/** Breath timings per pace, in seconds; sessions stay about 80-90 s long. */
+/** Breath timings per pace, in seconds; with intro and outro a session lasts about 75-95 s. */
 export const BREATH_PACES: Record<BreathPace, { inhale: number; hold: number; exhale: number; breaths: number }> = {
   slow: { inhale: 5, hold: 2, exhale: 7, breaths: 6 },
   medium: { inhale: 4, hold: 2, exhale: 6, breaths: 6 },

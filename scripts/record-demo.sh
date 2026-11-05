@@ -45,7 +45,45 @@ seat() {
 look() { cli xr look-at --input-json "{\"device\":\"headset\",\"target\":$1}" >/dev/null; }
 rec_start() { REC=start cli browser run .iwsdk-scripts/record.mjs >/dev/null; }
 rec_stop() { REC=stop REC_NAME="$1" cli browser run .iwsdk-scripts/record.mjs | grep -o '"file": "[^"]*"' || true; }
+# Poke a Comfort panel button with the left fingertip (element id from public/ui/comfort.uikitml).
+poke() { cli xr run-sequence --input-json "{\"device\":\"hand-left\",\"body\":\"auto\",\"steps\":[{\"target\":\"$1\",\"press\":{}}]}" --timeout 45000 >/dev/null; }
+# Reads a value from the running app (dev builds expose window.__zen).
+js() { EVAL="$1" cli browser run .iwsdk-scripts/eval.mjs | python3 -c 'import json,sys; print(json.dumps(json.load(sys.stdin)["data"]["result"]["value"]))'; }
+# Pokes a button until the app state matches (a passing hand can toggle the panel).
+poke_until() { for _ in 1 2 3; do [ "$(js "$2")" = true ] && return 0; poke "$1"; pause 0.6; done; [ "$(js "$2")" = true ]; }
+rest_left() { cli xr run-sequence --input-json '{"device":"hand-left","steps":[{"position":{"x":-0.25,"y":0.72,"z":0.08},"anchor":"wrist","duration":0.8}]}' --timeout 30000 >/dev/null; }
 entity() { cli ecs find --input-json "{\"withComponents\":[\"$1\"]}" | grep -o '"entityIndex": [0-9]*' | head -1 | grep -o '[0-9]*'; }
+
+# Accessibility clip: Comfort panel, high contrast, then picking up and pouring
+# with "hold to select" (no pinch). Settings are put back to default at the end.
+comfort_clip() {
+  say "Comfort settings and hold to select"
+  look '{"x":-0.25,"y":0.95,"z":-0.4}'
+  rec_start
+  pause 2
+  poke_until comfort-open '__zen.comfort.open'; pause 1
+  poke_until contrast-on '__zen.comfort.settings.highContrast'; pause 1.5
+  poke_until dwell-on '__zen.comfort.settings.dwell'; pause 1.5
+  poke_until comfort-open '!__zen.comfort.open'; pause 0.5
+  rest_left
+  look '{"x":0.1,"y":0.9,"z":-0.5}'
+  play 7-dwell-can; pause 2
+  rec_stop 08-comfort-hold-to-select
+  poke_until comfort-open '__zen.comfort.open'
+  poke_until contrast-off '!__zen.comfort.settings.highContrast'
+  poke_until dwell-off '!__zen.comfort.settings.dwell'
+  poke_until comfort-open '!__zen.comfort.open'
+  rest_left
+}
+
+if [ "${1:-}" = "comfort" ]; then
+  # Only the accessibility clip: npm run demo:record -- comfort
+  goto ''
+  enter
+  seat
+  comfort_clip
+  exit 0
+fi
 
 # One short clip per scene: easier to edit, and each recording is released
 # from memory when it stops (one long take can exhaust the page's memory).
@@ -66,6 +104,8 @@ rec_start; play 5-stone; look '{"x":0,"y":1.0,"z":-0.5}'; pause 33; rec_stop 05-
 say "The firefly follows the hand"
 rec_start; play 6-hand-play; pause 2; rec_stop 06-firefly-follows-hand
 
+comfort_clip
+
 say "Coming back (a new flower)"
 goto '?nextvisit'
 enter
@@ -78,4 +118,4 @@ look '{"x":0,"y":0.95,"z":-0.6}'
 pause 3
 rec_stop 07-return-new-flower
 
-say "Done. Clips are in artifacts/ (01- to 07-*.webm)."
+say "Done. Clips are in artifacts/ (01- to 08-*.webm)."

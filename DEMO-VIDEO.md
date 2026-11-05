@@ -24,6 +24,9 @@ The script (`scripts/record-demo.sh`) plays the experience by itself (about
 | `05-breathe.webm` | Pinching the stone: a two-breath session with the light orb |
 | `06-firefly-follows-hand.webm` | The firefly following the hand |
 | `07-return-new-flower.webm` | Coming back: "A new flower grew while you were away" |
+| `08-comfort-hold-to-select.webm` | Comfort panel: high contrast and hold to select, then the can picked up and pouring with no pinch |
+
+To record only the last clip again: `npm run demo:record -- comfort`.
 
 What is in the clips:
 - the 3D view only, in 1920×1080, with **no emulator badges or panels**;
@@ -50,10 +53,9 @@ Suggested cut, about 2:50:
 | 0:08–0:30 | planting (keep the ghost pinch next to the seed in frame) | *Hands only. The firefly shows the gesture in light.* |
 | 0:30–1:00 | first watering, growth | *Tilt to pour. The tree grows when it's cared for.* |
 | 1:00–1:40 | pruning, watering, bloom (speed up 1.5–2× if long) | *Trim the wild shoots to shape your bonsai.* |
-| 1:40–2:15 | breathing session | *When you need a pause, breathe with the light.* |
-| 2:15–2:25 | firefly following the hand | |
-| (optional, record by hand) | Comfort panel: high contrast on, hold to select picking up the can | *Comfort settings: hold to select, one hand, high contrast, large text.* |
-| 2:25–2:40 | `demo-return` | *Come back tomorrow: your garden keeps growing.* |
+| 1:40–2:05 | breathing session (cut to one breath) | *When you need a pause, breathe with the light.* |
+| 2:05–2:25 | `08-comfort-hold-to-select` (speed up the pokes, keep the can pouring by itself) | *No pinch? Hold to select. Also: one hand, high contrast, large text, breathing pace.* |
+| 2:25–2:40 | `07-return-new-flower` (the firefly-follows-hand clip 06 is a spare) | *Come back tomorrow: your garden keeps growing.* |
 | 2:40–2:50 | last frame held | *Hands only · Seated · 5–10 minutes · Built with IWSDK* + `broder893.github.io/zen-garden-vr` |
 
 ## 3. Publish

@@ -85,6 +85,7 @@ export const LINES = {
   meditateHintDwell: 'Any time, look at the glowing stone to breathe.',
   meditatePausedDwell: 'Paused. Look at the stone to continue.',
   putBack: 'Lower the tool to the table to let it go.',
+  comfortHint: 'No pinch? Poke Comfort, then Hold to select.',
 } as const;
 export type LineId = keyof typeof LINES;
 
@@ -113,6 +114,8 @@ const DWELL: Partial<Record<LineId, LineId>> = {
 };
 /** Seconds on the same task before the clearer help line appears. */
 const STUCK_SECONDS = 15;
+/** Still not planted after this long: point out the hands-free option. */
+const COMFORT_HINT_SECONDS = 30;
 /** Seconds before the ghost pinch appears, so players who already know just act. */
 const PINCH_HINT_DELAY = 1.5;
 
@@ -322,6 +325,12 @@ export class GuideSystem extends createSystem({
     } else this.taskTime += delta;
     const help = HELP[this.task];
     this.line = help && this.taskTime >= STUCK_SECONDS ? help : this.task;
+    // A player who cannot pinch never plants the seed: show them the Comfort panel.
+    if (this.task === 'plantSeed' && this.taskTime >= COMFORT_HINT_SECONDS && !this.comfort?.settings.dwell) {
+      this.line = 'comfortHint';
+      const opener = this.comfort?.openerObject;
+      if (opener) this.targetOf(opener, 0.02);
+    }
   }
 
   /** Acts out the gesture for the current task in light, next to its object. */
@@ -404,12 +413,12 @@ export class GuideSystem extends createSystem({
       return 'welcome';
     }
     const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
-    const canFree = this.queries.assistedCans.entities.size > 0;
-    const shearsFree = this.queries.assistedShears.entities.size > 0;
+    const canHandsFree = this.queries.assistedCans.entities.size > 0;
+    const shearsHandsFree = this.queries.assistedShears.entities.size > 0;
     if (stage >= BonsaiStage.Blooming) {
-      if (canFree || shearsFree) {
+      if (canHandsFree || shearsHandsFree) {
         this.task = 'putBack';
-        this.targetOf((canFree ? this.canRef : this.shearsRef).entity?.object3D, 0.12);
+        this.targetOf((canHandsFree ? this.canRef : this.shearsRef).entity?.object3D, 0.12);
         return 'bloom';
       }
       this.task = 'rest';
@@ -425,10 +434,10 @@ export class GuideSystem extends createSystem({
       if ((mask & (1 << i)) === 0) nextShoot = i;
     }
     if (nextShoot >= 0) {
-      if (canFree) {
+      if (canHandsFree) {
         this.task = 'putBack';
         this.targetOf(this.canRef.entity?.object3D, 0.12);
-      } else if (this.queries.heldShears.entities.size === 0 && !shearsFree) {
+      } else if (this.queries.heldShears.entities.size === 0 && !shearsHandsFree) {
         this.task = 'pickShears';
         this.targetOf(this.shearsRef.entity?.object3D, 0.02);
       } else {
@@ -438,10 +447,10 @@ export class GuideSystem extends createSystem({
       return 'prune';
     }
 
-    if (shearsFree) {
+    if (shearsHandsFree) {
       this.task = 'putBack';
       this.targetOf(this.shearsRef.entity?.object3D, 0.05);
-    } else if (this.queries.heldCans.entities.size === 0 && !canFree) {
+    } else if (this.queries.heldCans.entities.size === 0 && !canHandsFree) {
       this.task = 'pickCan';
       this.targetOf(this.canRef.entity?.object3D, 0.12);
     } else if (this.watering?.wateringBonsai) {

@@ -79,7 +79,6 @@ export class DwellSystem extends createSystem({
   stones: { required: [MeditationStone] },
   cans: { required: [WateringCan] },
   shears: { required: [PruningShears] },
-  held: { required: [AssistHeld] },
   bonsai: { required: [Bonsai] },
 }) {
   private comfort?: ComfortSystem;
@@ -91,6 +90,11 @@ export class DwellSystem extends createSystem({
   private shearsRef!: FirstEntity;
   private bonsai!: FirstEntity;
   private ring!: DwellRing;
+  /**
+   * What each hand (0 left, 1 right) carries hands-free, with its grip offset.
+   * Per-hand input state, not an entity list: the AssistHeld component is the
+   * source of truth that watering, pruning and the guide query.
+   */
   private holds: [Hold | null, Hold | null] = [null, null];
   // Per hand (0 left, 1 right) and for the gaze (2): what is being dwelt on, and how long.
   private dwellOn: (Entity | null)[] = [null, null, null];
@@ -112,7 +116,7 @@ export class DwellSystem extends createSystem({
   private scratchS = new Vector3();
   private frameBest = 0;
   /** Each object's bounding-box centre in its own frame (models' origins sit at their base or pivot). */
-  private localCenters = new Map<Entity, Vector3>();
+  private localCenters = new WeakMap<Entity, Vector3>();
   private nearest: Entity | null = null;
   private nearestD = 0;
 
@@ -177,9 +181,14 @@ export class DwellSystem extends createSystem({
     this.dwellTime[source] += delta;
     const k = Math.min(1, this.dwellTime[source] / seconds);
     if (k >= 1) {
-      this.spent[source] = target;
-      this.dwellOn[source] = null;
-      this.dwellTime[source] = 0;
+      // Every source on this target is spent, so a hand and a look on the
+      // stone cannot both fire (the second would pause the session just begun).
+      for (let i = 0; i < 3; i++) {
+        if (i !== source && this.dwellOn[i] !== target) continue;
+        this.spent[i] = target;
+        this.dwellOn[i] = null;
+        this.dwellTime[i] = 0;
+      }
       this.select(target, source);
       return;
     }
@@ -285,7 +294,8 @@ export class DwellSystem extends createSystem({
     this.nearest = null;
     this.nearestD = Infinity;
     this.consider(this.seed.entity);
-    this.consider(this.stone.entity);
+    // During a session a hand resting by the stone must not pause it: only a look does.
+    if (!this.meditation?.active) this.consider(this.stone.entity);
     this.consider(this.can.entity);
     this.consider(this.shearsRef.entity);
     return this.nearest;

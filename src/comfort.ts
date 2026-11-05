@@ -68,6 +68,9 @@ const TOOL_LAYOUT: Record<Hands, { can: [number, number, number]; shears: [numbe
 };
 const TABLE_TOP_Y = 0.77;
 
+/** The panel's authored x: the front-left corner of the table. */
+const PANEL_X = -0.44;
+
 /** A second touch on the same button this soon is the same poke, not a new one. */
 const CLICK_GUARD_MS = 450;
 
@@ -199,9 +202,11 @@ export class ComfortSystem extends createSystem({
       this.elements.get(`${c.id}-t`)?.setProperties({ color: on ? t.onText : t.text });
     }
     this.panel?.scale.setScalar(s.largeText ? PANEL_SCALE.large : PANEL_SCALE.normal);
+    // On the side of the hand in use (left by default).
+    if (this.panel) this.panel.position.x = PANEL_X * (s.hands === 'right' ? -1 : 1);
     // Subtitles: solid black with white text in high contrast; bigger when asked.
     this.subtitlePill?.setProperties({ backgroundColor: t.subtitleBg, borderColor: t.border, borderWidth: s.highContrast ? 0.35 : 0.15 });
-    this.subtitleText?.setProperties({ color: s.highContrast ? '#ffffff' : '#fff6dc' });
+    this.subtitleText?.setProperties({ color: t.text });
     this.subtitlePanel?.scale.setScalar(s.largeText ? SUBTITLE_SCALE.large : SUBTITLE_SCALE.normal);
     this.applyLayout();
     for (const h of this.highlighted) {
@@ -236,6 +241,11 @@ export class ComfortSystem extends createSystem({
     q[3] = Math.cos(half);
     // Already captured: ReturnHome must not overwrite this with the authored pose.
     e.setValue(ReturnHome, 'captured', true);
+  }
+
+  /** The Comfort button's 3D object, for the guide to point at. */
+  get openerObject(): Object3D | undefined {
+    return (this.elements.get('comfort-open') as unknown as Object3D | undefined) ?? undefined;
   }
 
   /** True when this hand may be used (both, or the one chosen in one-hand mode). */
