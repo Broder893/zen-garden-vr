@@ -29,36 +29,30 @@ A pocket zen garden for your work breaks: grow a bonsai with your bare hands, br
 
 ### Inspiration
 
-Most of us take our breaks on the same screen we work on, and come back more tired than we left. We wanted a break that actually feels like one: a few minutes away from the desk, with your hands busy on something small and alive, and a moment to breathe before going back to work.
+We take our breaks on the same screen we work on, and come back more tired. We wanted a break that feels like one: hands busy on something small and alive, and a moment to breathe.
 
-Zen Garden is that ritual in a headset. A small garden sits on a table in front of you. You plant a seed, water it, trim it, and watch a bonsai grow through four stages until it blossoms. When you need to slow down, a glowing meditation stone starts a short guided breathing session. The whole thing fits in a five to ten minute break, and you can do it sitting down.
+Zen Garden is that ritual in a headset. A little garden sits on a table in front of you: plant a seed, water it, trim it, and watch a bonsai grow through four stages until it blossoms. It fits in a five to ten minute break, sitting down.
 
 ### What it does
 
-- **A first five minutes that teaches itself.** A firefly guide floats to whatever matters next and explains it in one short sentence, spoken aloud and shown as an English subtitle: pinch the seed, lift the watering can, tilt it over the tree, trim the glowing shoots. Beside the object, a tiny ghost gesture drawn in light acts the motion out (two fingertips pinching, a spout turning down), so you see what to do before you read it. If you seem stuck for 15 seconds, the line becomes a clearer one, and after a pause the firefly welcomes you back to where you left off. The seed sprouts in the first seconds; in a scripted run in the emulator the tree first grew at 21 seconds and bloomed at 76 (a first-time player is slower, but the first reward still comes within the first minute). Still not planted after 30 seconds? The firefly flies to the Comfort button and offers the no-pinch mode.
-- **A tree that needs you.** The bonsai only grows when it has had its water and every overgrown shoot has been cut. Each stage arrives with sparkles and a little rising melody.
-- **A minute and a half to breathe.** Pinch the stone and an orb of light grows as you breathe in, holds, and shrinks as you breathe out, six times, while the music opens and closes with your breath. Pinch again to pause.
-- **Little breaks that find you.** Every few minutes of care (never while you hold a tool, never twice without care in between), the firefly comes close and asks: "Let us pause a moment to breathe together." Show an open hand to say "not now", with no penalty. Otherwise the garden dims, a light floats in front of your eyes with a card that says *Breathe in / Hold / Breathe out* and counts the breaths, and after three or four breaths your tree gets a drink of water as a thank-you. The rhythm grows with the tree: a simple 4-in 6-out for a young tree, box breathing (4-4-4-4) for a mature one, long and slow once it blooms.
-- **Comfortable for more bodies.** A small Comfort panel on the table (poke it, point at it, or click it) changes the experience at any time, and remembers your choice:
-  - **Hold to select:** no pinch needed. Keep a hand still beside an object for about a second, or look at the seed or stone for two, and a ring of light fills up and selects it. Tools then follow your hand, the can pours by itself when held over the tree, and lowering a tool to the table lets it go.
-  - **One hand:** choose left or right and both tools move to that side of the table; the firefly follows only that hand.
-  - **High contrast:** solid black and white subtitles, yellow outlines, and the things you can pick up glow.
-  - **Large text** for subtitles and the panel.
-  - **Breathing pace:** slow, medium or fast.
-  Subtitles are always on, and every spoken line is also written.
-- **A reason to come back.** Your garden is saved on the device. Every return visit (after a few hours away) a new flower opens in the sand, up to seven, and the firefly welcomes you back.
+- **A first five minutes that teaches itself.** A firefly guide flies to whatever matters next and says it in one short sentence, spoken and subtitled. Beside the object, a ghost gesture drawn in light acts the motion out (a pinch, a tilt). If you seem stuck, the line gets clearer; after a pause, the firefly welcomes you back. The seed sprouts within seconds and the tree first grows within a minute.
+- **A tree that needs you.** It grows only when watered and trimmed; each stage arrives with sparkles and music.
+- **Time to breathe.** Pinch the glowing stone for a guided session: an orb of light grows as you breathe in and shrinks as you breathe out, while the music breathes with you.
+- **Little breaks that find you.** Every few minutes of care (never while you hold a tool) the firefly invites a short pause. Show an open hand to say "not now". Otherwise the garden dims, a light in front of your eyes guides three or four breaths with a card that names each step, and the tree gets a drink of water as a thank-you. The rhythm grows with the tree, from a simple 4-in 6-out to box breathing.
+- **Comfortable for more bodies.** A small Comfort panel changes the experience at any time and remembers your choice: **hold to select** (no pinch: keep a hand still by an object, or look at the seed or stone), **one hand** (both tools move to that side), **high contrast**, **large text** and **breathing pace**. Subtitles are always on.
+- **A reason to come back.** The garden is saved on the device, and every return visit grows a new flower in the sand.
 
 ### How we built it
 
-Zen Garden is a WebXR app built with Meta's Immersive Web SDK (IWSDK) and Three.js, so it opens straight from a link in the Quest browser with nothing to install. Game logic is written as ECS systems: watering, pruning, growth, the guide, meditation, audio and saving each own one job and read each other's state.
+Zen Garden is a WebXR app built with Meta's Immersive Web SDK (IWSDK) and Three.js: it opens from a link in the Quest browser, nothing to install. The logic is a set of small ECS systems, each with one job.
 
-Everything is original and made in code. The table, bonsai, tools and flowers are procedural models; the bonsai's parts are merged per material to keep the whole scene around 80 draw calls and 14,000 triangles, well inside a Quest budget. All sound is synthesised live with the Web Audio API, from the pentatonic wind chimes to the water and the snip of the shears, so the app ships no audio files. The guide speaks through the device's own speech synthesis, and every line is also a subtitle. Progress is stored in localStorage with validation and error handling, so a blocked or corrupted save simply starts a fresh garden.
+Everything is original and made in code. The models are procedural and merged per material, keeping the scene around 80 draw calls and 14,000 triangles. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved in localStorage with validation, so a blocked or corrupted save simply starts a fresh garden.
 
-We had no headset during development, so the whole experience was built and tested in IWER, IWSDK's WebXR emulator, driving simulated hands from scripts: every tutorial step, growth stage and breathing session was played through that way.
+We had no headset, so everything was built and tested in IWER, IWSDK's WebXR emulator, with scripted hands playing every step.
 
 ### What's next
 
-Tuning gesture tolerances and pacing on real Quest hardware, more plants to choose from, a day and night cycle that follows the real clock, longer or shorter breathing sessions, and recorded voice lines in more languages.
+Tuning on real Quest hardware, more plants, unlocks as the tree levels up, a day and night cycle, and more languages.
 
 ---
 
@@ -70,6 +64,7 @@ The experience is completable from start to finish with hands only; controllers 
 - **Tilt to pour.** The can pours only when its spout actually points down (about 20 degrees below level), so you never spill by accident. Water counts when the spout is anywhere within 22 cm of the tree.
 - **Touch to trim.** Holding the shears, bring the blades within 7 cm of a glowing shoot and it is cut, with a snip animation and sound. No second gesture or precise aim is needed.
 - **Pinch as a button.** Pinching the seed plants it; pinching the stone starts, pauses or resumes the breathing session. These objects are released straight away, so they act like buttons you can find with your hand.
+- **Poke to set.** The Comfort panel's buttons react to a fingertip poke (IWSDK's `PokeInteractable`), as well as a pointing ray or a mouse click, and act on touch rather than on release, so a shaky poke still counts.
 - **Forgiving by design.** Released tools glide back to their place on the table, so nothing is ever lost or dropped out of reach.
 - **Shown, not told.** Each pinch task gets a ghost pinch drawn in light beside the object; holding the can level shows a turning arc to say "tilt".
 - **Hands that cannot pinch.** With "Hold to select" on, a hand held still beside an object (about 13 to 16 cm from its centre, measured from the palm) for 1.2 seconds acts as a pinch, and a steady look at the seed or stone does the same in 2 seconds. A ring of 18 light dots fills as the selection builds, so you can move away to cancel. A picked-up tool follows the hand; the can tips itself over the tree; lowering the hand to the table puts the tool down. All lines change to match ("Hold your hand by the can to pick it up.").
