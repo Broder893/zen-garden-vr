@@ -66,6 +66,8 @@ export class HealthSystem extends createSystem({
   private lantern: Entity | null = null;
   private lanternBase = new Color();
   private lanternColor = new Color();
+  private seasonLeaf: Color | null = null;
+  private seasonFlower: Color | null = null;
 
   init(): void {
     this.bonsai = trackFirst(this.queries.bonsai, this.cleanupFuncs);
@@ -159,6 +161,13 @@ export class HealthSystem extends createSystem({
     view[2] = this.lanternColor.b;
   }
 
+  /** The season's leaf and blossom colours become the healthy look (src/season.ts). */
+  setSeasonColors(leaf: Color, flower: Color): void {
+    this.seasonLeaf = leaf;
+    this.seasonFlower = flower;
+    for (const t of this.tinted) t.base.copy(t.flower ? flower : leaf);
+  }
+
   /** Own the foliage materials (never tint the shared prototype) and find the stage groups. */
   private bind(e: Entity): void {
     if (this.bound.has(e)) return;
@@ -179,7 +188,9 @@ export class HealthSystem extends createSystem({
       if (!mine) {
         mine = m.clone();
         owned.set(m, mine);
-        this.tinted.push({ mat: mine, base: mine.color.clone(), flower: m.name === 'Flower' });
+        const flower = m.name === 'Flower';
+        const season = flower ? this.seasonFlower : this.seasonLeaf;
+        this.tinted.push({ mat: mine, base: (season ?? mine.color).clone(), flower });
       }
       mesh.material = mine;
     });

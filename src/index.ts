@@ -15,6 +15,7 @@ import { MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
 import { RakeSystem } from './rake.js';
+import { SeasonSystem } from './season.js';
 import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
@@ -28,6 +29,7 @@ World.create(
     .registerSystem(PruningSystem)
     .registerSystem(BonsaiGrowthSystem)
     .registerSystem(HealthSystem)
+    .registerSystem(SeasonSystem)
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
     .registerSystem(EntranceSystem)
@@ -56,6 +58,7 @@ World.create(
       persistence: world.getSystem(PersistenceSystem),
       rake: world.getSystem(RakeSystem),
       health: world.getSystem(HealthSystem),
+      season: world.getSystem(SeasonSystem),
     };
   }
 });
