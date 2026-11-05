@@ -14,7 +14,7 @@ const REPEAT_SECONDS = 14;
 /** Breathing cues are timed by the session, so they are always spoken. */
 const ALWAYS_SPOKEN = new Set<LineId>([
   'breatheIntro', 'breatheIn', 'breatheHold', 'breatheOut',
-  'breatheSoften', 'breatheNotice', 'meditatePaused', 'meditateDone',
+  'breatheSoften', 'breatheNotice', 'meditatePaused', 'meditatePausedDwell', 'meditateDone',
 ]);
 const SCALE = GardenMusic.scale;
 const PLANT_NOTES = [SCALE[0], SCALE[2], SCALE[4]];

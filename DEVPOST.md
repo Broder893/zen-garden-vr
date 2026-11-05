@@ -38,6 +38,13 @@ Zen Garden is that ritual in a headset. A small garden sits on a table in front 
 - **A first five minutes that teaches itself.** A firefly guide floats to whatever matters next and explains it in one short sentence, spoken aloud and shown as an English subtitle: pinch the seed, lift the watering can, tilt it over the tree, trim the glowing shoots. Beside the object, a tiny ghost gesture drawn in light acts the motion out (two fingertips pinching, a spout turning down), so you see what to do before you read it. If you seem stuck for 15 seconds, the line becomes a clearer one, and after a pause the firefly welcomes you back to where you left off. The seed sprouts in the first seconds, and in our timed run the tree first grew at 21 seconds and bloomed at 76.
 - **A tree that needs you.** The bonsai only grows when it has had its water and every overgrown shoot has been cut. Each stage arrives with sparkles and a little rising melody.
 - **A minute and a half to breathe.** Pinch the stone and an orb of light grows as you breathe in, holds, and shrinks as you breathe out, six times, while the music opens and closes with your breath. Pinch again to pause.
+- **Comfortable for more bodies.** A small Comfort panel on the table (poke it, point at it, or click it) changes the experience at any time, and remembers your choice:
+  - **Hold to select:** no pinch needed. Keep a hand still beside an object for about a second, or look at the seed or stone for two, and a ring of light fills up and selects it. Tools then follow your hand, the can pours by itself when held over the tree, and lowering a tool to the table lets it go.
+  - **One hand:** choose left or right and both tools move to that side of the table; the firefly follows only that hand.
+  - **High contrast:** solid black and white subtitles, yellow outlines, and the things you can pick up glow.
+  - **Large text** for subtitles and the panel.
+  - **Breathing pace:** slow, medium or fast.
+  Subtitles are always on, and every spoken line is also written.
 - **A reason to come back.** Your garden is saved on the device. Every return visit (after a few hours away) a new flower opens in the sand, up to seven, and the firefly welcomes you back.
 
 ### How we built it
@@ -64,6 +71,8 @@ The experience is completable from start to finish with hands only; controllers 
 - **Pinch as a button.** Pinching the seed plants it; pinching the stone starts, pauses or resumes the breathing session. These objects are released straight away, so they act like buttons you can find with your hand.
 - **Forgiving by design.** Released tools glide back to their place on the table, so nothing is ever lost or dropped out of reach.
 - **Shown, not told.** Each pinch task gets a ghost pinch drawn in light beside the object; holding the can level shows a turning arc to say "tilt".
+- **Hands that cannot pinch.** With "Hold to select" on, a hand held still beside an object (about 13 to 16 cm from its centre, measured from the palm) for 1.2 seconds acts as a pinch, and a steady look at the seed or stone does the same in 2 seconds. A ring of 18 light dots fills as the selection builds, so you can move away to cancel. A picked-up tool follows the hand; the can tips itself over the tree; lowering the hand to the table puts the tool down. All lines change to match ("Hold your hand by the can to pick it up.").
+- **One hand is enough.** In one-hand mode the tools rest on that hand's side and the firefly ignores the other hand.
 - **The guide follows you.** The firefly never strays more than 35 degrees from where you are looking, leading your eye to the next task, and once the tree is in bloom it follows your hand.
 
 ## Built with

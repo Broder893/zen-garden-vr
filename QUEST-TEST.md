@@ -54,7 +54,22 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 - [ ] Press the **Meta button** (system menu) during the meditation: **sound stops** and the session pauses. Come back: everything is quiet until you pinch the stone.
 - [ ] At the end "Well done…" and a deeper bell.
 
-## 5. Comfort and fluidity
+## 5. Comfort panel (accessibility)
+
+- [ ] At the front-left corner of the table there is a small **Comfort** button. Poke it with a fingertip: the settings open; poke **Done** to close.
+- [ ] **High contrast On**: subtitles black and white, the can, shears, seed and stone glow yellow. Off restores.
+- [ ] **Text size Large**: the subtitles and panel grow; still readable and not covering the tree?
+- [ ] **Breathing pace Slow / Fast**: start a session with the stone and check the rhythm changes.
+- [ ] **Hands Right** (then **Left**): both tools move to that side and can be picked up with that hand alone. **Both** puts them back.
+- [ ] **Hold to select On**, without pinching at all:
+  - [ ] Start fresh (`?fresh`) and look at the seed for 2 seconds: a ring of light fills and it is planted.
+  - [ ] Hold your open hand still beside the can for about a second: it follows your hand. Hold it over the tree: it tips and pours by itself.
+  - [ ] Lower your hand to the table: the can is let go and glides back.
+  - [ ] Same with the shears, and cut a glowing shoot.
+  - [ ] Note how easy it is to trigger by accident (is 1.2 s right?).
+- [ ] Reload the page: the settings are kept.
+
+## 6. Comfort and fluidity
 
 - [ ] Everything you need to touch is **within reach** without getting up or leaning forward a lot.
 - [ ] The subtitles are **readable** and don't cover the tree.
@@ -62,7 +77,7 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
   *For a number: with the [OVR Metrics Tool](https://developers.meta.com/horizon/documentation/native/android/ts-ovrmetricstool/) the FPS must stay at **72 or more** (60 is the minimum).*
 - [ ] No nausea or eye strain after 10 minutes.
 
-## 6. Saving and returning
+## 7. Saving and returning
 
 - [ ] Exit VR, **close the browser tab**, reopen the address **without** `?fresh`:
       `https://broder893.github.io/zen-garden-vr/`
@@ -71,7 +86,7 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
       `https://broder893.github.io/zen-garden-vr/?nextvisit`
       → entering VR, once the light comes up, a **new flower** grows in the sand and the firefly announces it.
 
-## 7. When you're done
+## 8. When you're done
 
 Send me the notes (or a photo). The points that matter most:
 

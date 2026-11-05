@@ -1,5 +1,6 @@
 import { defineComponents } from '@iwsdk/core';
 import {
+  AssistHeld,
   Bonsai,
   BreathOrb,
   FireflyGuide,
@@ -21,4 +22,5 @@ export default defineComponents([
   MeditationStone,
   BreathOrb,
   VisitFlower,
+  AssistHeld,
 ]);

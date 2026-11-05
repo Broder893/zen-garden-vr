@@ -52,6 +52,7 @@ Suggested cut, about 2:50:
 | 1:00–1:40 | pruning, watering, bloom (speed up 1.5–2× if long) | *Trim the wild shoots to shape your bonsai.* |
 | 1:40–2:15 | breathing session | *When you need a pause, breathe with the light.* |
 | 2:15–2:25 | firefly following the hand | |
+| (optional, record by hand) | Comfort panel: high contrast on, hold to select picking up the can | *Comfort settings: hold to select, one hand, high contrast, large text.* |
 | 2:25–2:40 | `demo-return` | *Come back tomorrow: your garden keeps growing.* |
 | 2:40–2:50 | last frame held | *Hands only · Seated · 5–10 minutes · Built with IWSDK* + `broder893.github.io/zen-garden-vr` |
 

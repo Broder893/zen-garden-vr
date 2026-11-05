@@ -1,6 +1,6 @@
 import { createSystem, Entity, Grabbed, Object3D, Vector3 } from '@iwsdk/core';
 import { SHOOTS_BY_STAGE } from './bonsai-growth.js';
-import { Bonsai, PruningShears } from './garden-components.js';
+import { AssistHeld, Bonsai, PruningShears } from './garden-components.js';
 
 const SNIP_SECONDS = 0.25;
 const OPEN_YAW = 0.12;
@@ -21,6 +21,7 @@ interface ShearsParts {
 export class PruningSystem extends createSystem({
   shears: { required: [PruningShears] },
   held: { required: [PruningShears, Grabbed] },
+  assisted: { required: [PruningShears, AssistHeld] },
   bonsai: { required: [Bonsai] },
 }) {
   private parts = new Map<number, ShearsParts>();
@@ -77,28 +78,34 @@ export class PruningSystem extends createSystem({
       const shoots = SHOOTS_BY_STAGE[stage];
       if (!shoots) continue;
       let mask = bonsai.getValue(Bonsai, 'prunedMask') ?? 0;
-      for (const shears of this.queries.held.entities) {
-        const p = this.parts.get(shears.index);
-        if (!p) continue;
-        const radius = shears.getValue(PruningShears, 'cutRadius') ?? 0.07;
-        p.tip.getWorldPosition(this.tipPos);
-        for (let i = 0; i < shoots.length; i++) {
-          if (mask & (1 << i)) continue;
-          const cp = this.cutPoints.get(shoots[i]);
-          if (!cp) continue;
-          cp.getWorldPosition(this.cutPos);
-          if (this.cutPos.distanceTo(this.tipPos) > radius) {
-            this.armed |= 1 << i;
-            continue;
-          }
-          if (!(this.armed & (1 << i))) continue;
-          mask |= 1 << i;
-          p.snip = 0;
-          this.cuts++;
-        }
-      }
+      // Pinch-held and hands-free ("hold to select") shears cut the same way.
+      for (const shears of this.queries.held.entities) mask = this.cutWith(shears, shoots, mask);
+      for (const shears of this.queries.assisted.entities) mask = this.cutWith(shears, shoots, mask);
       bonsai.setValue(Bonsai, 'prunedMask', mask);
     }
+  }
+
+  /** Cuts every armed shoot within reach of these shears' blade tip; returns the new mask. */
+  private cutWith(shears: Entity, shoots: string[], mask: number): number {
+    const p = this.parts.get(shears.index);
+    if (!p) return mask;
+    const radius = shears.getValue(PruningShears, 'cutRadius') ?? 0.07;
+    p.tip.getWorldPosition(this.tipPos);
+    for (let i = 0; i < shoots.length; i++) {
+      if (mask & (1 << i)) continue;
+      const cp = this.cutPoints.get(shoots[i]);
+      if (!cp) continue;
+      cp.getWorldPosition(this.cutPos);
+      if (this.cutPos.distanceTo(this.tipPos) > radius) {
+        this.armed |= 1 << i;
+        continue;
+      }
+      if (!(this.armed & (1 << i))) continue;
+      mask |= 1 << i;
+      p.snip = 0;
+      this.cuts++;
+    }
+    return mask;
   }
 
   private animate(p: ShearsParts, delta: number): void {

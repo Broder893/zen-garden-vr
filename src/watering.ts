@@ -11,7 +11,7 @@ import {
   Vector3,
 } from '@iwsdk/core';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
-import { Bonsai, WateringCan } from './garden-components.js';
+import { AssistHeld, Bonsai, WateringCan } from './garden-components.js';
 
 const MAX_DROPS = 48;
 const EMIT_PER_SEC = 45;
@@ -27,6 +27,7 @@ const GRACE_SECONDS = 1.5;
  */
 export class WateringSystem extends createSystem({
   held: { required: [WateringCan, Grabbed] },
+  assisted: { required: [WateringCan, AssistHeld] },
   cans: { required: [WateringCan] },
   bonsai: { required: [Bonsai] },
 }) {
@@ -92,27 +93,31 @@ export class WateringSystem extends createSystem({
     this.pouring = false;
     this.wateringBonsai = false;
 
-    for (const can of this.queries.held.entities) {
-      const tip = this.tips.get(can.index);
-      const obj = can.object3D;
-      if (!tip || !obj) continue;
-      obj.getWorldQuaternion(this.quat);
-      this.dir.set(1, 0, 0).applyQuaternion(this.quat);
-      const threshold = can.getValue(WateringCan, 'pourThreshold') ?? 0.35;
-      if (-this.dir.y < threshold) continue;
-      this.pouring = true;
-      tip.getWorldPosition(this.tip);
-      this.emit(delta);
-
-      if (!bonsai || !bonsaiObj) continue;
-      const dx = this.tip.x - this.target.x;
-      const dz = this.tip.z - this.target.z;
-      if (dx * dx + dz * dz > REACH * REACH || this.tip.y < this.target.y) continue;
-      this.wateringBonsai = true;
-      const water = bonsai.getValue(Bonsai, 'water') ?? 0;
-      if (water < 1 && this.stageAge >= GRACE_SECONDS) bonsai.setValue(Bonsai, 'water', Math.min(1, water + delta / FILL_SECONDS));
-    }
+    // Pinch-held and hands-free ("hold to select") cans pour the same way.
+    for (const can of this.queries.held.entities) this.pourFrom(can, delta, bonsai);
+    for (const can of this.queries.assisted.entities) this.pourFrom(can, delta, bonsai);
     this.stepDrops(delta);
+  }
+
+  private pourFrom(can: Entity, delta: number, bonsai: Entity | null): void {
+    const tip = this.tips.get(can.index);
+    const obj = can.object3D;
+    if (!tip || !obj) return;
+    obj.getWorldQuaternion(this.quat);
+    this.dir.set(1, 0, 0).applyQuaternion(this.quat);
+    const threshold = can.getValue(WateringCan, 'pourThreshold') ?? 0.35;
+    if (-this.dir.y < threshold) return;
+    this.pouring = true;
+    tip.getWorldPosition(this.tip);
+    this.emit(delta);
+
+    if (!bonsai?.object3D) return;
+    const dx = this.tip.x - this.target.x;
+    const dz = this.tip.z - this.target.z;
+    if (dx * dx + dz * dz > REACH * REACH || this.tip.y < this.target.y) return;
+    this.wateringBonsai = true;
+    const water = bonsai.getValue(Bonsai, 'water') ?? 0;
+    if (water < 1 && this.stageAge >= GRACE_SECONDS) bonsai.setValue(Bonsai, 'water', Math.min(1, water + delta / FILL_SECONDS));
   }
 
   private emit(delta: number): void {

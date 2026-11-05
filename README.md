@@ -21,6 +21,11 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   shows the motion (a pinch, a tilt); a clearer line follows if you seem stuck, and the
   firefly welcomes you back after a pause. It stays within your view and, once the tree
   blooms, follows your hand.
+- **Comfort settings.** A small panel by the front-left corner of the table (poke, point
+  or click "Comfort"): breathing pace (slow, medium, fast), high contrast, large text, one
+  hand (left or right: both tools move to that side) and **hold to select**, which
+  replaces every pinch with a hand held still beside the object (or a steady look at the
+  seed or stone). Settings are saved separately from the garden.
 - **Come back.** The garden is saved on the device. Every return visit (after a few
   hours away) grows a new flower in the sand, up to seven.
 
@@ -33,6 +38,12 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
 | Touch a glowing shoot with the blades | Cuts it (within 7 cm) |
 | Pinch the seed / the stone | Plants the seed / starts, pauses, resumes breathing |
 | Open the hand | Releases a tool; it glides back to its place on the table |
+| Poke a button | Changes a Comfort setting |
+
+With **hold to select** on: keep a hand still by an object for 1.2 s (a ring of light
+fills) to plant, pick up or start breathing; look at the seed or stone for 2 s for the
+same; hold the can over the tree and it pours by itself; lower your hand to the table
+to put a tool down.
 
 Everything sits on a table within about 60 cm of a seated player. Controllers are
 never required.
@@ -41,7 +52,8 @@ never required.
 
 - [IWSDK](https://iwsdk.dev) (Immersive Web SDK) on WebXR and Three.js, TypeScript, Vite.
 - **ECS systems**, one job each: watering, pruning, growth, guide, meditation, audio,
-  saving, entrance, visit flowers (`src/*.ts`, registered in `src/index.ts`).
+  saving, entrance, visit flowers, comfort settings, hold-to-select (`src/*.ts`,
+  registered in `src/index.ts`).
 - **Procedural models** (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. The bonsai merges its parts per material: the
   scene is about 80 draw calls and 14k triangles.

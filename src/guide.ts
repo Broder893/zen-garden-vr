@@ -14,6 +14,7 @@ import {
 } from '@iwsdk/core';
 import { SHOOTS_BY_STAGE } from './bonsai-growth.js';
 import {
+  AssistHeld,
   Bonsai,
   BonsaiStage,
   BreathOrb,
@@ -75,6 +76,15 @@ export const LINES = {
   tiltCanHelp: 'Turn your wrist so the spout points down.',
   pickShearsHelp: 'Move your hand to the shears, then pinch them.',
   touchShootHelp: 'Bring the blade tips right onto the glowing shoot.',
+  // "Hold to select" versions (Comfort panel), for players who do not pinch.
+  plantSeedDwell: 'Welcome. Look at the seed, or hold your hand by it.',
+  pickCanDwell: 'Hold your hand by the can to pick it up.',
+  tiltCanDwell: 'Hold the can over the little tree to pour.',
+  pickShearsDwell: 'Hold your hand by the shears to pick them up.',
+  restDwell: 'Rest here, or look at the stone to breathe.',
+  meditateHintDwell: 'Any time, look at the glowing stone to breathe.',
+  meditatePausedDwell: 'Paused. Look at the stone to continue.',
+  putBack: 'Lower the tool to the table to let it go.',
 } as const;
 export type LineId = keyof typeof LINES;
 
@@ -85,6 +95,21 @@ const HELP: Partial<Record<LineId, LineId>> = {
   tiltCan: 'tiltCanHelp',
   pickShears: 'pickShearsHelp',
   touchShoot: 'touchShootHelp',
+};
+/** Lines that mention pinching, and what to say instead with "hold to select" on. */
+const DWELL: Partial<Record<LineId, LineId>> = {
+  plantSeed: 'plantSeedDwell',
+  plantSeedHelp: 'plantSeedDwell',
+  pickCan: 'pickCanDwell',
+  pickCanHelp: 'pickCanDwell',
+  tiltCan: 'tiltCanDwell',
+  tiltCanHelp: 'tiltCanDwell',
+  moveSpout: 'tiltCanDwell',
+  pickShears: 'pickShearsDwell',
+  pickShearsHelp: 'pickShearsDwell',
+  rest: 'restDwell',
+  meditateHint: 'meditateHintDwell',
+  meditatePaused: 'meditatePausedDwell',
 };
 /** Seconds on the same task before the clearer help line appears. */
 const STUCK_SECONDS = 15;
@@ -126,8 +151,10 @@ export class GuideSystem extends createSystem({
   seedPinched: { required: [Seed, Grabbed] },
   cans: { required: [WateringCan] },
   heldCans: { required: [WateringCan, Grabbed] },
+  assistedCans: { required: [WateringCan, AssistHeld] },
   shears: { required: [PruningShears] },
   heldShears: { required: [PruningShears, Grabbed] },
+  assistedShears: { required: [PruningShears, AssistHeld] },
   orbs: { required: [BreathOrb] },
   stones: { required: [MeditationStone] },
 }) {
@@ -210,12 +237,7 @@ export class GuideSystem extends createSystem({
         this.mats.push(mesh.material);
       });
     };
-    const plant = (seed: Entity) => {
-      for (const b of this.queries.bonsai.entities) b.setValue(Bonsai, 'planted', true);
-      this.grab?.forceRelease(seed);
-      if (seed.object3D) seed.object3D.visible = false;
-      this.showEvent('planted', EVENT_SECONDS);
-    };
+    const plant = (seed: Entity) => this.plantSeed(seed);
     this.hint = new GestureHint();
     this.world.createTransformEntity(this.hint.root);
     this.cleanupFuncs.push(
@@ -283,6 +305,15 @@ export class GuideSystem extends createSystem({
     this.billboardPanel();
   }
 
+  /** Plants the seed: on a pinch, or a hands-free selection. */
+  plantSeed(seed: Entity): void {
+    if (seed.object3D?.visible === false) return;
+    for (const b of this.queries.bonsai.entities) b.setValue(Bonsai, 'planted', true);
+    this.grab?.forceRelease(seed);
+    if (seed.object3D) seed.object3D.visible = false;
+    this.showEvent('planted', EVENT_SECONDS);
+  }
+
   /** Times the current task and swaps in its clearer help line once the player seems stuck. */
   private trackTask(delta: number): void {
     if (this.task !== this.lastTask) {
@@ -328,6 +359,8 @@ export class GuideSystem extends createSystem({
           break;
       }
       if (kind === 'pinch' && this.taskTime < PINCH_HINT_DELAY) kind = null;
+      // Hands-free players neither pinch nor tilt: the dwell ring guides them instead.
+      if (this.comfort?.settings.dwell) kind = null;
     }
     if (kind && obj) {
       obj.getWorldPosition(this.hintAt);
@@ -371,7 +404,14 @@ export class GuideSystem extends createSystem({
       return 'welcome';
     }
     const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
+    const canFree = this.queries.assistedCans.entities.size > 0;
+    const shearsFree = this.queries.assistedShears.entities.size > 0;
     if (stage >= BonsaiStage.Blooming) {
+      if (canFree || shearsFree) {
+        this.task = 'putBack';
+        this.targetOf((canFree ? this.canRef : this.shearsRef).entity?.object3D, 0.12);
+        return 'bloom';
+      }
       this.task = 'rest';
       // Nothing left to do: the firefly keeps the player company at their hand.
       if (!this.targetHand()) this.targetOf(bonsaiObj, 0.3);
@@ -385,7 +425,10 @@ export class GuideSystem extends createSystem({
       if ((mask & (1 << i)) === 0) nextShoot = i;
     }
     if (nextShoot >= 0) {
-      if (this.queries.heldShears.entities.size === 0) {
+      if (canFree) {
+        this.task = 'putBack';
+        this.targetOf(this.canRef.entity?.object3D, 0.12);
+      } else if (this.queries.heldShears.entities.size === 0 && !shearsFree) {
         this.task = 'pickShears';
         this.targetOf(this.shearsRef.entity?.object3D, 0.02);
       } else {
@@ -395,7 +438,10 @@ export class GuideSystem extends createSystem({
       return 'prune';
     }
 
-    if (this.queries.heldCans.entities.size === 0) {
+    if (shearsFree) {
+      this.task = 'putBack';
+      this.targetOf(this.shearsRef.entity?.object3D, 0.05);
+    } else if (this.queries.heldCans.entities.size === 0 && !canFree) {
       this.task = 'pickCan';
       this.targetOf(this.canRef.entity?.object3D, 0.12);
     } else if (this.watering?.wateringBonsai) {
@@ -463,7 +509,8 @@ export class GuideSystem extends createSystem({
     this.target.y += lift;
   }
 
-  private setLine(id: LineId): void {
+  private setLine(lineId: LineId): void {
+    const id = (this.comfort?.settings.dwell && DWELL[lineId]) || lineId;
     const text = LINES[id];
     if (text === this.shownText) return;
     this.shownText = text;

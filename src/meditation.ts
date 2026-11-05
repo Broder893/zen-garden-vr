@@ -124,7 +124,7 @@ export class MeditationSystem extends createSystem({
     this.cleanupFuncs.push(
       this.queries.stones.subscribe('qualify', bindStone),
       this.queries.orbs.subscribe('qualify', bindOrb),
-      this.queries.stonePinched.subscribe('qualify', (e) => this.onPinch(e)),
+      this.queries.stonePinched.subscribe('qualify', (e) => this.pinch(e)),
       this.world.visibilityState.subscribe((state) => {
         const away = state === VisibilityState.Hidden || state === VisibilityState.VisibleBlurred;
         if (away && this.active) this.paused = true;
@@ -134,7 +134,8 @@ export class MeditationSystem extends createSystem({
     for (const e of this.queries.orbs.entities) bindOrb(e);
   }
 
-  private onPinch(stone: Entity): void {
+  /** A pinch on the stone (or its hands-free equivalent): start, pause or resume. */
+  pinch(stone: Entity): void {
     this.grab?.forceRelease(stone);
     if (this.cooldown > 0) return;
     this.cooldown = PINCH_COOLDOWN;

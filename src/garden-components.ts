@@ -52,3 +52,12 @@ export const BreathOrb = createComponent('BreathOrb', {});
 export const VisitFlower = createComponent('VisitFlower', {
   order: { type: Types.Int8, default: 1, min: 1, max: 7, label: 'Appears on return visit #' },
 });
+
+/**
+ * A tool picked up by holding a hand still beside it ("hold to select"),
+ * for players who cannot pinch. It follows that hand until set back down.
+ * Runtime state, set by DwellSystem; `hand` is 0 for left, 1 for right.
+ */
+export const AssistHeld = createComponent('AssistHeld', {
+  hand: { type: Types.Int8, default: 1, min: 0, max: 1 },
+});

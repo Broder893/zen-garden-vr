@@ -1,10 +1,10 @@
 import { createSystem, Entity, Grabbed, Quaternion, Vector3 } from '@iwsdk/core';
-import { ReturnHome } from './garden-components.js';
+import { AssistHeld, ReturnHome } from './garden-components.js';
 
 /** Released tools glide back to their authored spot on the table. */
 export class ReturnHomeSystem extends createSystem({
   homes: { required: [ReturnHome] },
-  resting: { required: [ReturnHome], excluded: [Grabbed] },
+  resting: { required: [ReturnHome], excluded: [Grabbed, AssistHeld] },
 }) {
   private homePos = new Vector3();
   private homeQuat = new Quaternion();
