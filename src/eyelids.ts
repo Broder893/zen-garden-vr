@@ -1,3 +1,4 @@
+import { ChangeKind, ChangeQueue, EyesNow } from './change-queue.js';
 import {
   createSystem,
   Material,
@@ -51,14 +52,7 @@ const RING_CONE_TAN = Math.tan((8 * Math.PI) / 180);
 /** Opening when the player asks for it: quicker. */
 const ESCAPE_SECONDS = 1;
 
-/** Changes that wait for closed eyes (see mayApply). */
-export type ChangeKind = 'stage' | 'season' | 'time' | 'weather' | 'unlock';
-/**
- * How long each change may wait for closed eyes before it applies anyway,
- * gently (seconds). 0: only while a closure is under way (a breathing session,
- * the entrance); otherwise at once, as the tree's soft growth.
- */
-const MAX_WAIT: Record<ChangeKind, number> = { stage: 0, season: 300, time: 300, weather: 120, unlock: 300 };
+export type { ChangeKind } from './change-queue.js';
 
 /** Why the eyes are closed: each owner closes them and lets them open again. */
 export type CloseReason = 'session' | 'entrance' | 'return' | 'test';
@@ -101,8 +95,12 @@ export class EyelidSystem extends createSystem({}) {
   amount = 0;
   /** False with ?lids=off: the eyelids never show. */
   enabled = true;
+  /** Changes waiting for closed eyes (src/change-queue.ts). */
+  private readonly queue = new ChangeQueue();
   /** Changes waiting for closed eyes, with when each was first asked. */
-  readonly pending = new Map<ChangeKind, number>();
+  readonly pending = this.queue.pending;
+  /** Scratch for mayApply (no allocation per call). */
+  private eyesNow: EyesNow = { clock: 0, closedOrOff: false, closing: false };
   /** Why the eyes are meant to be closed now. */
   readonly reasons = new Set<CloseReason>();
   /** True from a session's end (eyes still closed) until they are open: "Open your eyes". */
@@ -195,25 +193,10 @@ export class EyelidSystem extends createSystem({}) {
    * eyelids are off); false keeps it in the queue for the next closed eyes.
    */
   mayApply(kind: ChangeKind): boolean {
-    if (!this.enabled || this.closed) {
-      this.pending.delete(kind);
-      return true;
-    }
-    const closing = this.reasons.size > 0;
-    if (!closing && MAX_WAIT[kind] === 0) {
-      this.pending.delete(kind);
-      return true;
-    }
-    const first = this.pending.get(kind);
-    if (first === undefined) {
-      this.pending.set(kind, this.clock);
-      return false;
-    }
-    if (!closing && this.clock - first >= MAX_WAIT[kind]) {
-      this.pending.delete(kind);
-      return true;
-    }
-    return false;
+    this.eyesNow.clock = this.clock;
+    this.eyesNow.closedOrOff = !this.enabled || this.closed;
+    this.eyesNow.closing = this.reasons.size > 0;
+    return this.queue.mayApply(kind, this.eyesNow);
   }
 
   /** Closes the eyes for `reason` (over `seconds`, or at once with 0). */
