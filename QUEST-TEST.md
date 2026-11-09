@@ -7,6 +7,23 @@ emulator cannot show: real hands, frame rate, voice, comfort.
 Write down what goes wrong next to each item (a few words are enough: "pinch on
 the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 
+## Short test (10 minutes)
+
+If there is little time, do only this; the full list follows. These are the points
+the emulator could not prove (QA-REPORT.md).
+
+- [ ] **Start:** `https://broder893.github.io/zen-garden-vr/?fresh` loads within about 15 s on the headset's Wi-Fi, and **Enter VR** appears.
+- [ ] **Eyes and voice:** the visit opens with closed eyes, then the lids open; a calm recorded voice reads the first line (not the headset's robotic one).
+- [ ] **Hands:** pinch the seed, lift the can and pour, pick up the shears and touch a glowing shoot: each works within two or three tries.
+- [ ] **Frame rate:** smooth all along; no stutter when the tree grows or the rain starts.
+- [ ] **Breathing break:** "Close your eyes…", the lids close; the music softens, the voice stays clear; it ends with "Open your eyes."
+- [ ] **Open hand:** at the next break invitation, show an open hand: "Of course. We will breathe later."
+- [ ] **Pause:** press the Meta button during a meditation: sound stops, the lids open, "Paused". Back in: quiet until you pinch the stone.
+- [ ] **Headset off for a minute, back on:** the garden carries on with no jump or error.
+- [ ] **No hands:** put the controllers in your hands, then down: "I cannot see your hands…", then "There are your hands again."
+- [ ] **Comfort:** poke Comfort, switch High contrast on and off, and Gentle fades on: the next session fades instead of the lids.
+- [ ] **Return:** close the browser, open the link **without** `?fresh` and with `?nextvisit`: a new flower grows, and the tree is as you left it.
+
 ## 0. Before you start
 
 - [ ] Quest updated, **hand tracking on**: Settings → Movement tracking → Hand and body tracking. Put the controllers down, out of reach.
