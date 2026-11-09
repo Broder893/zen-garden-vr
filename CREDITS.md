@@ -23,7 +23,9 @@ without speech voices.
 
 The bonsai (one model per stage: seed pot, sprout, young, mature, in bloom, with
 snow, fallen leaves and a puddle) is original, modelled in Blender for this project
-(`public/models/bonsai_*.glb`, low poly, under 5,000 triangles each). Every other model
+(`public/models/bonsai_*.glb`, low poly, under 5,000 triangles each). So is the forest
+around the garden (`public/models/forest.glb`, about 2,400 triangles, vertex colours,
+no textures). Every other model
 is procedural geometry written for this project (`src/scene-assets/`), as are the
 bonsai's glowing shoots and healthy branches. UI uses the IWSDK UIKitML toolkit. No
 third-party logos or trademarks are used.

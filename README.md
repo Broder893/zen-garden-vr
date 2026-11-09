@@ -104,10 +104,13 @@ never required.
   pot still come from code. The glowing shoots start at each model's `cut_NN` points;
   the healthy branches (a wrong cut leaves their stump) are code-made and set on the
   trunk at least 9 cm from every glowing shoot. `?bonsai=classic` shows the earlier
-  procedural tree. Everything else is procedural (`src/scene-assets/`), composed in
+  procedural tree. The forest around the garden is a Blender model too
+  (`public/models/forest.glb`, two meshes, vertex colours, no textures): its canopy
+  turns blossom pink, green, rust or frosty white with the season (`src/season.ts`).
+  Everything else is procedural (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. Models merge their parts per material and
-  particles are instanced; idle sparkles are not drawn: at most about 75 draw calls and
-  33k triangles per eye, with every unlock, the tree in bloom and the shared tree in
+  particles are instanced; idle sparkles are not drawn: at most about 79 draw calls and
+  36k triangles per eye, with every unlock, the tree in bloom and the shared tree in
   blossom at night in the rain. The garden's own textures take about 15 MB.
 - **Performance and quality** (`src/perf.ts`): the Comfort panel's *Visual quality* is
   Auto, High, Medium or Low (`src/save/quality.ts`). Medium halves fireflies and
@@ -126,7 +129,7 @@ never required.
   device at High and Medium and fails above 80 draw calls or 100k triangles per eye, or
   64 MB of GPU textures (measured at the WebGL uploads; the emulator's controller
   models, about 43 MB, are shown apart: a Quest used with hands never loads them).
-  Last run: 75 calls, 33k triangles, 57 MB (14.5 MB of it the garden's).
+  Last run: 79 calls, 36k triangles, 57 MB (14.5 MB of it the garden's).
 - **Shared tree service** (`server/shared-tree/`): a Cloudflare Worker with a D1
   database, a few dozen lines; anonymous counts, daily caps per garden, a rate limit per
   connection kept only in memory, CORS limited to the app. The app reads its address from

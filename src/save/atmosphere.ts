@@ -24,12 +24,12 @@ export function timeOfDayFor(date: Date): TimeOfDay {
   return 'night';
 }
 
-/** Leaf and blossom colours of the bonsai in each season. */
-export const SEASON_COLORS: Record<Season, { leaf: string; flower: string }> = {
-  spring: { leaf: '#6fae4a', flower: '#f7c1d5' },
-  summer: { leaf: '#3f7f34', flower: '#f6b8cf' },
-  autumn: { leaf: '#b8532c', flower: '#f2c49b' },
-  winter: { leaf: '#47705a', flower: '#e9e6f2' },
+/** Leaf and blossom colours of the bonsai, and the forest's canopy, in each season. */
+export const SEASON_COLORS: Record<Season, { leaf: string; flower: string; forest: string }> = {
+  spring: { leaf: '#6fae4a', flower: '#f7c1d5', forest: '#e9b6cb' },
+  summer: { leaf: '#3f7f34', flower: '#f6b8cf', forest: '#4f8f3d' },
+  autumn: { leaf: '#b8532c', flower: '#f2c49b', forest: '#c8622f' },
+  winter: { leaf: '#47705a', flower: '#e9e6f2', forest: '#dfe9ee' },
 };
 
 /** Reads ?season= and ?time= (anything else falls back to the real date). */

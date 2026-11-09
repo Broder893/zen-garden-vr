@@ -75,6 +75,22 @@
       }
     },
     {
+      "id": "forest",
+      "name": "Forest",
+      "framingRole": "support",
+      "content": {
+        "type": "asset",
+        "asset": "forest"
+      },
+      "transform": {
+        "position": [
+          0,
+          0,
+          -0.5
+        ]
+      }
+    },
+    {
       "id": "garden-lantern",
       "name": "Garden Lantern",
       "framingRole": "support",

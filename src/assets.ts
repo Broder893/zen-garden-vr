@@ -44,6 +44,9 @@ export default defineAssets({
   'bonsai-young-glb': glb('bonsai_2_young', 'Bonsai (Blender, young)'),
   'bonsai-mature-glb': glb('bonsai_3_mature', 'Bonsai (Blender, mature)'),
   'bonsai-blooming-glb': glb('bonsai_4_blooming', 'Bonsai (Blender, blooming)'),
+  // The forest around the garden (Blender): forest_fixed keeps its vertex colours,
+  // forest_leaf's material (foliage_forest) takes the season's colour (src/season.ts).
+  forest: glb('forest', 'Forest'),
   'subtitle-panel': ui('subtitle.uikitml', 'Subtitle Panel'),
   'comfort-panel': ui('comfort.uikitml', 'Comfort Panel'),
   'breath-panel': ui('breath.uikitml', 'Breath Panel'),
