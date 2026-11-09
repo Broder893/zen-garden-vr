@@ -11,6 +11,7 @@ import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { Bonsai, BonsaiStage } from './garden-components.js';
 import type { LineId } from './guide.js';
 import { BreathBreakSystem } from './breath-break.js';
+import { EyelidSystem } from './eyelids.js';
 import { HealthSystem } from './health.js';
 import { MeditationSystem } from './meditation.js';
 import { PerfSystem } from './perf.js';
@@ -64,6 +65,7 @@ export class WeatherSystem extends createSystem({
   private guide?: { showEvent(id: LineId, seconds: number): void; readonly busy: boolean };
   private meditation?: MeditationSystem;
   private breaks?: BreathBreakSystem;
+  private lids?: EyelidSystem;
   private drops!: InstancedMesh;
   private pos = new Float32Array(DROPS * 3);
   private m = new Matrix4();
@@ -111,10 +113,16 @@ export class WeatherSystem extends createSystem({
   }
 
   private advance(delta: number, b: NonNullable<FirstEntity['entity']>): void {
+    this.lids ??= this.world.getSystem(EyelidSystem);
+    const eyesClosed = this.lids?.closed ?? false;
     if (this.weather === 'clear') {
       this.wait -= delta;
-      // Never interrupt: wait until the firefly is free and no breathing is under way.
-      if (this.wait > 0 || this.guide?.busy || this.meditation?.active || this.breaks?.inviteLine) return;
+      if (this.wait > 0) return;
+      // Never interrupt: wait until the firefly is free and no breathing is under way
+      // (unless the eyes are closed: then the weather changes unseen).
+      if (!eyesClosed && (this.guide?.busy || this.meditation?.active || this.breaks?.inviteLine)) return;
+      // A new weather waits for closed eyes (EyelidSystem); ?weather= comes at once (demos, tests).
+      if (!this.forced && !(this.lids?.mayApply('weather') ?? true)) return;
       this.weather = this.forced ?? (Math.random() < 0.5 ? 'rain' : 'breeze');
       this.left = rand(DURATION_MIN, DURATION_MAX);
       this.guide?.showEvent(this.weather === 'rain' ? 'rainStarts' : 'breezeStarts', 4);
@@ -127,7 +135,7 @@ export class WeatherSystem extends createSystem({
       const stage = b.getValue(Bonsai, 'stage') ?? 0;
       if (water < 1 && stage <= BonsaiStage.Blooming) b.setValue(Bonsai, 'water', Math.min(1, water + delta / RAIN_WATER_SECONDS));
     }
-    if (this.left <= 0) {
+    if (this.left <= 0 && (this.forced || (this.lids?.mayApply('weather') ?? true))) {
       this.weather = 'clear';
       this.wait = this.forced ? FORCED_DELAY * 4 : rand(NEXT_MIN, NEXT_MAX);
     }

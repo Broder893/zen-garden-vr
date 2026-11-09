@@ -1,6 +1,7 @@
 import { Color, createSystem, Entity, Material, Mesh, MeshStandardMaterial, Object3D, Vector3 } from '@iwsdk/core';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { Sparkles } from './effects/sparkles.js';
+import { EyelidSystem } from './eyelids.js';
 import { Bonsai, BonsaiStage } from './garden-components.js';
 import { MeditationSystem } from './meditation.js';
 import { stageFor, XP } from './save/growth-levels.js';
@@ -67,6 +68,7 @@ export class BonsaiGrowthSystem extends createSystem({
   private burstAt = new Vector3();
   private bonsaiRef!: FirstEntity;
   private meditation?: MeditationSystem;
+  private lids?: EyelidSystem;
   // Last seen care state, to award XP once per action (null until the first frame).
   private seen = false;
   private lastPlanted = false;
@@ -119,7 +121,9 @@ export class BonsaiGrowthSystem extends createSystem({
     // Enough experience: the tree grows (never shrinks), and the new stage starts dry and untrimmed.
     let stage = entity.getValue(Bonsai, 'stage') ?? 0;
     const earned = stageFor(entity.getValue(Bonsai, 'xp') ?? 0);
-    if (earned > stage) {
+    // During a breathing session the new stage waits for closed eyes (EyelidSystem).
+    this.lids ??= this.world.getSystem(EyelidSystem);
+    if (earned > stage && (this.lids?.mayApply('stage') ?? true)) {
       stage = earned;
       this.wetness = 1; // just watered in full: the soil starts the new stage wet
       entity.setValue(Bonsai, 'stage', stage);

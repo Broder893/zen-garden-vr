@@ -11,6 +11,7 @@ import {
 import { BonsaiGrowthSystem } from './bonsai-growth.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { Sparkles } from './effects/sparkles.js';
+import { EyelidSystem } from './eyelids.js';
 import { Bonsai } from './garden-components.js';
 import { isUnlocked, Unlock } from './save/growth-levels.js';
 import { FLOW_DASHES, streamPoint, streamTangent } from './scene-assets/unlocks.scene-asset.js';
@@ -47,6 +48,7 @@ export class UnlocksSystem extends createSystem({
   private reveals: Reveal[] = [];
   private sparkles!: Sparkles;
   private growth?: BonsaiGrowthSystem;
+  private lids?: EyelidSystem;
   private time = 0;
   private flow = 0;
   private m = new Matrix4();
@@ -101,6 +103,9 @@ export class UnlocksSystem extends createSystem({
     if (was === on) return;
     // The pot is not bound yet: wait, keeping the pending change (and its ceremony).
     if (id === 'glazedPot' && !this.potMat) return;
+    // A new unlock appears while the eyes are closed (EyelidSystem); the restored ones at once.
+    this.lids ??= this.world.getSystem(EyelidSystem);
+    if (was !== null && !(this.lids?.mayApply('unlock') ?? true)) return;
     this.shown[id] = on;
     const first = was === null;
     if (id === 'glazedPot') this.glaze(on, first);

@@ -10,6 +10,7 @@ import {
   SphereGeometry,
   Vector3,
 } from '@iwsdk/core';
+import { EyelidSystem } from './eyelids.js';
 import { PerfSystem } from './perf.js';
 import { overridesFrom, TimeOfDay, timeOfDayFor } from './save/atmosphere.js';
 
@@ -33,13 +34,13 @@ const IBL: Record<TimeOfDay, Palette> = {
 const FIREFLIES: Record<TimeOfDay, number> = { day: 0, sunset: 12, night: 36 };
 const MAX_FIREFLIES = 36;
 const RECHECK_SECONDS = 30;
-/** Hours over which one time of day fades into the next. */
-const FADE_HOURS = 1;
+/** A new time of day that could not wait for closed eyes fades in over this long. */
+const TIME_FADE_SECONDS = 20;
 
 /**
  * The garden's sky follows the real clock: a clear day, a golden sunset, a
  * deep night where the lantern glows. Fireflies gather around the garden in
- * the evening. Colours change gradually around the hour boundaries; ?time=
+ * the evening. A new time of day lands while the eyes are closed; ?time=
  * forces one look (demos). One draw call for all the fireflies.
  */
 export class DayNightSystem extends createSystem({}) {
@@ -52,6 +53,13 @@ export class DayNightSystem extends createSystem({}) {
   private visibleFlies = 0;
   private perf?: PerfSystem;
   private targetFlies = 0;
+  /** The look being left, and how far the fade to `time` has come (1 = done). */
+  private fadeFrom: TimeOfDay = 'sunset';
+  private fade = 1;
+  private painted = false;
+  /** A new time of day waiting for closed eyes. */
+  private waiting: TimeOfDay | null = null;
+  private lids?: EyelidSystem;
   private clock = 0;
   private m = new Matrix4();
   private p = new Vector3();
@@ -81,31 +89,24 @@ export class DayNightSystem extends createSystem({}) {
       this.sinceCheck = 0;
       this.applySky();
     }
+    if (this.waiting) this.switchIfAllowed();
+    if (this.fade < 1 && this.level) {
+      this.fade = Math.min(1, this.fade + delta / TIME_FADE_SECONDS);
+      this.paint(this.level);
+    }
     // Fireflies arrive and leave one by one.
     if (this.visibleFlies < this.targetFlies) this.visibleFlies = Math.min(this.targetFlies, this.visibleFlies + delta * 3);
     else if (this.visibleFlies > this.targetFlies) this.visibleFlies = Math.max(this.targetFlies, this.visibleFlies - delta * 3);
     this.drawFlies();
   }
 
-  /** Sets the sky and ambient colours for now, blending near the hour boundaries. */
+  /**
+   * Follows the clock. A new time of day waits for closed eyes (EyelidSystem)
+   * and then switches unseen; if none come for a while it fades in slowly
+   * (TIME_FADE_SECONDS). ?time= is applied at once and never changes.
+   */
   private applySky(): void {
     this.level ??= this.world.activeLevel.peek() ?? null;
-    const now = new Date();
-    this.time = this.forced ?? timeOfDayFor(now);
-    // Blend toward the neighbouring look within FADE_HOURS of a boundary (real clock only).
-    const h = now.getHours() + now.getMinutes() / 60;
-    let other: TimeOfDay = this.time;
-    let k = 0;
-    if (!this.forced) {
-      for (const [edge, before, after] of BOUNDARIES) {
-        const d = h - edge;
-        if (Math.abs(d) < FADE_HOURS / 2) {
-          other = d < 0 ? after : before;
-          k = 0.5 - Math.abs(d) / FADE_HOURS;
-        }
-      }
-    }
-    this.targetFlies = Math.round(FIREFLIES[this.time] * (1 - k) + FIREFLIES[other] * k);
     const level = this.level;
     if (!level || !level.hasComponent(DomeGradient)) {
       // The level is not ready yet: try again next frame, not in 30 s.
@@ -113,9 +114,41 @@ export class DayNightSystem extends createSystem({}) {
       this.sinceCheck = RECHECK_SECONDS;
       return;
     }
+    const target = this.forced ?? timeOfDayFor(new Date());
+    if (!this.painted) {
+      // First look: whatever the clock says (the eyes are closed on entering).
+      this.painted = true;
+      this.time = this.fadeFrom = target;
+      this.fade = 1;
+    } else if (target !== this.time && this.fade >= 1) {
+      this.waiting = target;
+      this.switchIfAllowed();
+      return;
+    }
+    this.paint(level);
+  }
+
+  /** Lands a waiting time of day if the eyes allow it (every frame until it does). */
+  private switchIfAllowed(): void {
+    const level = this.level;
+    if (!this.waiting || !level) return;
+    this.lids ??= this.world.getSystem(EyelidSystem);
+    if (!(this.lids?.mayApply('time') ?? true)) return;
+    this.fadeFrom = this.time;
+    this.time = this.waiting;
+    this.waiting = null;
+    // Unseen behind closed eyes: at once. Otherwise a slow fade.
+    this.fade = this.lids?.closed || !this.lids?.enabled ? 1 : 0;
+    this.paint(level);
+  }
+
+  /** Writes the sky and ambient colours (and the fireflies wanted) for the current fade. */
+  private paint(level: Entity): void {
+    const k = this.fade * this.fade * (3 - 2 * this.fade);
+    this.targetFlies = Math.round(FIREFLIES[this.fadeFrom] * (1 - k) + FIREFLIES[this.time] * k);
     for (const field of ['sky', 'equator', 'ground'] as const) {
-      if (level.hasComponent(DomeGradient)) this.blendInto(level.getVectorView(DomeGradient, field), DOME[this.time][field], DOME[other][field], k);
-      if (level.hasComponent(IBLGradient)) this.blendInto(level.getVectorView(IBLGradient, field), IBL[this.time][field], IBL[other][field], k);
+      this.blendInto(level.getVectorView(DomeGradient, field), DOME[this.fadeFrom][field], DOME[this.time][field], k);
+      if (level.hasComponent(IBLGradient)) this.blendInto(level.getVectorView(IBLGradient, field), IBL[this.fadeFrom][field], IBL[this.time][field], k);
     }
   }
 
@@ -146,11 +179,3 @@ export class DayNightSystem extends createSystem({}) {
     this.flies.instanceMatrix.needsUpdate = true;
   }
 }
-
-/** Clock boundaries: [hour, look before, look after]. */
-const BOUNDARIES: [number, TimeOfDay, TimeOfDay][] = [
-  [6, 'night', 'sunset'],
-  [8, 'sunset', 'day'],
-  [17, 'day', 'sunset'],
-  [20, 'sunset', 'night'],
-];
