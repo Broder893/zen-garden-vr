@@ -30,6 +30,11 @@ function bits(mask: number): number {
   return n;
 }
 
+/** Growing in view: from this size to full over GROW_SECONDS, with a warm glow. */
+const GROW_FROM = 0.92;
+const GROW_SECONDS = 1.2;
+const GLOW = new Color('#fff0c2');
+const GLOW_PEAK = 0.45;
 const DRY = new Color('#8a6a4c');
 /** Soil under too much water: very dark brown and a little glossy (not black, not a plate). */
 const PUDDLE = new Color('#2b1b10');
@@ -63,6 +68,8 @@ export class BonsaiGrowthSystem extends createSystem({
   /** Shown puddle, 0..1 (follows overwater). */
   private puddle = 0;
   private sparkles!: Sparkles;
+  /** Materials warmed by the growth glow, with their own emissive to return to. */
+  private glowing: { mat: MeshStandardMaterial; color: Color; intensity: number }[] = [];
   /** The light wood of a fresh cut (a wrong cut's stump). */
   private freshWood = new MeshStandardMaterial({ color: FRESH_WOOD, roughness: 0.85 });
   private burstAt = new Vector3();
@@ -149,8 +156,14 @@ export class BonsaiGrowthSystem extends createSystem({
     if (stage !== this.shownStage || mask !== this.shownMask) {
       // -1 means first frame (restored save): show it without ceremony.
       if (stage !== this.shownStage && this.shownStage !== -1) {
-        this.pop = 0;
         this.celebrate(entity, stage);
+        // Seen growing: a soft growth with a glow. Behind closed eyes: simply there.
+        this.lids ??= this.world.getSystem(EyelidSystem);
+        if (this.lids?.closed) this.pop = 1;
+        else {
+          this.pop = 0;
+          this.glowFrom(this.stageGroup(stage));
+        }
       }
       this.applyVisibility(stage, mask);
       this.applyStumps(stage, stumps);
@@ -160,9 +173,10 @@ export class BonsaiGrowthSystem extends createSystem({
     this.updateSoil(delta, stage, water, entity.getValue(Bonsai, 'overwater') ?? 0);
 
     if (this.pop < 1) {
-      this.pop = Math.min(1, this.pop + delta / 1.2);
-      const s = 0.7 + 0.3 * (1 - (1 - this.pop) ** 3);
+      this.pop = Math.min(1, this.pop + delta / GROW_SECONDS);
+      const s = GROW_FROM + (1 - GROW_FROM) * (1 - (1 - this.pop) ** 3);
       this.scaleStage(stage, s);
+      this.glow(this.pop);
     }
   }
 
@@ -301,7 +315,8 @@ export class BonsaiGrowthSystem extends createSystem({
     });
   }
 
-  private scaleStage(stage: number, s: number): void {
+  /** The group that shows this stage. */
+  private stageGroup(stage: number): Object3D | undefined {
     const bloomModel = this.parts.has('Blooming');
     const name =
       stage === BonsaiStage.Sprout
@@ -311,7 +326,32 @@ export class BonsaiGrowthSystem extends createSystem({
           : stage === BonsaiStage.Blooming && bloomModel
             ? 'Blooming'
             : 'Mature';
-    this.parts.get(name)?.scale.setScalar(s);
-    if (stage === BonsaiStage.Blooming && !bloomModel) this.parts.get('Flowers')?.scale.setScalar(s);
+    return this.parts.get(name);
+  }
+
+  private scaleStage(stage: number, s: number): void {
+    this.stageGroup(stage)?.scale.setScalar(s);
+    if (stage === BonsaiStage.Blooming && !this.parts.has('Blooming')) this.parts.get('Flowers')?.scale.setScalar(s);
+  }
+
+  /** Remembers the new stage's materials as they are, to warm them for a moment (no transparency). */
+  private glowFrom(group: Object3D | undefined): void {
+    this.glow(1); // a previous glow ends cleanly first
+    this.glowing.length = 0;
+    group?.traverse((o) => {
+      const mat = (o as Mesh).material as MeshStandardMaterial | undefined;
+      if (!(o as Mesh).isMesh || !mat?.emissive || this.glowing.some((g) => g.mat === mat)) return;
+      this.glowing.push({ mat, color: mat.emissive.clone(), intensity: mat.emissiveIntensity });
+    });
+  }
+
+  /** A warm glow that rises and falls over the growth (k 0..1), then the materials as they were. */
+  private glow(k: number): void {
+    const g = k >= 1 ? 0 : GLOW_PEAK * Math.sin(Math.PI * k);
+    for (const e of this.glowing) {
+      e.mat.emissive.copy(e.color).lerp(GLOW, g);
+      e.mat.emissiveIntensity = e.intensity + (1 - e.intensity) * g;
+    }
+    if (k >= 1) this.glowing.length = 0;
   }
 }
