@@ -68,6 +68,20 @@ const PLACES: Record<number, { shoots: [string, string][]; healthy: [string, V3,
 /** Parts every stage model repeats; only the pot model's copy is used. */
 const SHARED_POT_PARTS = new Set(['pot', 'soil', 'moss', 'glow', 'seed']);
 
+/** Fallen leaves: raised clear of the soil and moss, and spread a little wider over the soil. */
+const FALLEN_LIFT = 0.005;
+const FALLEN_SPREAD = 1.35;
+/** ...but never past the soil (radius 8 cm) onto the pot's rim. */
+const FALLEN_MAX_RADIUS = 0.074;
+
+/** Farthest a mesh's vertices reach from its vertical axis (local). */
+function horizontalRadius(mesh: Mesh): number {
+  const pos = mesh.geometry.attributes.position;
+  let r = 0;
+  for (let i = 0; i < pos.count; i++) r = Math.max(r, Math.hypot(pos.getX(i), pos.getZ(i)));
+  return r || 1;
+}
+
 /** Excess water at which the model's puddle starts to show, and where it is full size. */
 const PUDDLE_FROM = 0.1;
 const PUDDLE_FULL = 0.5;
@@ -179,6 +193,7 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
     this.glow = take(potModel, 'glow', 'PlantGlow', pot);
 
     let bark: Material | null = null;
+    let leaf: Material | null = null;
     for (const [stage, scene] of models) {
       const name = STAGE_MODELS[stage].group;
       let group = root.getObjectByName(name);
@@ -206,11 +221,18 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
         // Health and season tint materials by these names (a copy: the cached model stays as loaded).
         if (/^foliage/.test(mat.name)) mesh.material = Object.assign(mat.clone(), { name: 'Leaf' });
         else if (/^flower/.test(mat.name)) mesh.material = Object.assign(mat.clone(), { name: 'Flower' });
-        if (child.name === 'trunk' && stage === BonsaiStage.Mature) bark = mat;
+        if (stage === BonsaiStage.Mature && child.name === 'trunk') bark = mat;
+        if (stage === BonsaiStage.Mature && child.name === 'foliage') leaf = mesh.material as Material;
         const kind = child.name;
         mesh.name = `${name}_${kind}`;
         if (kind === 'fallen' || kind === 'puddle') {
           mesh.visible = false;
+          if (kind === 'fallen') {
+            // Modelled 1-2 mm above the soil, they hid under it and the moss: lift and spread them.
+            mesh.position.y += FALLEN_LIFT;
+            const spread = Math.min(FALLEN_SPREAD, FALLEN_MAX_RADIUS / horizontalRadius(mesh));
+            mesh.scale.set(spread, 1, spread);
+          }
           ground.add(mesh);
           parts[kind] = mesh;
         } else {
@@ -226,14 +248,15 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
     }
     // The procedural blossoms belong to the procedural tree; the blooming model has its own.
     root.getObjectByName('Flowers')?.removeFromParent();
-    // Healthy branches take the model's bark, so they read as part of the same tree.
-    if (bark) {
-      for (const name of ['Healthy_Young_0', 'Healthy_Young_1', 'Healthy_Mature_0', 'Healthy_Mature_1']) {
-        root.getObjectByName(name)?.traverse((o) => {
-          const m = o as Mesh;
-          if (m.isMesh && (m.material as Material).name !== 'Leaf') m.material = bark as Material;
-        });
-      }
+    // Healthy branches take the model's bark and foliage, so they read as part of the same tree.
+    for (const name of ['Healthy_Young_0', 'Healthy_Young_1', 'Healthy_Mature_0', 'Healthy_Mature_1']) {
+      root.getObjectByName(name)?.traverse((o) => {
+        const m = o as Mesh;
+        if (!m.isMesh) return;
+        const isLeaf = (m.material as Material).name === 'Leaf';
+        if (isLeaf && leaf) m.material = leaf;
+        else if (!isLeaf && bark) m.material = bark;
+      });
     }
     this.root = root;
     this.entity = e;
