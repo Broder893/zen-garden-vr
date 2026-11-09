@@ -17,7 +17,7 @@ import { EntranceSystem } from './entrance.js';
 import { AssistHeld, Bonsai, BreathOrb, PruningShears, WateringCan } from './garden-components.js';
 import type { LineId } from './guide.js';
 import { MeditationSystem } from './meditation.js';
-import { HandReader } from './hand-joints.js';
+import { OpenHandDetector } from './open-hand.js';
 import { HealthSystem } from './health.js';
 import { Health } from './save/plant-health.js';
 import { isUnlocked } from './save/growth-levels.js';
@@ -51,25 +51,8 @@ const WATER_BONUS = 0.5;
 const FRONT_DISTANCE = 0.5;
 const FRONT_DROP = 0;
 const PANEL_DROP = 0.19;
-/**
- * Open-hand ("not now") test: the hand pushed forward and raised, palm facing
- * away, and the index, middle and ring fingers straight (tip-to-knuckle
- * distance close to the finger's length, which a relaxed or curled hand fails).
- */
-const HAND_RAISED = 0.45;
-const HAND_FORWARD = 0.28;
-const PALM_FORWARD = 0.4;
-const STRAIGHT = 0.9;
 
 type State = 'waiting' | 'inviting' | 'session';
-const FINGERS = ['index', 'middle', 'ring'] as const;
-type Finger = (typeof FINGERS)[number];
-/** Joint names of each finger, knuckle to tip (WebXR Hand Input names). */
-const BONES: Record<Finger, readonly XRHandJoint[]> = {
-  index: ['index-finger-phalanx-proximal', 'index-finger-phalanx-intermediate', 'index-finger-phalanx-distal', 'index-finger-tip'],
-  middle: ['middle-finger-phalanx-proximal', 'middle-finger-phalanx-intermediate', 'middle-finger-phalanx-distal', 'middle-finger-tip'],
-  ring: ['ring-finger-phalanx-proximal', 'ring-finger-phalanx-intermediate', 'ring-finger-phalanx-distal', 'ring-finger-tip'],
-};
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
@@ -132,13 +115,7 @@ export class BreathBreakSystem extends createSystem({
   private headQuat = new Quaternion();
   private forward = new Vector3();
   private v = new Vector3();
-  private wrist = new Vector3();
-  private tip = new Vector3();
-  private hands!: HandReader;
-  private j0 = new Vector3();
-  private j1 = new Vector3();
-  private a = new Vector3();
-  private b = new Vector3();
+  private openHand!: OpenHandDetector;
 
   init(): void {
     this.bonsaiRef = trackFirst(this.queries.bonsai, this.cleanupFuncs);
@@ -154,7 +131,7 @@ export class BreathBreakSystem extends createSystem({
     this.count = panel?.getElementById<UIKit.Text>('breath-count') ?? null;
     if (this.panel) this.panel.visible = false;
     this.subtitles = this.world.getSceneObject('subtitle-panel') ?? null;
-    this.hands = new HandReader(this.renderer.xr, this.player);
+    this.openHand = new OpenHandDetector(this.renderer.xr, this.player, this.player.head, (side) => this.comfort?.usesHand(side) ?? true);
   }
 
   /** The guide registers itself here (it is created after this system). */
@@ -256,7 +233,7 @@ export class BreathBreakSystem extends createSystem({
       this.endInvite(RETRY_SECONDS);
       return;
     }
-    this.openHandTime = this.openHand() ? this.openHandTime + delta : 0;
+    this.openHandTime = this.openHand.shown() ? this.openHandTime + delta : 0;
     if (this.openHandTime >= OPEN_HAND_SECONDS) {
       this.postponed++;
       this.endInvite(rand(LATER_MIN, LATER_MAX));
@@ -392,56 +369,5 @@ export class BreathBreakSystem extends createSystem({
   private setWorldPosition(obj: Object3D, world: Vector3): void {
     obj.position.copy(world);
     obj.parent?.worldToLocal(obj.position);
-  }
-
-  /**
-   * True when a tracked hand the player uses is pushed forward, open, palm
-   * facing away: the universal "not now". Read from the WebXR hand joints.
-   */
-  private openHand(): boolean {
-    const hands = this.hands;
-    if (!hands.begin() || !hands.sources) return false;
-    this.player.head.getWorldQuaternion(this.headQuat);
-    this.horizontalForward();
-    const sources = hands.sources;
-    for (let i = 0; i < sources.length; i++) {
-      const source = sources[i];
-      const hand = source.hand;
-      if (!hand || source.handedness === 'none') continue;
-      if (!(this.comfort?.usesHand(source.handedness) ?? true)) continue;
-      if (!hands.joint(hand, 'wrist', this.wrist)) continue;
-      // Raised, and pushed out in front of the body.
-      if (this.wrist.y < this.head.y - HAND_RAISED) continue;
-      this.v.subVectors(this.wrist, this.head);
-      this.v.y = 0;
-      if (this.v.dot(this.forward) < HAND_FORWARD) continue;
-      // Palm facing away: the normal of the knuckle triangle points forward.
-      if (!hands.joint(hand, 'index-finger-metacarpal', this.a)) continue;
-      if (!hands.joint(hand, 'pinky-finger-metacarpal', this.b)) continue;
-      this.a.sub(this.wrist);
-      this.b.sub(this.wrist);
-      if (source.handedness === 'right') this.tip.crossVectors(this.a, this.b);
-      else this.tip.crossVectors(this.b, this.a);
-      if (this.tip.normalize().dot(this.forward) < PALM_FORWARD) continue;
-      if (this.fingersStraight(hand)) return true;
-    }
-    return false;
-  }
-
-  /** Index, middle and ring each nearly straight from knuckle to tip. */
-  private fingersStraight(hand: XRHand): boolean {
-    for (const finger of FINGERS) {
-      const bones = BONES[finger];
-      let length = 0;
-      if (!this.hands.joint(hand, bones[0], this.j0)) return false;
-      this.a.copy(this.j0);
-      for (let i = 1; i < bones.length; i++) {
-        if (!this.hands.joint(hand, bones[i], this.j1)) return false;
-        length += this.j1.distanceTo(this.j0);
-        this.j0.copy(this.j1);
-      }
-      if (length <= 0 || this.j1.distanceTo(this.a) / length < STRAIGHT) return false;
-    }
-    return true;
   }
 }
