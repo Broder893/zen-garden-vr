@@ -9,7 +9,7 @@ noticeable, **P2** is minor (listed, not fixed).
 | | P0 | P1 | P2 |
 |---|---|---|---|
 | Found | 0 | 1 | 15 |
-| Fixed | 0 | 1 (`d2a44a0`, `7df2a09`) | listed only |
+| Fixed | 0 | 1 (`d2a44a0`, `7df2a09`) | 5 on request (4, 7, 8, 9, 10); the rest listed |
 
 P1-1 is fixed in two parts: the failed start is retried once, and if it fails again
 the card says so (decided on 9 November).
@@ -163,23 +163,23 @@ computer (their names do not resolve here), so nothing was sent to them.
    connections to `localhost:8787` (`.env.development.local`). Not in the published app.
 4. A meditation can start while a tool is held; the eyes close with it in hand.
    Breathing breaks already wait for empty hands; the stone is the player's own pinch.
-    **Fixed:** a session that starts lets go of any tool in a hand; it glides back to its place on the table (`ReturnHomeSystem`) before the eyes start to close (`src/meditation.ts`). Emulator, can held 31 cm from its place: session at 2.4 s, can 2 mm from its place at 3.2 s, in place at 3.8 s, lids start closing at 4.0 s. Budget 78-79.
+    **Fixed:** (commit `3bb1b42`) a session that starts lets go of any tool in a hand; it glides back to its place on the table (`ReturnHomeSystem`) before the eyes start to close (`src/meditation.ts`). Emulator, can held 31 cm from its place: session at 2.4 s, can 2 mm from its place at 3.2 s, in place at 3.8 s, lids start closing at 4.0 s. Budget 78-79.
 5. A one-off line can be cut short by a more important one ("A gentle rain…" by the
    break invitation after about 3 s).
 6. On a return that levels up, the level line comes before "A daily gift…", which
    is what caused it.
 7. With gaze care or hold to select, the can stops by itself when the tree is full,
    yet "That is plenty of water. Let it rest a moment." appears.
-    **Fixed:** a hands-free can (gaze care, hold to select) stops filling at full and never counts as too much water (`src/watering.ts`); pouring by hand past full still warns. Emulator: gaze and hold to select, no line and overwater 0; by hand, the line and overwater 0.55. Budget 78-79.
+    **Fixed:** (commit `b8467ce`) a hands-free can (gaze care, hold to select) stops filling at full and never counts as too much water (`src/watering.ts`); pouring by hand past full still warns. Emulator: gaze and hold to select, no line and overwater 0; by hand, the line and overwater 0.55. Budget 78-79.
 8. A slow voice file: its line is read by the device voice, the next ones by the
    recording, so one line can come in a different voice.
-    **Fixed:** a line waits up to 8 s (was 2.5) for its own recording, which is fetched at once instead of queuing behind the others (`src/audio/voice.ts`, `src/audio/voice-clips.ts`); the device voice is left for a missing file or one still not there after 8 s. Emulator, every voice request 2.5 s slow: the first line is the recording, after 5 s (before: the device voice). Only past about 4 s per request (8 s in all) does the device voice step in. Budget 77-79.
+    **Fixed:** (commit `0fd5538`) a line waits up to 8 s (was 2.5) for its own recording, which is fetched at once instead of queuing behind the others (`src/audio/voice.ts`, `src/audio/voice-clips.ts`); the device voice is left for a missing file or one still not there after 8 s. Emulator, every voice request 2.5 s slow: the first line is the recording, after 5 s (before: the device voice). Only past about 4 s per request (8 s in all) does the device voice step in. Budget 77-79.
 9. First load about 2.2 MB compressed: about 14 s on slow 4G, with the card shown and
    no progress indicator.
     **Fixed:** the card shows "Loading your garden…" from the first moment, then the share of the garden's files loaded (models, sounds: the engine's LoadingManager), and hides it when the garden runs, or for the error line (`index.html`, `src/loading-line.ts`; commit 241a251). Emulator, files slowed: 0% → 8% … 99% over 2 s, then hidden; a failed start, hidden with the error line shown. The code download comes before the percentage can show: the line stays without a number until then. Budget 78-79.
 10. The frame time is not capped: after a long pause the first frame can be minutes
     long. Nothing broke when tested; capping it (about 0.1 s) would be safer.
-    **Fixed:** the step the engine's loop passes to `world.update` is capped at 0.1 s (`src/index.ts`). Emulator: a 60-second frame mid-meditation now moves it on by 0.1 s (before: a whole breathing phase); frame rate unchanged. Budget 77-78.
+    **Fixed:** (commit `c09dfd8`) the step the engine's loop passes to `world.update` is capped at 0.1 s (`src/index.ts`). Emulator: a 60-second frame mid-meditation now moves it on by 0.1 s (before: a whole breathing phase); frame rate unchanged. Budget 77-78.
 11. The service's GET is not rate-limited (cost only; the data is public counts).
 12. The service allows 192.168.x.x origins in production (for testing on a headset).
 13. The service reads the whole body before checking its size (Workers cap bodies anyway).
