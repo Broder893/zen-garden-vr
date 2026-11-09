@@ -1,8 +1,12 @@
 import { SoundEngine } from './sound-engine.js';
 import { VoiceClips } from './voice-clips.js';
 
-/** How long a line may wait for its recording (still loading) before the device voice reads it. */
-const WAIT_FOR_CLIP_MS = 2500;
+/**
+ * How long a line may wait for its recording (still loading, fetched next) before
+ * the device voice reads it. Long enough for a slow connection, so the first lines
+ * keep the same voice as the rest; a line replaced meanwhile is never spoken late.
+ */
+const WAIT_FOR_CLIP_MS = 8000;
 /** The manifest's narrator: the music dips while she speaks. */
 const NARRATOR = 'narrator';
 

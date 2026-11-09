@@ -73,18 +73,15 @@ export class VoiceClips {
     return !!clip && clip.state !== 'missing';
   }
 
-  /** Resolves when `id` is ready or known missing; a queued file is fetched next. */
+  /** Resolves when `id` is ready or known missing; a queued file is fetched at once (a line is waiting for it). */
   async settle(id: string): Promise<void> {
     if (this.manifest) await this.manifest;
     const clip = this.clips.get(id);
     if (!clip) return;
     if (clip.state === 'queued') {
       const i = this.queue.indexOf(id);
-      if (i > 0) {
-        this.queue.splice(i, 1);
-        this.queue.unshift(id);
-      }
-      this.pump();
+      if (i >= 0) this.queue.splice(i, 1);
+      this.start(clip);
     }
     await clip.settled;
   }
@@ -124,12 +121,17 @@ export class VoiceClips {
     while (this.active < PARALLEL && this.queue.length > 0) {
       const clip = this.clips.get(this.queue.shift()!);
       if (!clip || clip.state !== 'queued') continue;
-      this.active++;
-      void this.fetchClip(clip).finally(() => {
-        this.active--;
-        this.pump();
-      });
+      this.start(clip);
     }
+  }
+
+  /** Fetches one clip now (counted among the files in flight). */
+  private start(clip: Clip): void {
+    this.active++;
+    void this.fetchClip(clip).finally(() => {
+      this.active--;
+      this.pump();
+    });
   }
 
   private async fetchClip(clip: Clip): Promise<void> {
