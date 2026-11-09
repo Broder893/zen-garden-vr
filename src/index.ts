@@ -29,6 +29,12 @@ import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
 
+/**
+ * The longest step one frame may take (seconds). After a pause (headset off, a tab in
+ * the background) the first frame back can be minutes long; every system would jump
+ * that far at once. A normal frame is about 0.014 s, so this changes nothing else.
+ */
+const MAX_FRAME_SECONDS = 0.1;
 /** When this tab last retried a start that failed (sessionStorage: this tab only). */
 const RETRY_KEY = 'zen-garden-vr/start-retry';
 /** A failed start is retried once, unless one was retried this recently (no reload loop). */
@@ -41,6 +47,9 @@ World.create(
   projectOptions,
 ).then((world) => {
   loading.stop();
+  // The engine's loop calls world.update every frame: cap the step it passes on.
+  const update = world.update.bind(world);
+  world.update = (delta: number, time: number) => update(Math.min(delta, MAX_FRAME_SECONDS), time);
   try {
     sessionStorage.removeItem(RETRY_KEY);
   } catch {

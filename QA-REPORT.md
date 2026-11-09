@@ -178,6 +178,7 @@ computer (their names do not resolve here), so nothing was sent to them.
     **Fixed:** the card shows "Loading your garden…" from the first moment, then the share of the garden's files loaded (models, sounds: the engine's LoadingManager), and hides it when the garden runs, or for the error line (`index.html`, `src/loading-line.ts`; commit 241a251). Emulator, files slowed: 0% → 8% … 99% over 2 s, then hidden; a failed start, hidden with the error line shown. The code download comes before the percentage can show: the line stays without a number until then. Budget 78-79.
 10. The frame time is not capped: after a long pause the first frame can be minutes
     long. Nothing broke when tested; capping it (about 0.1 s) would be safer.
+    **Fixed:** the step the engine's loop passes to `world.update` is capped at 0.1 s (`src/index.ts`). Emulator: a 60-second frame mid-meditation now moves it on by 0.1 s (before: a whole breathing phase); frame rate unchanged. Budget 77-78.
 11. The service's GET is not rate-limited (cost only; the data is public counts).
 12. The service allows 192.168.x.x origins in production (for testing on a headset).
 13. The service reads the whole body before checking its size (Workers cap bodies anyway).
