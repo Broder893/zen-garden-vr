@@ -100,6 +100,7 @@
     <div class="row">
       <div id="quality-auto" class="btn"><span id="quality-auto-t" class="btn-text">Auto</span></div>
       <div id="quality-high" class="btn"><span id="quality-high-t" class="btn-text">High</span></div>
+      <div id="quality-medium" class="btn"><span id="quality-medium-t" class="btn-text">Med</span></div>
       <div id="quality-low" class="btn"><span id="quality-low-t" class="btn-text">Low</span></div>
     </div>
   </div>

@@ -108,7 +108,7 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
   - [ ] Lower your hand to the table: the can is let go and glides back.
   - [ ] Same with the shears, and cut a glowing shoot.
   - [ ] Note how easy it is to trigger by accident (is 1.2 s right?).
-- [ ] **Visual quality Low**: fewer fireflies at night, fewer raindrops, the rocks and the far lantern disappear. **High** brings them back; **Auto** is the default.
+- [ ] **Visual quality Low**: fewer fireflies at night, fewer raindrops, the rocks and the far lantern disappear. **Med** is in between; **High** brings everything back; **Auto** is the default and steps down by itself if the frame rate drops (with `?debug` the readout shows e.g. `medium (auto)`).
 - [ ] Reload the page: the settings are kept.
 
 ## 6. Comfort and fluidity

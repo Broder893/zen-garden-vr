@@ -10,40 +10,47 @@ import {
 } from '@iwsdk/core';
 import { ComfortSystem } from './comfort.js';
 import type { Quality } from './save/comfort-settings.js';
+import { lighter, loadAutoLevel, QUALITY, QualityLevel, storeAutoLevel } from './save/quality.js';
 
 /** Measured over windows this long. */
 const WINDOW_SECONDS = 4;
 /** No judgement in the first seconds of a session (loading and shader warm-up hitches). */
 const SETTLE_SECONDS = 10;
-/** Auto lowers the quality after two windows in a row below this share of the headset's rate. */
-const SLOW_SHARE = 0.85;
-/** Low quality: share of fireflies and raindrops kept, and the XR resolution for the next session. */
-const LOW_EFFECTS = 0.5;
-const LOW_FRAMEBUFFER = 0.8;
+/**
+ * The threshold: Auto steps one level lighter after two windows in a row (8 s)
+ * below this share of the headset's rate (61 fps at 72 Hz, 76 at 90 Hz).
+ */
+export const SLOW_SHARE = 0.85;
+/** Where Auto starts on a device it has not measured yet. */
+const AUTO_START: QualityLevel = 'high';
 /** Scenery hidden in low quality (background only, never something to care for). */
 const LOW_HIDDEN = ['Garden Lantern', 'Rocks'];
 /** The debug readout redraws this often (seconds). */
 const HUD_EVERY = 0.5;
 
 /**
- * Performance and quality. Measures frames per second, applies the visual
- * quality chosen in the Comfort panel (auto, high, low) and, in auto, lowers
- * it once for the rest of the session when the headset cannot keep its frame
- * rate. Low quality halves fireflies and raindrops, hides two background
- * pieces and lowers the XR resolution from the next session. With ?debug a
- * small readout behind the table shows fps, frame time, draw calls and
- * triangles; ?quality=high|low forces a level for tests.
+ * Performance and quality. Measures frames per second (the same counter the
+ * ?debug readout shows) and applies the visual quality chosen in the Comfort
+ * panel: Auto, High, Medium or Low (src/save/quality.ts). In Auto, whenever
+ * the headset stays under the threshold (SLOW_SHARE of its frame rate) the
+ * quality steps one level lighter, as many times as needed; the level reached
+ * is remembered, so the next visit starts there and its lower XR resolution
+ * (which can only change between sessions) applies from the start. With
+ * ?debug a small readout behind the table shows fps, the worst frame, draw
+ * calls, triangles and the level; ?quality=high|medium|low forces one.
  */
 export class PerfSystem extends createSystem({}) {
   /** Average frames per second of the last window (0 until measured). */
   fps = 0;
   /** Worst frame of the last window, in ms. */
   worstMs = 0;
-  /** The quality in effect: 'high' or 'low'. */
-  level: Exclude<Quality, 'auto'> = 'high';
-  /** True once auto lowered the quality: kept for the visit (the device stays as slow). */
-  autoLowered = false;
-  /** Share of effect particles to draw (1 high, 0.5 low): read by DayNight and Weather. */
+  /** The quality in effect. */
+  level: QualityLevel = AUTO_START;
+  /** Where Auto stands: its start, or lighter after slow windows (remembered between visits). */
+  autoLevel: QualityLevel = loadAutoLevel() ?? AUTO_START;
+  /** Steps Auto took down during this visit. */
+  autoSteps = 0;
+  /** Share of effect particles to draw: read by DayNight and Weather. */
   effects = 1;
   private comfort?: ComfortSystem;
   private forced?: Quality;
@@ -62,7 +69,7 @@ export class PerfSystem extends createSystem({}) {
   init(): void {
     const q = new URLSearchParams(window.location.search);
     const forced = q.get('quality');
-    if (forced === 'high' || forced === 'low') this.forced = forced;
+    if (forced === 'high' || forced === 'medium' || forced === 'low') this.forced = forced;
     if (q.has('debug')) this.createHud();
     this.cleanupFuncs.push(
       this.world.visibilityState.subscribe((state) => {
@@ -85,8 +92,11 @@ export class PerfSystem extends createSystem({}) {
     this.comfort ??= this.world.getSystem(ComfortSystem);
     const chosen = this.chosen;
     if (chosen !== this.applied) {
-      // Only a change of the quality choice itself (not other comfort settings) judges afresh.
-      if (this.applied !== null) this.autoLowered = false;
+      // Choosing Auto again (not other comfort settings) judges the device afresh.
+      if (this.applied !== null && chosen === 'auto') {
+        this.autoLevel = AUTO_START;
+        storeAutoLevel(null);
+      }
       this.applied = chosen;
       this.slowWindows = 0;
       this.apply();
@@ -120,25 +130,28 @@ export class PerfSystem extends createSystem({}) {
     this.frames = 0;
     this.elapsed = 0;
     this.worst = 0;
-    if (!inVR || this.chosen !== 'auto' || this.autoLowered || this.sessionTime < SETTLE_SECONDS) return;
+    if (!inVR || this.chosen !== 'auto' || this.sessionTime < SETTLE_SECONDS) return;
     const target = this.world.session?.frameRate ?? 72;
     this.slowWindows = this.fps < target * SLOW_SHARE ? this.slowWindows + 1 : 0;
-    if (this.slowWindows >= 2) {
-      this.autoLowered = true;
-      this.apply();
-      console.info(`[zen] ${this.fps.toFixed(0)} fps (target ${target}): lowering visual quality`);
-    }
+    if (this.slowWindows < 2 || this.autoLevel === 'low') return;
+    this.slowWindows = 0;
+    const from = this.autoLevel;
+    this.autoLevel = lighter(from);
+    this.autoSteps++;
+    storeAutoLevel(this.autoLevel);
+    this.apply();
+    console.info(`[zen] ${this.fps.toFixed(0)} fps (target ${target}): visual quality ${from} -> ${this.autoLevel}`);
   }
 
   private apply(): void {
     const chosen = this.chosen;
-    this.level = chosen === 'low' || (chosen === 'auto' && this.autoLowered) ? 'low' : 'high';
-    const low = this.level === 'low';
-    this.effects = low ? LOW_EFFECTS : 1;
-    for (const o of this.scenery) o.visible = !low;
+    this.level = chosen === 'auto' ? this.autoLevel : chosen;
+    const spec = QUALITY[this.level];
+    this.effects = spec.effects;
+    for (const o of this.scenery) o.visible = !spec.hideScenery;
     const xr = this.world.renderer.xr;
     // Resolution can only change between sessions; it applies on the next entry.
-    if (!xr.isPresenting) xr.setFramebufferScaleFactor(low ? LOW_FRAMEBUFFER : 1);
+    if (!xr.isPresenting) xr.setFramebufferScaleFactor(spec.framebuffer);
   }
 
   /** Looks the background pieces up once a second until the level has them. */

@@ -94,10 +94,14 @@ never required.
   particles are instanced; idle sparkles are not drawn: about 66 draw calls and 31k
   triangles per eye at the busiest (night, rain, the shared tree in view).
 - **Performance and quality** (`src/perf.ts`): the Comfort panel's *Visual quality* is
-  Auto, High or Low. Low halves fireflies and raindrops, hides two background pieces
-  and lowers the XR resolution from the next session; Auto does this by itself if the
-  headset stays below 85% of its frame rate for 8 seconds. `?debug` shows fps, the
-  worst frame, draw calls and triangles behind the table.
+  Auto, High, Medium or Low (`src/save/quality.ts`). Medium halves fireflies and
+  raindrops and renders at 90% resolution; Low keeps a quarter of them, hides two
+  background pieces and renders at 80%. Auto measures the frame rate every 4 seconds
+  and, whenever the headset stays below 85% of its rate for 8 seconds (61 fps at
+  72 Hz), steps one level lighter. The level it reaches is remembered on the device, so
+  the next visit starts there (resolution can only change between sessions); choosing
+  Auto again starts over. `?debug` shows fps, the worst frame, draw calls, triangles
+  and the level behind the table.
 - **Shared tree service** (`server/shared-tree/`): a Cloudflare Worker with a D1
   database, a few dozen lines; anonymous counts, daily caps per garden, a rate limit per
   connection kept only in memory, CORS limited to the app. The app reads its address from
@@ -135,7 +139,7 @@ first reward (the sprout) still comes within the first minute.
 Address options for demos: `?fresh` starts a new garden, `?nextvisit` counts the
 next VR entry as a return visit without waiting (both are removed from the address
 right after use); `?season=spring|summer|autumn|winter`, `?time=day|sunset|night` and
-`?weather=rain|breeze` force the atmosphere; `?quality=high|low` forces the visual
+`?weather=rain|breeze` force the atmosphere; `?quality=high|medium|low` forces the visual
 quality and `?debug` shows the performance readout.
 
 ## Credits

@@ -38,7 +38,7 @@ const CHOICES: Choice[] = [
   ...(['both', 'left', 'right'] as Hands[]).map((v) => ({ id: `hands-${v}`, key: 'hands' as const, value: v })),
   { id: 'dwell-off', key: 'dwell', value: false },
   { id: 'dwell-on', key: 'dwell', value: true },
-  ...(['auto', 'high', 'low'] as Quality[]).map((v) => ({ id: `quality-${v}`, key: 'quality' as const, value: v })),
+  ...(['auto', 'high', 'medium', 'low'] as Quality[]).map((v) => ({ id: `quality-${v}`, key: 'quality' as const, value: v })),
 ];
 
 /** Panel and subtitle palettes: normal (soft, warm) and high contrast (black, white, yellow). */

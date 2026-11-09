@@ -6,7 +6,7 @@
 export type BreathPace = 'slow' | 'medium' | 'fast';
 export type Hands = 'both' | 'left' | 'right';
 /** Visual quality: auto lowers it by itself if the headset cannot keep its frame rate. */
-export type Quality = 'auto' | 'high' | 'low';
+export type Quality = 'auto' | 'high' | 'medium' | 'low';
 
 export interface ComfortSettings {
   breathPace: BreathPace;
@@ -70,6 +70,6 @@ export function parseSettings(raw: string): ComfortSettings {
   s.largeText = d.largeText === true;
   s.dwell = d.dwell === true;
   // Added later: older stored settings simply keep the default (auto).
-  if (d.quality === 'auto' || d.quality === 'high' || d.quality === 'low') s.quality = d.quality;
+  if (d.quality === 'auto' || d.quality === 'high' || d.quality === 'medium' || d.quality === 'low') s.quality = d.quality;
   return s;
 }
