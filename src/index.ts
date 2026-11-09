@@ -1,6 +1,7 @@
 import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 import { GardenAudioSystem } from './audio-system.js';
+import { BlenderBonsaiSystem } from './blender-bonsai.js';
 import { BonsaiGrowthSystem } from './bonsai-growth.js';
 import { BreathBreakSystem } from './breath-break.js';
 import { ComfortSystem } from './comfort.js';
@@ -35,6 +36,8 @@ World.create(
     .registerSystem(PruningSystem)
     .registerSystem(BonsaiGrowthSystem)
     .registerSystem(HealthSystem)
+    // Trial (?bonsai=blender): after Growth and Health, which own the soil and leaf materials it reuses.
+    .registerSystem(BlenderBonsaiSystem)
     .registerSystem(SeasonSystem)
     .registerSystem(DayNightSystem)
     .registerSystem(WeatherSystem)
@@ -79,6 +82,7 @@ World.create(
       gazeCare: world.getSystem(GazeCareSystem),
       shared: world.getSystem(SharedTreeSystem),
       watering: world.getSystem(WateringSystem),
+      blender: world.getSystem(BlenderBonsaiSystem),
     };
   }
 });

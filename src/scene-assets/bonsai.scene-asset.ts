@@ -103,6 +103,8 @@ function overgrowth(name: string, from: Vector3, to: Vector3): Group {
   g.add(pad(`${name}_Tuft`, to, v(0.02, 0.014, 0.018), wildMat));
   // The shoot shows and hides as a whole: one draw call instead of four.
   mergeByMaterial(g);
+  // Where the shoot leaves the tree, so a different tree model can move it onto its own cut point.
+  g.userData.shootBase = [from.x, from.y, from.z];
   const cut = new Object3D();
   cut.name = 'CutPoint';
   cut.position.copy(from.clone().lerp(to, 0.6));

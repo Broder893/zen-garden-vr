@@ -30,6 +30,13 @@ export default defineAssets({
   'zen-stream': createStream(),
   'shared-tree': createSharedTree(),
   'stone-basin': createStoneBasin(),
+  // Trial (?bonsai=blender): the mature bonsai modelled in Blender, loaded only on demand.
+  'bonsai-mature-glb': {
+    url: `${import.meta.env.BASE_URL}models/bonsai_3_mature.glb`,
+    type: AssetType.GLTF,
+    priority: 'lazy',
+    name: 'Bonsai (Blender, mature)',
+  },
   'subtitle-panel': ui('subtitle.uikitml', 'Subtitle Panel'),
   'comfort-panel': ui('comfort.uikitml', 'Comfort Panel'),
   'breath-panel': ui('breath.uikitml', 'Breath Panel'),
