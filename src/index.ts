@@ -28,10 +28,20 @@ import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
 
+/** When this tab last retried a start that failed (sessionStorage: this tab only). */
+const RETRY_KEY = 'zen-garden-vr/start-retry';
+/** A failed start is retried once, unless one was retried this recently (no reload loop). */
+const RETRY_GAP_MS = 10 * 60 * 1000;
+
 World.create(
   document.getElementById('scene-container') as HTMLDivElement,
   projectOptions,
 ).then((world) => {
+  try {
+    sessionStorage.removeItem(RETRY_KEY);
+  } catch {
+    /* storage blocked: nothing to clear */
+  }
   world
     // First: it swaps the Blender models in before the other bonsai systems find the parts by name.
     .registerSystem(BlenderBonsaiSystem)
@@ -89,4 +99,16 @@ World.create(
       lids: world.getSystem(EyelidSystem),
     };
   }
+}).catch((err: unknown) => {
+  // A file that failed to load (one dropped request on a weak connection) stops the
+  // start: try the whole start once more, a moment later. A second failure stays.
+  console.error('[zen] the garden could not start', err);
+  let retried = true;
+  try {
+    retried = Date.now() - Number(sessionStorage.getItem(RETRY_KEY) ?? 0) < RETRY_GAP_MS;
+    if (!retried) sessionStorage.setItem(RETRY_KEY, String(Date.now()));
+  } catch {
+    /* storage blocked: no way to know it was tried, so do not loop */
+  }
+  if (!retried) setTimeout(() => window.location.reload(), 1500);
 });
