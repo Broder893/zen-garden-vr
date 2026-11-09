@@ -85,6 +85,9 @@ function horizontalRadius(mesh: Mesh): number {
 /** Excess water at which the model's puddle starts to show, and where it is full size. */
 const PUDDLE_FROM = 0.1;
 const PUDDLE_FULL = 0.5;
+/** Its size from first sign to full (the model's puddle reaches 6.4 cm of the soil's 8). */
+const PUDDLE_MIN = 0.35;
+const PUDDLE_MAX = 0.78;
 /** Healthy branches were made for the larger procedural tree. */
 const BRANCH_SCALE = 0.75;
 
@@ -155,8 +158,10 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
       if (parts.fallen) parts.fallen.visible = season === 'autumn';
       if (parts.puddle) {
         parts.puddle.visible = k > 0;
-        // It spreads over the soil as the water pools (scaled flat: its height stays on the soil).
-        parts.puddle.scale.set(0.4 + 0.6 * k, 1, 0.4 + 0.6 * k);
+        // It spreads over the soil as the water pools (scaled flat: its height stays on the soil),
+        // never to the pot's edge: a margin of soil keeps it a puddle, not a plate.
+        const r = PUDDLE_MIN + (PUDDLE_MAX - PUDDLE_MIN) * k;
+        parts.puddle.scale.set(r, 1, r);
       }
     }
   }

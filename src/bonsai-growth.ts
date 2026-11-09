@@ -1,4 +1,4 @@
-import { Color, createSystem, Entity, MeshStandardMaterial, Object3D, Vector3 } from '@iwsdk/core';
+import { Color, createSystem, Entity, Material, Mesh, MeshStandardMaterial, Object3D, Vector3 } from '@iwsdk/core';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { Sparkles } from './effects/sparkles.js';
 import { Bonsai, BonsaiStage } from './garden-components.js';
@@ -30,7 +30,12 @@ function bits(mask: number): number {
 }
 
 const DRY = new Color('#8a6a4c');
-const PUDDLE = new Color('#20262c');
+/** Soil under too much water: very dark brown and a little glossy (not black, not a plate). */
+const PUDDLE = new Color('#2b1b10');
+const PUDDLE_GLOSS = 0.45;
+/** A wrong cut's stump: this much bigger than the branch's base, in fresh light wood. */
+const STUMP_GROW = 2.2;
+const FRESH_WOOD = '#dcb98c';
 const WET = new Color('#2a1c12');
 /** Soil dries back toward the stage's water level over roughly this long. */
 const DRY_SECONDS = 45;
@@ -57,6 +62,8 @@ export class BonsaiGrowthSystem extends createSystem({
   /** Shown puddle, 0..1 (follows overwater). */
   private puddle = 0;
   private sparkles!: Sparkles;
+  /** The light wood of a fresh cut (a wrong cut's stump). */
+  private freshWood = new MeshStandardMaterial({ color: FRESH_WOOD, roughness: 0.85 });
   private burstAt = new Vector3();
   private bonsaiRef!: FirstEntity;
   private meditation?: MeditationSystem;
@@ -207,7 +214,7 @@ export class BonsaiGrowthSystem extends createSystem({
     // Too much water pools on top: darker and glossy, like a puddle in the pot.
     this.puddle += (Math.min(1, overwater * 1.6) - this.puddle) * (1 - Math.exp(-2 * delta));
     this.soil.color.lerp(PUDDLE, this.puddle * 0.6);
-    this.soil.roughness = 1 - 0.8 * this.puddle;
+    this.soil.roughness = 1 - PUDDLE_GLOSS * this.puddle;
   }
 
   /** Sparkles rising from the canopy when the seed sprouts or the tree grows. */
@@ -262,8 +269,31 @@ export class BonsaiGrowthSystem extends createSystem({
       const o = this.parts.get(n);
       if (!o) return;
       o.visible = true;
+      const cut = (stumps & (1 << i)) !== 0;
       const leafy = o.getObjectByName('Leafy');
-      if (leafy) leafy.visible = (stumps & (1 << i)) === 0;
+      if (leafy) leafy.visible = !cut;
+      this.showStump(o, cut);
+    });
+  }
+
+  /**
+   * A cut healthy branch leaves a stump that reads from the seat: thicker and
+   * longer (grown from where it leaves the trunk) and the light colour of
+   * fresh wood. Uncut, the same piece is the branch's ordinary bark base.
+   */
+  private showStump(branch: Object3D, cut: boolean): void {
+    const stump = branch.getObjectByName(`${branch.name}_Stump`);
+    const from = branch.userData.branchFrom as [number, number, number] | undefined;
+    if (!stump || !from) return;
+    const s = cut ? STUMP_GROW : 1;
+    stump.scale.setScalar(s);
+    stump.position.set(from[0] * (1 - s), from[1] * (1 - s), from[2] * (1 - s));
+    stump.traverse((o) => {
+      const m = o as Mesh;
+      if (!m.isMesh) return;
+      // Its own bark (as the tree model set it) is kept to put back when the stump grows again.
+      m.userData.bark ??= m.material;
+      m.material = cut ? this.freshWood : (m.userData.bark as Material);
     });
   }
 
