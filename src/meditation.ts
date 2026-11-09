@@ -34,7 +34,8 @@ export type MeditationCue =
 const INTRO_SECONDS = 5;
 /** A session left paused this long ends quietly so the garden guide comes back. */
 const PAUSE_TIMEOUT = 60;
-const OUTRO_SECONDS = 5;
+/** Long enough for the eyes to open (src/eyelids.ts) and the closing words to be read. */
+const OUTRO_SECONDS = 7;
 /** Ignore a second pinch this soon after the last one (a held pinch can re-grab). */
 const PINCH_COOLDOWN = 0.8;
 /** Breaths (0-based) that get a gentler variant line instead of the plain cue. */

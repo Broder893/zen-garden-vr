@@ -24,6 +24,7 @@ import {
   Seed,
   WateringCan,
 } from './garden-components.js';
+import { EyelidSystem } from './eyelids.js';
 import { MeditationCue, MeditationSystem } from './meditation.js';
 import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
@@ -69,6 +70,8 @@ export const LINES = {
   rest: 'Rest, rake the sand with your fingers, or pinch the stone.',
   meditateHint: 'Any time, pinch the glowing stone to breathe.',
   breatheIntro: 'Let us breathe together. Follow the light.',
+  breatheIntroEyes: 'Close your eyes. Let us breathe together.',
+  openEyes: 'Open your eyes.',
   breatheIn: 'Breathe in...',
   breatheHold: 'Hold...',
   breatheOut: 'And breathe out...',
@@ -271,6 +274,7 @@ export class GuideSystem extends createSystem({
   private pruning?: PruningSystem;
   private grab?: GrabSystem;
   private meditation?: MeditationSystem;
+  private lids?: EyelidSystem;
   private hintShown = false;
   private guideRef!: FirstEntity;
   private bonsaiRef!: FirstEntity;
@@ -399,6 +403,13 @@ export class GuideSystem extends createSystem({
       this.eventLeft = 0;
       // A break ends with its own line: the tree's reward.
       this.line = cue === 'done' && this.meditation?.kind === 'break' ? 'breakDone' : CUE_LINES[cue];
+      // With eyelids: the session closes the eyes after its first words and opens them at its end.
+      this.lids ??= this.world.getSystem(EyelidSystem);
+      if (this.lids?.enabled) {
+        if (cue === 'intro') this.line = 'breatheIntroEyes';
+        // From the first frame of the end: the eyes are still closed for the session.
+        if (cue === 'done' && (this.lids.sessionEnding || this.lids.reasons.has('session'))) this.line = 'openEyes';
+      }
       this.lastTask = null;
       this.targetNextToOrb();
       this.setLine(this.line);

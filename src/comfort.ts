@@ -39,6 +39,8 @@ const CHOICES: Choice[] = [
   { id: 'dwell-off', key: 'dwell', value: false },
   { id: 'dwell-on', key: 'dwell', value: true },
   ...(['auto', 'high', 'medium', 'low'] as Quality[]).map((v) => ({ id: `quality-${v}`, key: 'quality' as const, value: v })),
+  { id: 'gentle-off', key: 'softTransitions', value: false },
+  { id: 'gentle-on', key: 'softTransitions', value: true },
 ];
 
 /** Panel and subtitle palettes: normal (soft, warm) and high contrast (black, white, yellow). */

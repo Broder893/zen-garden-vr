@@ -5,6 +5,7 @@ import { SoundEngine } from './audio/sound-engine.js';
 import { GuideVoice } from './audio/voice.js';
 import { Bonsai, BonsaiStage } from './garden-components.js';
 import { GuideSystem, LINES, LineId } from './guide.js';
+import { EyelidSystem } from './eyelids.js';
 import { MeditationPhase, MeditationSystem } from './meditation.js';
 import { PruningSystem } from './pruning.js';
 import { RakeSystem } from './rake.js';
@@ -18,7 +19,7 @@ import { WateringSystem } from './watering.js';
 const REPEAT_SECONDS = 14;
 /** Breathing cues are timed by the session, so they are always spoken. */
 const ALWAYS_SPOKEN = new Set<LineId>([
-  'breatheIntro', 'breatheIn', 'breatheHold', 'breatheOut',
+  'breatheIntro', 'breatheIntroEyes', 'openEyes', 'breatheIn', 'breatheHold', 'breatheOut',
   'breatheSoften', 'breatheNotice', 'meditatePaused', 'meditatePausedDwell', 'meditateDone',
 ]);
 const SCALE = GardenMusic.scale;
@@ -48,6 +49,8 @@ export class GardenAudioSystem extends createSystem({
   private watering?: WateringSystem;
   private pruning?: PruningSystem;
   private meditation?: MeditationSystem;
+  private lids?: EyelidSystem;
+  private lastReopenings = 0;
   private spokenAt = new Map<LineId, number>();
   private lastLine: LineId | null = null;
   private bonsai!: FirstEntity;
@@ -123,6 +126,9 @@ export class GardenAudioSystem extends createSystem({
 
     const med = this.meditation;
     this.music.tick(delta, med?.active ?? false, med?.fullness ?? 0);
+    // Closed eyes: the music is muffled (low-passed), as if heard from inside.
+    this.lids ??= this.world.getSystem(EyelidSystem);
+    this.engine.setMuffle(Math.round((this.lids?.amount ?? 0) * 10) / 10);
     this.waterSounds(delta);
     this.engine.setRake(this.rake?.raking ? 1 : 0);
     this.healthCues();
@@ -206,13 +212,20 @@ export class GardenAudioSystem extends createSystem({
     const phase = med.phase;
     if (phase !== this.lastPhase) {
       if (phase === 'intro') this.engine.bowl(BOWL_OPEN_HZ);
-      if (phase === 'outro') this.engine.bowl(BOWL_CLOSE_HZ, 0.26);
+      // The closing bell: at the end of a session, or (eyes closed) as they open again.
+      if (phase === 'outro' && !this.lids?.reasons.has('session')) this.engine.bowl(BOWL_CLOSE_HZ, 0.26);
       if (phase === 'in' || phase === 'out') {
         this.engine.musicChime(phase === 'in' ? SCALE[2] : SCALE[0], 0.04);
       }
       if (phase === 'intro' || phase === 'outro') log(`meditation ${phase}`);
     }
     this.lastPhase = phase;
+    const reopenings = this.lids?.reopenings ?? 0;
+    if (reopenings > this.lastReopenings) {
+      this.engine.bowl(BOWL_CLOSE_HZ, 0.26);
+      log('eyes open after a session');
+    }
+    this.lastReopenings = reopenings;
     if (med.paused !== this.lastPaused && med.paused) this.voice.stop();
     this.lastPaused = med.paused;
   }

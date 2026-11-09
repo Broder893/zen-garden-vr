@@ -17,6 +17,8 @@ export interface ComfortSettings {
   /** Hold a hand still by an object (or look at it) instead of pinching. */
   dwell: boolean;
   quality: Quality;
+  /** Closed-eye moments fade slowly instead of showing eyelids. */
+  softTransitions: boolean;
 }
 
 /** Breath timings per pace, in seconds; with intro and outro a session lasts about 75-95 s. */
@@ -30,7 +32,7 @@ const KEY = 'zen-garden-vr/comfort';
 const VERSION = 1;
 
 export function defaultSettings(): ComfortSettings {
-  return { breathPace: 'medium', highContrast: false, largeText: false, hands: 'both', dwell: false, quality: 'auto' };
+  return { breathPace: 'medium', highContrast: false, largeText: false, hands: 'both', dwell: false, quality: 'auto', softTransitions: false };
 }
 
 export function loadSettings(): ComfortSettings {
@@ -71,5 +73,6 @@ export function parseSettings(raw: string): ComfortSettings {
   s.dwell = d.dwell === true;
   // Added later: older stored settings simply keep the default (auto).
   if (d.quality === 'auto' || d.quality === 'high' || d.quality === 'medium' || d.quality === 'low') s.quality = d.quality;
+  s.softTransitions = d.softTransitions === true;
   return s;
 }

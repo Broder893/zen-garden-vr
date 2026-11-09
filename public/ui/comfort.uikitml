@@ -5,7 +5,7 @@
     align-items: stretch;
     justify-content: flex-end;
     width: 30;
-    height: 71;
+    height: 78;
     gap: 1;
   }
   .opener {
@@ -95,6 +95,11 @@
     <div class="row">
       <div id="dwell-off" class="btn"><span id="dwell-off-t" class="btn-text">Off</span></div>
       <div id="dwell-on" class="btn"><span id="dwell-on-t" class="btn-text">On</span></div>
+    </div>
+    <span class="label">Gentle fades (no eyelids)</span>
+    <div class="row">
+      <div id="gentle-off" class="btn"><span id="gentle-off-t" class="btn-text">Off</span></div>
+      <div id="gentle-on" class="btn"><span id="gentle-on-t" class="btn-text">On</span></div>
     </div>
     <span class="label">Visual quality</span>
     <div class="row">

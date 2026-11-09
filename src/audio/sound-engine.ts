@@ -15,6 +15,10 @@ interface NoiseLoop {
   gain: GainNode | null;
 }
 
+/** The music's low-pass: open (inaudible) and muffled (eyes closed). */
+const OPEN_HZ = 18000;
+const MUFFLED_HZ = 650;
+
 export class SoundEngine {
   readonly ctx: AudioContext | null;
   /** Everything ends here; fades in on first unlock. */
@@ -22,6 +26,8 @@ export class SoundEngine {
   /** Wet send into a soft synthetic room reverb. */
   readonly reverb: GainNode | null = null;
   readonly music: GainNode | null = null;
+  private muffler: BiquadFilterNode | null = null;
+  private muffled = 0;
   readonly sfx: GainNode | null = null;
   private noise: AudioBuffer | null = null;
   /** Loop nodes exist only while sounding, so silence costs nothing. */
@@ -53,7 +59,11 @@ export class SoundEngine {
 
     this.music = ctx.createGain();
     this.music.gain.value = 0.32;
-    this.music.connect(this.master);
+    // The music passes through a low-pass that muffles it while the eyes are closed.
+    this.muffler = ctx.createBiquadFilter();
+    this.muffler.type = 'lowpass';
+    this.muffler.frequency.value = OPEN_HZ;
+    this.music.connect(this.muffler).connect(this.master);
     this.sfx = ctx.createGain();
     this.sfx.gain.value = 0.7;
     this.sfx.connect(this.master);
@@ -175,6 +185,15 @@ export class SoundEngine {
   /** Fingers drawing in the sand: a soft, low hiss (0 = off). */
   setRake(level: number): void {
     this.setLoop(this.rake, level, 'lowpass', 700, 0.7, 0.1);
+  }
+
+  /** Muffles the music, 0 (clear) .. 1 (eyes closed: soft and low). Acts on change only. */
+  setMuffle(amount: number): void {
+    if (!this.ctx || !this.muffler || amount === this.muffled) return;
+    this.muffled = amount;
+    // Exponential between the two cut-offs: an even-sounding sweep.
+    const hz = OPEN_HZ * Math.pow(MUFFLED_HZ / OPEN_HZ, amount);
+    this.muffler.frequency.setTargetAtTime(hz, this.ctx.currentTime, 0.25);
   }
 
   /** Rain on leaves and sand: a soft, wide hiss (0 = off). */
