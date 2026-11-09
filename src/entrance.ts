@@ -6,17 +6,23 @@ import {
   PointLightComponent,
   VisibilityState,
 } from '@iwsdk/core';
+import { EyelidSystem } from './eyelids.js';
 import { FireflyGuide } from './garden-components.js';
 
 const WARM_UP_SECONDS = 4.5;
 /** Light level the scene starts from on entering VR (fraction of authored). */
 const START_LEVEL = 0.08;
+/** The visit starts with closed eyes, open after this long (changes since last time land unseen). */
+const ENTRANCE_CLOSED_SECONDS = 1.2;
+/** Coming back (headset back on, system menu closed): a shorter moment with closed eyes. */
+const RETURN_CLOSED_SECONDS = 0.8;
 /** Where the firefly comes from: high and far, so it is seen arriving. */
 const FIREFLY_FROM = { x: 0.45, y: 1.55, z: -1.5 };
 
 /**
- * The first moment in VR: the garden starts almost dark, the lantern warms
- * up and the firefly flies in from the distance to greet the player.
+ * The first moment in VR: the eyes open (src/eyelids.ts) onto a garden
+ * almost dark, the lantern warms up and the firefly flies in from the
+ * distance to greet the player. Coming back after a pause opens them again.
  * The flat browser preview stays fully lit.
  */
 export class EntranceSystem extends createSystem({
@@ -43,7 +49,10 @@ export class EntranceSystem extends createSystem({
   init(): void {
     this.cleanupFuncs.push(
       this.world.visibilityState.subscribe((state) => {
-        if (state === VisibilityState.Visible && this.t < 0) this.begin();
+        if (state !== VisibilityState.Visible) return;
+        if (this.t < 0) this.begin();
+        // Back in the garden: open the eyes again onto whatever changed meanwhile.
+        else this.world.getSystem(EyelidSystem)?.holdFor('return', RETURN_CLOSED_SECONDS);
       }),
     );
   }
@@ -67,6 +76,8 @@ export class EntranceSystem extends createSystem({
     }
     this.warm = START_LEVEL;
     this.apply(START_LEVEL * this.dim);
+    // Eyes closed while the garden settles (EyelidSystem), opening as the lantern warms.
+    this.world.getSystem(EyelidSystem)?.holdFor('entrance', ENTRANCE_CLOSED_SECONDS);
   }
 
   /** Dims the garden toward `level` (1 = normal), e.g. during a breathing break. */
