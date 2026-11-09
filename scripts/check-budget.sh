@@ -68,15 +68,17 @@ device=$(cli xr status | grep -o '"deviceName": "[^"]*"' | head -1 | cut -d'"' -
 echo "[budget] emulated device: ${device:-unknown}"
 RESULTS=$(mktemp)
 
-# The heaviest garden: every unlock, the tree in bloom, all 7 visit flowers, the
-# shared tree in full blossom (counts seeded on this device), at night in the rain.
+# The heaviest garden a player can see: every unlock, the tree in bloom, all 7 visit
+# flowers (a regular: 8 visits), the shared tree in full blossom (counts seeded on this
+# device), at night in the rain. The tree is planted through the save, as on a return
+# visit, so the seed is gone as in play (setting `planted` live would leave it shown);
+# no breathing session yet, so the ghost pinch at the stone shows too.
 worst_garden() {
   js "localStorage.setItem('zen-garden-vr/shared', JSON.stringify({v:1, garden: crypto.randomUUID(), introShown: true, pending: 0, cache: {day: new Date().toISOString().slice(0,10), today: 40, gardens: 9, total: 400}}))"
+  js "localStorage.setItem('zen-garden-vr/save', JSON.stringify({v: 2, planted: true, stage: 4, xp: 400, water: 1, prunedMask: 255, visits: 8, meditations: 0, breaks: 0, lastGiftDay: (d => d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate())(new Date()), stress: 0, overwater: 0, stumpMask: 0, lastVisitAt: Date.now(), savedAt: Date.now()}))"
   goto_metered "$1"; enter; seat; sleep 3
   B=$(entity Bonsai)
-  set_bonsai planted true; set_bonsai xp 400; set_bonsai prunedMask 255; set_bonsai water 1
-  # A regular: 8 visits, so all 7 visit flowers are in the sand.
-  js "__zen.persistence.save.visits = 8"
+  set_bonsai prunedMask 255; set_bonsai water 1
   # New unlocks wait for closed eyes (src/eyelids.ts): close them a moment so they land.
   js "__zen.lids.holdFor('test', 1)"
   sleep 5
@@ -84,7 +86,8 @@ worst_garden() {
 
 for quality in high medium; do
   # High is the worst case; Medium is where Auto starts on a new device.
-  qs="time=night&weather=rain&debug&texmeter"
+  # No ?debug: its FPS counter (2 draw calls) is never in front of a player.
+  qs="time=night&weather=rain&texmeter"
   if [ "$quality" = high ]; then qs="$qs&quality=high"; else qs="$qs&quality=medium"; fi
   worst_garden "?$qs"
   for view in seated tree basin closed; do
@@ -95,6 +98,11 @@ for quality in high medium; do
       # Seated with the eyes closed: the eyelid quad is drawn over everything.
       closed) seat; js "__zen.lids.hold('test', 0)" ;;
     esac
+    # Sample with the guide's task line on screen and its ghost pinch beside the stone
+    # (subtitle and hint: 3 calls), as most of the time in play: any one-off line
+    # (level up...) is ended first, since it hides the hint and would make the count
+    # depend on what the guide happens to be saying.
+    js "__zen.guide.eventLeft = 0"
     sleep 2
     echo "{\"quality\":\"$quality\",\"view\":\"$view\",\"s\":$(sample)}" >> "$RESULTS"
     if [ "$view" = closed ]; then js "__zen.lids.release('test')"; fi
