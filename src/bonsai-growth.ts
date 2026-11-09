@@ -34,7 +34,7 @@ function bits(mask: number): number {
 const GROW_FROM = 0.92;
 const GROW_SECONDS = 1.2;
 const GLOW = new Color('#fff0c2');
-const GLOW_PEAK = 0.45;
+const GLOW_PEAK = 0.2;
 const DRY = new Color('#8a6a4c');
 /** Soil under too much water: very dark brown and a little glossy (not black, not a plate). */
 const PUDDLE = new Color('#2b1b10');
