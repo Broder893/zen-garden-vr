@@ -9,7 +9,7 @@ import {
 } from '@iwsdk/core';
 import { BreathPattern } from './breath-patterns.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
-import { BreathOrb, MeditationStone } from './garden-components.js';
+import { BreathOrb, MeditationStone, ReturnHome } from './garden-components.js';
 
 /**
  * Where a session is. `idle` = no session; `hold` follows the inhale, `rest`
@@ -58,6 +58,8 @@ export class MeditationSystem extends createSystem({
   stones: { required: [MeditationStone] },
   stonePinched: { required: [MeditationStone, Grabbed] },
   orbs: { required: [BreathOrb] },
+  /** Tools in a hand (can, shears): set down when a session starts. */
+  heldTools: { required: [ReturnHome, Grabbed] },
 }) {
   phase: MeditationPhase = 'idle';
   paused = false;
@@ -161,6 +163,9 @@ export class MeditationSystem extends createSystem({
 
   /** Starts a session (replacing any in progress). */
   start(kind: SessionKind, pattern: BreathPattern): void {
+    // A tool still in a hand is let go: it glides back to its place on the table
+    // (ReturnHomeSystem) in about a second, before the eyes close (EyelidSystem).
+    for (const tool of [...this.queries.heldTools.entities]) this.grab?.forceRelease(tool);
     this.kind = kind;
     this.pattern = pattern;
     this.phase = 'intro';

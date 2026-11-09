@@ -163,6 +163,7 @@ computer (their names do not resolve here), so nothing was sent to them.
    connections to `localhost:8787` (`.env.development.local`). Not in the published app.
 4. A meditation can start while a tool is held; the eyes close with it in hand.
    Breathing breaks already wait for empty hands; the stone is the player's own pinch.
+    **Fixed:** a session that starts lets go of any tool in a hand; it glides back to its place on the table (`ReturnHomeSystem`) before the eyes start to close (`src/meditation.ts`). Emulator, can held 31 cm from its place: session at 2.4 s, can 2 mm from its place at 3.2 s, in place at 3.8 s, lids start closing at 4.0 s. Budget 78-79.
 5. A one-off line can be cut short by a more important one ("A gentle rain…" by the
    break invitation after about 3 s).
 6. On a return that levels up, the level line comes before "A daily gift…", which
