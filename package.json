@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "build": "vite build",
     "preview": "vite preview",
-    "demo:record": "bash scripts/record-demo.sh"
+    "demo:record": "bash scripts/record-demo.sh",
+    "check:budget": "bash scripts/check-budget.sh"
   },
   "dependencies": {
     "@iwsdk/core": "1.1.0-rc.2",

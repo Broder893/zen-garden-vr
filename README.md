@@ -98,8 +98,9 @@ never required.
   registered in `src/index.ts`).
 - **Procedural models** (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. Models merge their parts per material and
-  particles are instanced; idle sparkles are not drawn: about 66 draw calls and 31k
-  triangles per eye at the busiest (night, rain, the shared tree in view).
+  particles are instanced; idle sparkles are not drawn: at most about 73 draw calls and
+  31k triangles per eye, with every unlock, the tree in bloom and the shared tree in
+  blossom at night in the rain. The garden's own textures take about 15 MB.
 - **Performance and quality** (`src/perf.ts`): the Comfort panel's *Visual quality* is
   Auto, High, Medium or Low (`src/save/quality.ts`). Medium halves fireflies and
   raindrops and renders at 90% resolution; Low keeps a quarter of them, hides two
@@ -107,8 +108,15 @@ never required.
   and, whenever the headset stays below 85% of its rate for 8 seconds (61 fps at
   72 Hz), steps one level lighter. The level it reaches is remembered on the device, so
   the next visit starts there (resolution can only change between sessions); choosing
-  Auto again starts over. `?debug` shows fps, the worst frame, draw calls, triangles
-  and the level behind the table.
+  Auto again starts over. Auto starts at **Medium** on a device it has not measured:
+  conservative, since the app could not be tried on a real headset. `?debug` shows fps,
+  the worst frame, draw calls, triangles and the level behind the table.
+- **Budget check on the Quest 3 profile** (`npm run check:budget`,
+  `scripts/check-budget.sh`): plays the heaviest moments in the emulator's Meta Quest 3
+  device at High and Medium and fails above 80 draw calls or 100k triangles per eye, or
+  64 MB of GPU textures (measured at the WebGL uploads; the emulator's controller
+  models, about 43 MB, are shown apart: a Quest used with hands never loads them).
+  Last run: 73 calls, 31k triangles, 57 MB (14.5 MB of it the garden's).
 - **Shared tree service** (`server/shared-tree/`): a Cloudflare Worker with a D1
   database, a few dozen lines; anonymous counts, daily caps per garden, a rate limit per
   connection kept only in memory, CORS limited to the app. The app reads its address from

@@ -21,8 +21,12 @@ const SETTLE_SECONDS = 10;
  * below this share of the headset's rate (61 fps at 72 Hz, 76 at 90 Hz).
  */
 export const SLOW_SHARE = 0.85;
-/** Where Auto starts on a device it has not measured yet. */
-const AUTO_START: QualityLevel = 'high';
+/**
+ * Where Auto starts on a device it has not measured yet: conservative, since
+ * the app could never be tried on a real headset. Medium halves the particle
+ * effects and renders at 90% resolution; High stays one tap away (Comfort).
+ */
+const AUTO_START: QualityLevel = 'medium';
 /** Scenery hidden in low quality (background only, never something to care for). */
 const LOW_HIDDEN = ['Garden Lantern', 'Rocks'];
 /** The debug readout redraws this often (seconds). */
