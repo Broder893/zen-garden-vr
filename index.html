@@ -61,6 +61,15 @@
         font-size: 13px;
         color: #ffd76a;
       }
+      /* Shown only when the garden cannot start, even after one retry (src/index.ts). */
+      .intro .load-error {
+        margin-top: 10px;
+        color: #ffb8a6;
+        font-weight: 600;
+      }
+      .intro .load-error[hidden] {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -77,6 +86,9 @@
         <li>5 to 10 minutes</li>
         <li>Sound on</li>
       </ul>
+      <p id="load-error" class="load-error" role="alert" hidden>
+        The garden could not load. Check the connection and reload the page.
+      </p>
     </section>
     <script type="module" src="/src/index.ts"></script>
   </body>

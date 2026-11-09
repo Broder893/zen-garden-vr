@@ -101,7 +101,8 @@ World.create(
   }
 }).catch((err: unknown) => {
   // A file that failed to load (one dropped request on a weak connection) stops the
-  // start: try the whole start once more, a moment later. A second failure stays.
+  // start: try the whole start once more, a moment later. A second failure shows a
+  // line on the page's card (index.html).
   console.error('[zen] the garden could not start', err);
   let retried = true;
   try {
@@ -111,4 +112,6 @@ World.create(
     /* storage blocked: no way to know it was tried, so do not loop */
   }
   if (!retried) setTimeout(() => window.location.reload(), 1500);
+  // Already retried (or no way to tell): say so on the card instead of leaving it silent.
+  else document.getElementById('load-error')?.removeAttribute('hidden');
 });
