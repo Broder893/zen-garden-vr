@@ -30,6 +30,17 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   breathes with you, with a card naming each step and counting 3-4 breaths; the tree
   gets water as a reward. The rhythm follows the tree: simple (4 in, 6 out), box
   (4-4-4-4) or long and slow (5-2-8).
+- **Eyes closed.** Every breathing session, at the stone or a break, begins with "Close
+  your eyes": two eyelids close over about 2 seconds and the music softens; the
+  breathing light, its card and the subtitles stay visible, as if seen through the lids.
+  What changed meanwhile (a new stage, an unlock, the weather, the time of day, the
+  season) lands while the eyes are closed; then a bell, "Open your eyes", and the lids
+  open. A visit, and coming back from a pause, also start with closed eyes. Outside
+  breathing, a new stage grows softly in view (92% to full size in 1.2 s, with a warm
+  glow). Always a way out: an open hand, or a two-second look at the small ring of light
+  above, opens the eyes at once; never more than 10 seconds of darkness with nothing to
+  follow; leaving the headset opens them. *Gentle fades* (Comfort) replaces the lids
+  with a slow fade.
 - **A guide, not a manual.** A firefly flies to whatever matters next and says it in
   one short sentence, spoken and subtitled in English. A ghost gesture drawn in light
   shows the motion (a pinch, a tilt); a clearer line follows if you seem stuck, and the
@@ -112,6 +123,15 @@ never required.
   particles are instanced; idle sparkles are not drawn: at most about 79 draw calls and
   36k triangles per eye, with every unlock, the tree in bloom and the shared tree in
   blossom at night in the rain. The garden's own textures take about 15 MB.
+- **Eyelids** (`src/eyelids.ts`, `src/eyelid-shader.ts`): one quad fixed to the headset,
+  15 cm in front of the eyes, with a shader drawing two almond-edged lids (or a plain
+  fade). Hidden while the eyes are open, so it costs no draw call then; drawn last,
+  without depth test, when shown, with the subtitles, breathing light and card lifted
+  above it. Changes wait in a queue: the growth, unlock, weather, day-night and season
+  systems ask `mayApply()` and land their change while the eyes are closed (a season or
+  time of day that finds no closed eyes for 5 minutes still arrives, as a 20-second
+  fade; weather after 2). `?lids=off` disables the eyelids; `?season=`, `?time=` and
+  `?weather=` apply at once, so demos and tests never wait.
 - **Performance and quality** (`src/perf.ts`): the Comfort panel's *Visual quality* is
   Auto, High, Medium or Low (`src/save/quality.ts`). Medium halves fireflies and
   raindrops and renders at 90% resolution; Low keeps a quarter of them, hides two

@@ -21,11 +21,11 @@ The script (`scripts/record-demo.sh`) plays the experience by itself (about
 | `02-water-and-grow.webm` | Lifting the can, pouring, the sprout grows |
 | `03-prune-and-grow.webm` | Shears trim the glowing shoots, watering, the tree grows again |
 | `04-prune-and-bloom.webm` | Last pruning and watering: the tree blooms |
-| `05-breathe.webm` | Pinching the stone: a two-breath session with the light orb |
+| `05-breathe.webm` | Pinching the stone: "Close your eyes", the eyelids close, a two-breath session with the light orb, "Open your eyes" |
 | `06-firefly-follows-hand.webm` | The firefly following the hand |
 | `07-return-new-flower.webm` | Coming back: "A new flower grew while you were away" |
 | `08-comfort-hold-to-select.webm` | Comfort panel: high contrast and hold to select, then the can picked up and pouring with no pinch |
-| `09-breathing-break.webm` | A breathing break: the firefly's invitation, the dimmed garden, the light and the breath card, the reward |
+| `09-breathing-break.webm` | A breathing break: the firefly's invitation, the eyelids closing, the light and the breath card through them, the eyes opening onto the reward |
 
 To record only the last clip again: `npm run demo:record -- comfort`.
 
@@ -59,7 +59,7 @@ Suggested cut, about 2:50:
 | 0:08–0:30 | planting (keep the ghost pinch next to the seed in frame) | *Hands only. The firefly shows the gesture in light.* |
 | 0:30–1:00 | first watering, growth | *Tilt to pour. The tree grows when it's cared for.* |
 | 1:00–1:40 | pruning, watering, bloom (speed up 1.5–2× if long) | *Trim the wild shoots to shape your bonsai.* |
-| 1:40–2:05 | `09-breathing-break` (the invitation, then one or two breaths in front of the eyes) | *Every few minutes, the firefly offers a short break. An open hand says "not now".* |
+| 1:40–2:05 | `09-breathing-break` (the invitation, then one or two breaths in front of the eyes) | *Every few minutes, the firefly offers a short break. Close your eyes, breathe; the garden changes while they are closed.* |
 | (short, optional) | a wilted tree (overwater or a wrong cut) recovering during a breathing break | *Mistakes show, but the tree never dies. Breathing with it brings it back.* |
 | 2:05–2:25 | `08-comfort-hold-to-select` (speed up the pokes, keep the can pouring by itself) | *No pinch? Hold to select. Also: one hand, high contrast, large text, breathing pace.* |
 | 2:25–2:40 | `07-return-new-flower`: the new flower, the daily gift, the level badge (the firefly-follows-hand clip 06 is a spare) | *Come back tomorrow: care earns levels. A glazed pot, a lantern, a stream...* |

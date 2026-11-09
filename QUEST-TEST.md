@@ -21,7 +21,7 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 - [ ] The page shows the table and the "Bloom Break" card.
 - [ ] There is an **Enter VR** button (top). Press it.
 - [ ] The table is **in front of you**, at a comfortable height for someone seated. If it's turned or off-center: hold the **Meta button** on your right hand to recenter.
-- [ ] The light **warms up** gently (a few seconds), the firefly arrives from the distance.
+- [ ] The visit starts with **closed eyes**: about a second of dark, then two eyelids open over about 2 seconds while the light **warms up** and the firefly arrives from the distance. Comfortable, or unsettling?
 - [ ] You hear the **music** (soft drone + chimes) and the **voice** reading the first subtitle. *(If there's no voice but the subtitles are there: note it, it's an important point.)*
 
 ## 2. Tutorial: seed and water
@@ -52,7 +52,11 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 - [ ] **Pinch the stone again**: "Paused". Again: it resumes.
 - [ ] Press the **Meta button** while caring for the tree, then come back: the firefly says "Welcome back. Let us carry on." and the task continues.
 - [ ] Press the **Meta button** (system menu) during the meditation: **sound stops** and the session pauses. Come back: everything is quiet until you pinch the stone.
-- [ ] At the end "Well done…" and a deeper bell.
+- [ ] At the start the firefly says "Close your eyes. Let us breathe together." and two **eyelids** close over about 2 seconds; the music softens. The breathing light, its words and the subtitles stay visible through them. Any discomfort with the lids fixed to your view?
+- [ ] At the end, with the eyes still closed, a deeper bell, "Open your eyes.", the lids open in about 2 seconds, then "Well done…".
+- [ ] During a closed-eye session, hold up an **open hand** (palm out): the eyes open at once and the session goes on. Next session: **look up** at the small ring of light above (2 seconds): same.
+- [ ] If the tree was about to grow (or a level was reached) during the session, the change is simply there when the eyes open.
+- [ ] Press the **Meta button** with the eyes closed: back in the garden, the eyes are open (or open within a second).
 
 ## 4a. Careful care (the tree wilts, never dies)
 
@@ -102,6 +106,7 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] **High contrast On**: subtitles black and white, the can, shears, seed and stone glow yellow. Off restores.
 - [ ] **Text size Large**: the subtitles and panel grow; still readable and not covering the tree?
 - [ ] **Breathing pace Slow / Fast**: start a session with the stone and check the rhythm changes.
+- [ ] **Gentle fades On**: start a session: instead of eyelids, the view fades slowly to dark (about 3 s). More comfortable than the lids?
 - [ ] **Hands Right** (then **Left**): both tools move to that side and can be picked up with that hand alone. **Both** puts them back.
 - [ ] **Hold to select On**, without pinching at all:
   - [ ] Start fresh (`?fresh`) and look at the seed for 2 seconds: a ring of light fills and it is planted.

@@ -75,7 +75,9 @@ worst_garden() {
   goto_metered "$1"; enter; seat; sleep 3
   B=$(entity Bonsai)
   set_bonsai planted true; set_bonsai xp 400; set_bonsai prunedMask 255; set_bonsai water 1
-  sleep 4
+  # New unlocks wait for closed eyes (src/eyelids.ts): close them a moment so they land.
+  js "__zen.lids.holdFor('test', 1)"
+  sleep 5
 }
 
 for quality in high medium; do
@@ -83,14 +85,17 @@ for quality in high medium; do
   qs="time=night&weather=rain&debug&texmeter"
   if [ "$quality" = high ]; then qs="$qs&quality=high"; else qs="$qs&quality=medium"; fi
   worst_garden "?$qs"
-  for view in seated tree basin; do
+  for view in seated tree basin closed; do
     case $view in
       seated) seat ;;
       tree) look '{"x":1.0,"y":1.5,"z":-2.6}' ;;
       basin) look '{"x":0.6,"y":0.9,"z":-0.5}' ;;
+      # Seated with the eyes closed: the eyelid quad is drawn over everything.
+      closed) seat; js "__zen.lids.hold('test', 0)" ;;
     esac
     sleep 2
     echo "{\"quality\":\"$quality\",\"view\":\"$view\",\"s\":$(sample)}" >> "$RESULTS"
+    if [ "$view" = closed ]; then js "__zen.lids.release('test')"; fi
   done
 done
 # Put the developer's garden back. Writes to garden keys are then ignored in this page,
