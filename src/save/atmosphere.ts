@@ -25,11 +25,19 @@ export function timeOfDayFor(date: Date): TimeOfDay {
 }
 
 /** Leaf and blossom colours of the bonsai, and the forest's canopy, in each season. */
-export const SEASON_COLORS: Record<Season, { leaf: string; flower: string; forest: string; ground: string }> = {
-  spring: { leaf: '#6fae4a', flower: '#f7c1d5', forest: '#e9b6cb', ground: '#7fae5a' },
-  summer: { leaf: '#3f7f34', flower: '#f6b8cf', forest: '#4f8f3d', ground: '#4f7f3a' },
-  autumn: { leaf: '#b8532c', flower: '#f2c49b', forest: '#c8622f', ground: '#9a6a3a' },
-  winter: { leaf: '#47705a', flower: '#e9e6f2', forest: '#dfe9ee', ground: '#e6edf0' },
+/**
+ * Season colours. `forest` tints the forest's canopy (it multiplies the
+ * canopy's grey shading, so it is scaled up in src/season.ts); `forestGlow`
+ * is how much of that tint the canopy also emits (snow catches the light).
+ */
+export const SEASON_COLORS: Record<
+  Season,
+  { leaf: string; flower: string; forest: string; forestGlow: number; ground: string }
+> = {
+  spring: { leaf: '#6fae4a', flower: '#f7c1d5', forest: '#e9b6cb', forestGlow: 0, ground: '#7fae5a' },
+  summer: { leaf: '#3f7f34', flower: '#f6b8cf', forest: '#4f8f3d', forestGlow: 0, ground: '#4f7f3a' },
+  autumn: { leaf: '#b8532c', flower: '#f2c49b', forest: '#c8622f', forestGlow: 0, ground: '#9a6a3a' },
+  winter: { leaf: '#47705a', flower: '#e9e6f2', forest: '#f6f9fc', forestGlow: 0.2, ground: '#e6edf0' },
 };
 
 /** Reads ?season= and ?time= (anything else falls back to the real date). */

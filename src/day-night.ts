@@ -21,7 +21,8 @@ type Palette = { sky: RGB; equator: RGB; ground: RGB };
  * file writes them; sunset is the authored look of main.iwsdk.scene.json.
  */
 const DOME: Record<TimeOfDay, Palette> = {
-  day: { sky: [0.66, 0.76, 0.82], equator: [0.78, 0.82, 0.86], ground: [0.3, 0.28, 0.26] },
+  // A light clear blue above, warming to a pale peach-cream horizon.
+  day: { sky: [0.6, 0.77, 0.93], equator: [0.96, 0.87, 0.76], ground: [0.3, 0.28, 0.26] },
   sunset: { sky: [0.17, 0.13, 0.32], equator: [0.62, 0.34, 0.24], ground: [0.1, 0.07, 0.09] },
   night: { sky: [0.02, 0.03, 0.1], equator: [0.08, 0.1, 0.2], ground: [0.02, 0.02, 0.03] },
 };

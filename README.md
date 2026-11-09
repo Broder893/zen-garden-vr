@@ -117,7 +117,9 @@ never required.
   trunk at least 9 cm from every glowing shoot. `?bonsai=classic` shows the earlier
   procedural tree. The forest around the garden is a Blender model too
   (`public/models/forest.glb`, two meshes, vertex colours, no textures): its canopy
-  turns blossom pink, green, rust or frosty white with the season (`src/season.ts`).
+  turns blossom pink, green, rust or snow white with the season (`src/season.ts`); its
+  very dark vertex colours are lifted by the material colour, and winter snow gets a
+  little light of its own that dims at night.
   The ground is one 42 m disc under the whole forest, the same mesh as the raked sand:
   sand in the middle, then grass or snow in the season's colour, fading into the sky
   beyond the hills, so no edge of the world shows in any direction.
