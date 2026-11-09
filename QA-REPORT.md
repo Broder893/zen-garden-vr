@@ -153,7 +153,7 @@ computer (their names do not resolve here), so nothing was sent to them.
 - **Fix:** the start is retried once, and a second failure shows a line on the card
   (see Fixes).
 
-### P2 (listed, not fixed)
+### P2 (listed; 4, 7, 8, 9, 10 fixed later on request)
 
 1. `SharedTreeSystem.shown` (`src/shared-tree.ts`) is written but never read.
 2. Hot reload only: `GuideVoice.dispose()` keeps the decoded voices; the sound
@@ -169,6 +169,7 @@ computer (their names do not resolve here), so nothing was sent to them.
    is what caused it.
 7. With gaze care or hold to select, the can stops by itself when the tree is full,
    yet "That is plenty of water. Let it rest a moment." appears.
+    **Fixed:** a hands-free can (gaze care, hold to select) stops filling at full and never counts as too much water (`src/watering.ts`); pouring by hand past full still warns. Emulator: gaze and hold to select, no line and overwater 0; by hand, the line and overwater 0.55. Budget 78-79.
 8. A slow voice file: its line is read by the device voice, the next ones by the
    recording, so one line can come in a different voice.
 9. First load about 2.2 MB compressed: about 14 s on slow 4G, with the card shown and

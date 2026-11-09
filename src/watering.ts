@@ -112,15 +112,19 @@ export class WateringSystem extends createSystem({
 
     // Pinch-held and hands-free ("hold to select") cans pour the same way.
     this.pourAssisted = false;
-    for (const can of this.queries.held.entities) this.pourFrom(can, delta, bonsai);
+    for (const can of this.queries.held.entities) this.pourFrom(can, delta, bonsai, false);
     for (const can of this.queries.assisted.entities) {
-      if (this.pourFrom(can, delta, bonsai)) this.pourAssisted = true;
+      if (this.pourFrom(can, delta, bonsai, true)) this.pourAssisted = true;
     }
     this.stepDrops(delta);
   }
 
-  /** Pours from one can if it is tipped; true when it pours this frame. */
-  private pourFrom(can: Entity, delta: number, bonsai: Entity | null): boolean {
+  /**
+   * Pours from one can if it is tipped; true when it pours this frame. A hands-free
+   * can (`assisted`: hold to select, gaze care) stops filling when the tree is full and
+   * never overwaters it: the player did not choose to keep pouring.
+   */
+  private pourFrom(can: Entity, delta: number, bonsai: Entity | null, assisted: boolean): boolean {
     const tip = this.tips.get(can.index);
     const obj = can.object3D;
     if (!tip || !obj) return false;
@@ -144,7 +148,7 @@ export class WateringSystem extends createSystem({
       const next = Math.min(1, water + delta / FILL_SECONDS);
       bonsai.setValue(Bonsai, 'water', next);
       if (next >= 1) this.filledByPouring = true;
-    } else if (water >= 1 && this.filledByPouring && this.stageAge >= GRACE_SECONDS) {
+    } else if (water >= 1 && this.filledByPouring && !assisted && this.stageAge >= GRACE_SECONDS) {
       // Already full: the excess pools (no experience for it); HealthSystem drains it and shows the stress.
       this.overflowing = true;
       const over = bonsai.getValue(Bonsai, 'overwater') ?? 0;
