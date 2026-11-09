@@ -56,7 +56,7 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 
 ## 4a. Careful care (the tree wilts, never dies)
 
-- [ ] After the first growth, keep pouring on the tree once it is full: "That is plenty of water. Let it rest a moment.", a dark glossy puddle in the pot; keep going and the tree sinks, leans and its leaves fade, with a soft low tone.
+- [ ] After the first growth, keep pouring on the tree once it is full: "That is plenty of water. Let it rest a moment.", a puddle spreads over the soil in the pot; keep going and the tree sinks, leans and its leaves fade, with a soft low tone.
 - [ ] Put the can down and wait: "Too much water. Let the soil drain a little." In a minute or two the tree is well again ("Your tree is feeling better.", a light rising tone).
 - [ ] With the shears, touch one of the dark green, **not glowing** branches: a stump stays, "That branch was healthy. Trim only the glowing shoots." Was it ever cut by accident while trimming the glowing ones?
 - [ ] Wilt the tree, then pinch the stone (or accept the firefly's "Your tree is tense. Let us breathe together."): during the breaths it recovers, and at the end it is well.
@@ -75,7 +75,8 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 ## 4d. Atmosphere
 
 - [ ] The sky matches the time of day (day 8-17, sunset 6-8 and 17-20, night otherwise); at night fireflies drift around the garden. Comfortable brightness by day?
-- [ ] The tree's colours match the season (in November: red autumn leaves).
+- [ ] The tree's colours match the season (in November: red autumn leaves, and a few fallen leaves on the soil). Open `...?season=winter` with a grown tree: snow on the canopy.
+- [ ] Each stage is its own model (sprout, young, mature, in bloom): does every growth step read clearly as the same tree getting bigger? Before planting, a warm glow in the empty pot.
 - [ ] Open `...?weather=rain`: after a few seconds rain falls, you hear it, the firefly says "A gentle rain. It is watering your tree." and the soil darkens.
 - [ ] Open `...?weather=breeze`: the tree sways gently, wind in the bamboo. No discomfort?
 - [ ] Frame rate at night with rain (the busiest moment): smooth?

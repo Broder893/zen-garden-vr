@@ -32,12 +32,12 @@ World.create(
   projectOptions,
 ).then((world) => {
   world
+    // First: it swaps the Blender models in before the other bonsai systems find the parts by name.
+    .registerSystem(BlenderBonsaiSystem)
     .registerSystem(WateringSystem)
     .registerSystem(PruningSystem)
     .registerSystem(BonsaiGrowthSystem)
     .registerSystem(HealthSystem)
-    // Trial (?bonsai=blender): after Growth and Health, which own the soil and leaf materials it reuses.
-    .registerSystem(BlenderBonsaiSystem)
     .registerSystem(SeasonSystem)
     .registerSystem(DayNightSystem)
     .registerSystem(WeatherSystem)

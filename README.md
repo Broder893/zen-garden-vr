@@ -12,7 +12,8 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
 
 - **Plant and grow.** Pinch the glowing seed, water the sprout by tilting the can over
   it, and trim the glowing overgrown shoots with the shears. The bonsai grows through
-  four stages (sprout, young, mature, in bloom).
+  four stages (sprout, young, mature, in bloom), each its own low-poly model made in
+  Blender; it carries snow in winter and drops leaves in autumn.
 - **Careful care.** The tree can be stressed, never lost. Pouring on a tree that already
   has its water pools in the pot (a glossy puddle) and stresses it; cutting a healthy
   (not glowing) branch leaves a stump and stresses it; about three wrong cuts wilt it. A
@@ -96,10 +97,17 @@ never required.
   saving, entrance, visit flowers, comfort settings, hold-to-select, breathing breaks,
   levels and unlocks, the sand rake (`src/*.ts`,
   registered in `src/index.ts`).
-- **Procedural models** (`src/scene-assets/`), composed in
+- **Models**: the bonsai is five original low-poly glTF models made in Blender
+  (`public/models/`), loaded before the garden appears; `src/blender-bonsai.ts` swaps
+  them in for each stage under the names the other systems use (stage groups, `Leaf`
+  and `Flower` materials, `Soil`, `PotShell`), so season, wilt, wet soil and the glazed
+  pot still come from code. The glowing shoots start at each model's `cut_NN` points;
+  the healthy branches (a wrong cut leaves their stump) are code-made and set on the
+  trunk at least 9 cm from every glowing shoot. `?bonsai=classic` shows the earlier
+  procedural tree. Everything else is procedural (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. Models merge their parts per material and
-  particles are instanced; idle sparkles are not drawn: at most about 73 draw calls and
-  31k triangles per eye, with every unlock, the tree in bloom and the shared tree in
+  particles are instanced; idle sparkles are not drawn: at most about 77 draw calls and
+  33k triangles per eye, with every unlock, the tree in bloom and the shared tree in
   blossom at night in the rain. The garden's own textures take about 15 MB.
 - **Performance and quality** (`src/perf.ts`): the Comfort panel's *Visual quality* is
   Auto, High, Medium or Low (`src/save/quality.ts`). Medium halves fireflies and
@@ -118,7 +126,7 @@ never required.
   device at High and Medium and fails above 80 draw calls or 100k triangles per eye, or
   64 MB of GPU textures (measured at the WebGL uploads; the emulator's controller
   models, about 43 MB, are shown apart: a Quest used with hands never loads them).
-  Last run: 73 calls, 31k triangles, 57 MB (14.5 MB of it the garden's).
+  Last run: 77 calls, 33k triangles, 57 MB (14.5 MB of it the garden's).
 - **Shared tree service** (`server/shared-tree/`): a Cloudflare Worker with a D1
   database, a few dozen lines; anonymous counts, daily caps per garden, a rate limit per
   connection kept only in memory, CORS limited to the app. The app reads its address from

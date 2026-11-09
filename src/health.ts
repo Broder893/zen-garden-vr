@@ -31,7 +31,7 @@ const STRESSED_LEAF = new Color('#9a9440');
 const WILTED_LEAF = new Color('#7a6a45');
 const WILTED_FLOWER = new Color('#b9a58f');
 const COOL_LIGHT = new Color('#a9b8ff');
-const STAGES = ['Sprout', 'Young', 'Mature', 'Flowers'] as const;
+const STAGES = ['Sprout', 'Young', 'Mature', 'Blooming', 'Flowers'] as const;
 
 interface Tinted {
   mat: MeshStandardMaterial;

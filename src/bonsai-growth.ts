@@ -79,7 +79,7 @@ export class BonsaiGrowthSystem extends createSystem({
       const root = entity.object3D;
       if (!root) return;
       root.traverse((o) => {
-        if (/^(Sprout|Young|Mature|Flowers|Overgrowth_\w+_\d|Healthy_\w+_\d)$/.test(o.name)) this.parts.set(o.name, o);
+        if (/^(Sprout|Young|Mature|Blooming|Flowers|Overgrowth_\w+_\d|Healthy_\w+_\d)$/.test(o.name)) this.parts.set(o.name, o);
         if (o.name === 'Soil') {
           // Own soil material so darkening it never touches another asset.
           const mesh = o as unknown as { material: MeshStandardMaterial };
@@ -241,8 +241,12 @@ export class BonsaiGrowthSystem extends createSystem({
     };
     set('Sprout', stage === BonsaiStage.Sprout);
     set('Young', stage === BonsaiStage.Young);
-    set('Mature', stage >= BonsaiStage.Mature);
-    set('Flowers', stage === BonsaiStage.Blooming);
+    // A tree with its own blooming model (src/blender-bonsai.ts) swaps it in; the
+    // procedural one adds its blossoms to the mature tree.
+    const bloomModel = this.parts.has('Blooming');
+    set('Mature', stage === BonsaiStage.Mature || (stage === BonsaiStage.Blooming && !bloomModel));
+    set('Blooming', stage === BonsaiStage.Blooming);
+    set('Flowers', stage === BonsaiStage.Blooming && !bloomModel);
     for (const n of ALL_SHOOTS) set(n, false);
     const shoots = SHOOTS_BY_STAGE[stage] ?? [];
     shoots.forEach((n, i) => set(n, (mask & (1 << i)) === 0));
@@ -264,8 +268,16 @@ export class BonsaiGrowthSystem extends createSystem({
   }
 
   private scaleStage(stage: number, s: number): void {
-    const name = stage === BonsaiStage.Sprout ? 'Sprout' : stage === BonsaiStage.Young ? 'Young' : 'Mature';
+    const bloomModel = this.parts.has('Blooming');
+    const name =
+      stage === BonsaiStage.Sprout
+        ? 'Sprout'
+        : stage === BonsaiStage.Young
+          ? 'Young'
+          : stage === BonsaiStage.Blooming && bloomModel
+            ? 'Blooming'
+            : 'Mature';
     this.parts.get(name)?.scale.setScalar(s);
-    if (stage === BonsaiStage.Blooming) this.parts.get('Flowers')?.scale.setScalar(s);
+    if (stage === BonsaiStage.Blooming && !bloomModel) this.parts.get('Flowers')?.scale.setScalar(s);
   }
 }

@@ -40,7 +40,7 @@ Zen Garden is that ritual in a headset: a little garden on a table in front of y
 - **Time to breathe.** Pinch the glowing stone: an orb of light grows as you breathe in and shrinks as you breathe out.
 - **Little breaks that find you.** Every few minutes of care the firefly invites a short pause; an open hand says "not now". Otherwise the garden dims and a light guides a few breaths.
 - **Comfortable for more bodies.** A Comfort panel offers **hold to select** (no pinch: keep a hand still by an object, or look at it), **one hand**, **high contrast**, **large text** and **breathing pace**. No hand tracking? Everything also works by looking. Subtitles are always on.
-- **A garden that lives with your day.** The garden follows the real clock and season: day, sunset, a night of fireflies, red autumn leaves, a passing rain. Rake the sand with your fingertips.
+- **A garden that lives with your day.** The garden follows the real clock and season: day, sunset, a night of fireflies, red autumn leaves, winter snow, a passing rain. Rake the sand with your fingertips.
 - **A reason to come back.** Care earns experience and levels: a glazed pot, a stone lantern, a stream, a new deep breath. Each return brings new shoots to trim, a daily gift and a flower in the sand.
 - **A tree we share.** One big tree in the garden belongs to everyone who visits. Pour water into the stone basin and a light carries it over; the tree blossoms with the day's care from every garden. No accounts, nothing personal sent.
 
@@ -48,7 +48,7 @@ Zen Garden is that ritual in a headset: a little garden on a table in front of y
 
 Zen Garden is a WebXR app built with Meta's Immersive Web SDK (IWSDK) and Three.js: it opens from a link in the Quest browser, nothing to install. The logic is a set of small ECS systems, each with one job.
 
-Everything is original and made in code. Models are procedural and merged per material: at most about 73 draw calls and 31k triangles per eye, checked by a script on the emulator's Quest 3 profile. Quality starts conservative and lowers itself if the headset struggles. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved locally with a versioned, validated format. The shared tree talks to a tiny Cloudflare Worker that only counts anonymous cares; if it is unreachable, the garden carries on offline.
+Everything is original. The bonsai is five low-poly Blender models, one per stage, tinted by code; the rest is procedural, merged per material: at most about 77 draw calls and 33k triangles per eye, checked by a script on the emulator's Quest 3 profile. Quality starts conservative and lowers itself if the headset struggles. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved locally with a versioned, validated format. The shared tree talks to a tiny Cloudflare Worker that only counts anonymous cares; if it is unreachable, the garden carries on offline.
 
 We had no headset, so everything was built and tested in IWER, IWSDK's WebXR emulator, with scripted hands playing every step.
 

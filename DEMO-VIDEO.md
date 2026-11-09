@@ -29,6 +29,9 @@ The script (`scripts/record-demo.sh`) plays the experience by itself (about
 
 To record only the last clip again: `npm run demo:record -- comfort`.
 
+Record the clips again after the Blender bonsai (9 November): the pruning clips (03, 04)
+follow its new cut points; older recordings show the earlier procedural tree.
+
 What is in the clips:
 - the 3D view only, in 1920×1080, with **no emulator badges or panels**;
 - the app's **music and sounds** (chimes, water, shears, singing bowls);
@@ -50,7 +53,7 @@ Suggested cut, about 2:50:
 
 | Time | From | Add as text on screen |
 | --- | --- | --- |
-| (montage, optional) | the same garden by day, sunset and night (`?time=`), autumn leaves, a shower (`?weather=rain`) | *A garden that follows your day and the seasons.* |
+| (montage, optional) | the same garden by day, sunset and night (`?time=`), autumn leaves, the snowy tree (`?season=winter`), a shower (`?weather=rain`) | *A garden that follows your day and the seasons.* |
 | (opening, optional) | look around the garden at sunset, then fingertips raking the sand | *A pocket zen garden for your work breaks* |
 | 0:00–0:08 | start of `demo-main` (lights warming up) | *Zen Garden — a pocket garden for your work breaks* |
 | 0:08–0:30 | planting (keep the ghost pinch next to the seed in frame) | *Hands only. The firefly shows the gesture in light.* |

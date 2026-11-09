@@ -161,6 +161,9 @@ function healthyBranch(name: string, from: Vector3, to: Vector3): Group {
   leafy.add(pad(`${name}_Pad`, to, v(0.024, 0.013, 0.021)));
   mergeByMaterial(leafy);
   g.add(leafy);
+  // Where and which way it grows, so a different tree model can move and turn it onto its trunk.
+  g.userData.branchFrom = [from.x, from.y, from.z];
+  g.userData.branchDir = [to.x - from.x, to.y - from.y, to.z - from.z];
   const cut = new Object3D();
   cut.name = 'CutPoint';
   cut.position.copy(from.clone().lerp(to, 0.6));

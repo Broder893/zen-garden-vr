@@ -21,8 +21,12 @@ without speech voices.
 
 ## 3D models and UI
 
-All models are procedural geometry written for this project (`src/scene-assets/`).
-UI uses the IWSDK UIKitML toolkit. No third-party logos or trademarks are used.
+The bonsai (one model per stage: seed pot, sprout, young, mature, in bloom, with
+snow, fallen leaves and a puddle) is original, modelled in Blender for this project
+(`public/models/bonsai_*.glb`, low poly, under 5,000 triangles each). Every other model
+is procedural geometry written for this project (`src/scene-assets/`), as are the
+bonsai's glowing shoots and healthy branches. UI uses the IWSDK UIKitML toolkit. No
+third-party logos or trademarks are used.
 
 ## Libraries
 
