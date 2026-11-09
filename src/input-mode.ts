@@ -7,6 +7,8 @@ export type InputMode = 'hands' | 'controllers' | 'none';
 const CHECK_SECONDS = 0.25;
 /** A change must hold this long before it counts (a hand briefly out of view is not "no hands"). */
 const SWITCH_SECONDS = 2.5;
+/** "No input at all" must hold longer: hands resting out of view may drop their sources. */
+const NONE_SECONDS = 6;
 /** Hands coming back count sooner. */
 const HANDS_BACK_SECONDS = 0.75;
 
@@ -53,7 +55,8 @@ export class InputModeSystem extends createSystem({}) {
       this.candidateTime = 0;
     }
     this.candidateTime += step;
-    if (this.candidateTime < (seen === 'hands' ? HANDS_BACK_SECONDS : SWITCH_SECONDS)) return;
+    const needed = seen === 'hands' ? HANDS_BACK_SECONDS : seen === 'none' ? NONE_SECONDS : SWITCH_SECONDS;
+    if (this.candidateTime < needed) return;
     this.mode = seen;
     this.gaze = seen !== 'hands';
     this.changes++;

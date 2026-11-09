@@ -106,12 +106,14 @@ never required.
   raindrops and renders at 90% resolution; Low keeps a quarter of them, hides two
   background pieces and renders at 80%. Auto measures the frame rate every 4 seconds
   and, whenever the headset stays below 85% of its rate for 8 seconds (61 fps at
-  72 Hz), steps one level lighter. The level it reaches is remembered on the device, so
-  the next visit starts there (resolution can only change between sessions); choosing
-  Auto again starts over. Auto starts at **Medium** on a device it has not measured:
+  72 Hz), steps one level lighter; after a full minute at 97% or better it steps back
+  up, never above where it started. The level it reaches is remembered on the device,
+  so the next visit starts there (resolution can only change between sessions);
+  choosing Auto again starts over. Auto starts at **Medium** on a device it has not measured:
   conservative, since the app could not be tried on a real headset. `?debug` shows fps,
   the worst frame, draw calls, triangles and the level behind the table.
-- **Budget check on the Quest 3 profile** (`npm run check:budget`,
+- **Budget check on the Quest 3 profile** (`npm run check:budget`, which keeps and
+  restores the developer's saved garden;
   `scripts/check-budget.sh`): plays the heaviest moments in the emulator's Meta Quest 3
   device at High and Medium and fails above 80 draw calls or 100k triangles per eye, or
   64 MB of GPU textures (measured at the WebGL uploads; the emulator's controller

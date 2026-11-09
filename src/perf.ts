@@ -10,7 +10,7 @@ import {
 } from '@iwsdk/core';
 import { ComfortSystem } from './comfort.js';
 import type { Quality } from './save/comfort-settings.js';
-import { lighter, loadAutoLevel, QUALITY, QualityLevel, storeAutoLevel } from './save/quality.js';
+import { heavier, lighter, loadAutoLevel, QUALITY, QualityLevel, storeAutoLevel } from './save/quality.js';
 
 /** Measured over windows this long. */
 const WINDOW_SECONDS = 4;
@@ -21,6 +21,12 @@ const SETTLE_SECONDS = 10;
  * below this share of the headset's rate (61 fps at 72 Hz, 76 at 90 Hz).
  */
 export const SLOW_SHARE = 0.85;
+/**
+ * And back up one level (never above its start) after this many windows in a
+ * row (60 s) at 97% of the rate or better: one bad stretch is not forever.
+ */
+const FAST_SHARE = 0.97;
+const FAST_WINDOWS = 15;
 /**
  * Where Auto starts on a device it has not measured yet: conservative, since
  * the app could never be tried on a real headset. Medium halves the particle
@@ -63,6 +69,7 @@ export class PerfSystem extends createSystem({}) {
   private elapsed = 0;
   private worst = 0;
   private slowWindows = 0;
+  private fastWindows = 0;
   private sessionTime = 0;
   private hud: { ctx: CanvasRenderingContext2D; texture: CanvasTexture } | null = null;
   private sinceHud = HUD_EVERY;
@@ -83,6 +90,7 @@ export class PerfSystem extends createSystem({}) {
         this.elapsed = 0;
         this.worst = 0;
         this.slowWindows = 0;
+        this.fastWindows = 0;
         if (state === VisibilityState.NonImmersive) {
           this.sessionTime = 0;
           // Out of the session the resolution can change: an auto-lowered one applies next time.
@@ -137,8 +145,20 @@ export class PerfSystem extends createSystem({}) {
     if (!inVR || this.chosen !== 'auto' || this.sessionTime < SETTLE_SECONDS) return;
     const target = this.world.session?.frameRate ?? 72;
     this.slowWindows = this.fps < target * SLOW_SHARE ? this.slowWindows + 1 : 0;
+    this.fastWindows = this.fps >= target * FAST_SHARE ? this.fastWindows + 1 : 0;
+    if (this.fastWindows >= FAST_WINDOWS && this.autoLevel !== AUTO_START && this.autoLevel !== 'high') {
+      // Plenty of headroom for a minute: one level back up, toward the start.
+      this.fastWindows = 0;
+      const from = this.autoLevel;
+      this.autoLevel = heavier(from);
+      storeAutoLevel(this.autoLevel === AUTO_START ? null : this.autoLevel);
+      this.apply();
+      console.info(`[zen] ${this.fps.toFixed(0)} fps for a minute: visual quality ${from} -> ${this.autoLevel}`);
+      return;
+    }
     if (this.slowWindows < 2 || this.autoLevel === 'low') return;
     this.slowWindows = 0;
+    this.fastWindows = 0;
     const from = this.autoLevel;
     this.autoLevel = lighter(from);
     this.autoSteps++;

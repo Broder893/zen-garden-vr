@@ -510,10 +510,11 @@ export class GuideSystem extends createSystem({
   }
 
   private watchEvents(bonsai: Entity): void {
-    // Hands gone (tracking off) or controllers picked up: say once how to carry on.
+    // Hands gone (tracking off) or controllers picked up: say once how to carry on
+    // (after a breathing session, never into it).
     this.inputMode ??= this.world.getSystem(InputModeSystem);
     const changes = this.inputMode?.changes ?? 0;
-    if (changes !== this.inputChanges) {
+    if (changes !== this.inputChanges && !this.meditation?.active) {
       this.inputChanges = changes;
       const mode = this.inputMode?.mode;
       this.showEvent(mode === 'none' ? 'handsMissing' : mode === 'controllers' ? 'controllersOn' : 'handsBack', EVENT_SECONDS + 2);

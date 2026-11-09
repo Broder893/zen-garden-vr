@@ -29,6 +29,12 @@ export function lighter(level: QualityLevel): QualityLevel {
   return QUALITY_ORDER[Math.min(QUALITY_ORDER.length - 1, i + 1)];
 }
 
+/** One level richer, or the same when already the best. */
+export function heavier(level: QualityLevel): QualityLevel {
+  const i = QUALITY_ORDER.indexOf(level);
+  return QUALITY_ORDER[Math.max(0, i - 1)];
+}
+
 const KEY = 'zen-garden-vr/quality';
 
 /** The level Auto settled on in an earlier visit (this device stays as fast), or null. */

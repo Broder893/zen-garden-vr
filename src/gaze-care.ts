@@ -41,6 +41,7 @@ const ABOVE_BASIN = 0.2;
 /** The shears come down onto the shoot from this far above (so the blades arrive, as the cut needs). */
 const SHEARS_ABOVE = 0.09;
 const RING_COLOR = new Color('#bfe8ff');
+const NO_SHOOTS: string[] = [];
 
 type Act = 'water' | 'share' | 'trim';
 type Target = 'can' | 'shears' | 'basin';
@@ -98,6 +99,7 @@ export class GazeCareSystem extends createSystem({
   private p = new Vector3();
   private q = new Quaternion();
   private tiltQ = new Quaternion();
+  private parentQ = new Quaternion();
   private zAxis = new Vector3(0, 0, 1);
   private localCenters = new WeakMap<Object3D, Vector3>();
   private jobPool: Job = {
@@ -188,7 +190,7 @@ export class GazeCareSystem extends createSystem({
     if (!b) return null;
     const stage = b.getValue(Bonsai, 'stage') ?? 0;
     const mask = b.getValue(Bonsai, 'prunedMask') ?? 0;
-    const shoots = SHOOTS_BY_STAGE[stage] ?? [];
+    const shoots = SHOOTS_BY_STAGE[stage] ?? NO_SHOOTS;
     for (let i = 0; i < shoots.length; i++) {
       if (mask & (1 << i)) continue;
       const shoot = this.growth?.getShoot(shoots[i]);
@@ -257,7 +259,8 @@ export class GazeCareSystem extends createSystem({
   private step(delta: number): void {
     const job = this.job;
     const obj = job?.entity.object3D;
-    if (!job || !obj) return this.finish();
+    // Grabbed meanwhile (a controller squeeze or a pinch): the hand takes over.
+    if (!job || !obj || job.entity.hasComponent(Grabbed)) return this.finish();
     job.t += delta;
     const trim = job.act === 'trim';
     switch (job.phase) {
@@ -333,8 +336,8 @@ export class GazeCareSystem extends createSystem({
     if (parent) {
       parent.updateWorldMatrix(true, false);
       parent.worldToLocal(obj.position);
-      parent.getWorldQuaternion(this.tiltQ).invert();
-      obj.quaternion.premultiply(this.tiltQ);
+      parent.getWorldQuaternion(this.parentQ).invert();
+      obj.quaternion.premultiply(this.parentQ);
     }
   }
 }

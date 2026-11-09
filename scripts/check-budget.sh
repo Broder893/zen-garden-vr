@@ -54,10 +54,16 @@ seat() {
 }
 look() { cli xr look-at --input-json "{\"device\":\"headset\",\"target\":$1}" >/dev/null; }
 js() { EVAL="$1" cli browser run .iwsdk-scripts/eval.mjs >/dev/null; }
+value() { EVAL="$1" cli browser run .iwsdk-scripts/eval.mjs | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["result"]["value"])'; }
 entity() { cli ecs find --input-json "{\"withComponents\":[\"$1\"]}" | grep -o '"entityIndex": [0-9]*' | head -1 | grep -o '[0-9]*'; }
 set_bonsai() { cli ecs set-component --input-json "{\"entityIndex\":$B,\"componentId\":\"Bonsai\",\"field\":\"$1\",\"value\":$2}" >/dev/null; }
 sample() { cli browser run .iwsdk-scripts/budget-sample.mjs | python3 -c 'import json,sys; print(json.dumps(json.load(sys.stdin)["data"]["result"]))'; }
 
+# The check rewrites the dev garden (level, shared tree counts): keep the developer's
+# own saved state (every zen-garden-vr/ key but the large sand image, which the check
+# never touches) and put it back at the end.
+goto ""
+SAVED=$(value "btoa(unescape(encodeURIComponent(JSON.stringify(Object.fromEntries(Object.keys(localStorage).filter(k => k.startsWith('zen-garden-vr/') && k !== 'zen-garden-vr/sand').map(k => [k, localStorage.getItem(k)]))))))")
 device=$(cli xr status | grep -o '"deviceName": "[^"]*"' | head -1 | cut -d'"' -f4)
 echo "[budget] emulated device: ${device:-unknown}"
 RESULTS=$(mktemp)
@@ -87,9 +93,10 @@ for quality in high medium; do
     echo "{\"quality\":\"$quality\",\"view\":\"$view\",\"s\":$(sample)}" >> "$RESULTS"
   done
 done
-# Back to an everyday garden for whoever uses the browser next.
-js "(localStorage.removeItem('zen-garden-vr/shared'), localStorage.removeItem('zen-garden-vr/quality'))"
-goto "?fresh"
+# Put the developer's garden back. Writes to garden keys are then ignored in this page,
+# so its save on leaving cannot overwrite what was restored; the reload starts clean.
+js "(Object.keys(localStorage).filter(k => k.startsWith('zen-garden-vr/') && k !== 'zen-garden-vr/sand').forEach(k => localStorage.removeItem(k)), Object.entries(JSON.parse(decodeURIComponent(escape(atob('$SAVED'))))).forEach(([k, v]) => localStorage.setItem(k, v)), (() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (!String(k).startsWith('zen-garden-vr/')) set.call(this, k, v); }; })())"
+goto ""
 
 python3 - "$RESULTS" "$MAX_CALLS" "$MAX_TRIS" "$MAX_TEX_MB" <<'PY'
 import json, sys

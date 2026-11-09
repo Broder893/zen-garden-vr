@@ -43,7 +43,9 @@ export default async function run({ page, frame }) {
       p.texImage2D = function (target, level, internal, ...rest) {
         let w = 0;
         let h = 0;
-        if (typeof rest[0] === 'number') [w, h] = rest;
+        // (w, h, border, format, type, pixels) or (format, type, source): only the
+        // first form starts with two sizes followed by more numbers.
+        if (typeof rest[0] === 'number' && rest.length > 3) [w, h] = rest;
         else {
           const src = rest[rest.length - 1];
           w = src?.width ?? src?.videoWidth ?? 0;
