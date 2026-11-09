@@ -8,6 +8,7 @@ import { ComfortSystem } from './comfort.js';
 import { DwellSystem } from './dwell.js';
 import { DayNightSystem } from './day-night.js';
 import { EntranceSystem } from './entrance.js';
+import { EyelidSystem } from './eyelids.js';
 import { FirstMomentsSystem } from './first-moments.js';
 import { GuideSystem } from './guide.js';
 import { GazeCareSystem } from './gaze-care.js';
@@ -60,7 +61,9 @@ World.create(
     .registerSystem(LevelBadgeSystem)
     .registerSystem(UnlocksSystem)
     .registerSystem(FirstMomentsSystem)
-    .registerSystem(PerfSystem);
+    .registerSystem(PerfSystem)
+    // Last: the eyelids follow everything that may close or open them.
+    .registerSystem(EyelidSystem);
   if (import.meta.env.DEV) {
     // Dev only: lets .iwsdk-scripts/eval.mjs read live system state in tests.
     (window as unknown as { __zen?: unknown }).__zen = {
@@ -83,6 +86,7 @@ World.create(
       shared: world.getSystem(SharedTreeSystem),
       watering: world.getSystem(WateringSystem),
       blender: world.getSystem(BlenderBonsaiSystem),
+      lids: world.getSystem(EyelidSystem),
     };
   }
 });
