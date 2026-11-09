@@ -1,0 +1,357 @@
+{
+ "plantSeed": {
+  "voice": "firefly",
+  "file": "firefly/plantSeed.mp3",
+  "seconds": 2.26
+ },
+ "welcomeBack": {
+  "voice": "narrator",
+  "file": "narrator/welcomeBack.mp3",
+  "seconds": 1.51
+ },
+ "welcomeGift": {
+  "voice": "narrator",
+  "file": "narrator/welcomeGift.mp3",
+  "seconds": 1.39
+ },
+ "planted": {
+  "voice": "firefly",
+  "file": "firefly/planted.mp3",
+  "seconds": 2.26
+ },
+ "pickCan": {
+  "voice": "firefly",
+  "file": "firefly/pickCan.mp3",
+  "seconds": 1.63
+ },
+ "tiltCan": {
+  "voice": "firefly",
+  "file": "firefly/tiltCan.mp3",
+  "seconds": 2.02
+ },
+ "moveSpout": {
+  "voice": "firefly",
+  "file": "firefly/moveSpout.mp3",
+  "seconds": 1.39
+ },
+ "pouring": {
+  "voice": "firefly",
+  "file": "firefly/pouring.mp3",
+  "seconds": 1.32
+ },
+ "grewYoung": {
+  "voice": "firefly",
+  "file": "firefly/grewYoung.mp3",
+  "seconds": 2.35
+ },
+ "grewMature": {
+  "voice": "firefly",
+  "file": "firefly/grewMature.mp3",
+  "seconds": 1.92
+ },
+ "pickShears": {
+  "voice": "firefly",
+  "file": "firefly/pickShears.mp3",
+  "seconds": 1.46
+ },
+ "touchShoot": {
+  "voice": "firefly",
+  "file": "firefly/touchShoot.mp3",
+  "seconds": 1.7
+ },
+ "snip": {
+  "voice": "firefly",
+  "file": "firefly/snip.mp3",
+  "seconds": 1.15
+ },
+ "bloomed": {
+  "voice": "firefly",
+  "file": "firefly/bloomed.mp3",
+  "seconds": 1.97
+ },
+ "rest": {
+  "voice": "narrator",
+  "file": "narrator/rest.mp3",
+  "seconds": 1.03
+ },
+ "meditateHint": {
+  "voice": "narrator",
+  "file": "narrator/meditateHint.mp3",
+  "seconds": 1.34
+ },
+ "breatheIntro": {
+  "voice": "narrator",
+  "file": "narrator/breatheIntro.mp3",
+  "seconds": 1.9
+ },
+ "breatheIntroEyes": {
+  "voice": "narrator",
+  "file": "narrator/breatheIntroEyes.mp3",
+  "seconds": 1.7
+ },
+ "openEyes": {
+  "voice": "narrator",
+  "file": "narrator/openEyes.mp3",
+  "seconds": 1.7
+ },
+ "breatheIn": {
+  "voice": "narrator",
+  "file": "narrator/breatheIn.mp3",
+  "seconds": 1.39
+ },
+ "breatheHold": {
+  "voice": "narrator",
+  "file": "narrator/breatheHold.mp3",
+  "seconds": 1.25
+ },
+ "breatheOut": {
+  "voice": "narrator",
+  "file": "narrator/breatheOut.mp3",
+  "seconds": 1.66
+ },
+ "breatheSoften": {
+  "voice": "narrator",
+  "file": "narrator/breatheSoften.mp3",
+  "seconds": 1.25
+ },
+ "breatheNotice": {
+  "voice": "narrator",
+  "file": "narrator/breatheNotice.mp3",
+  "seconds": 1.25
+ },
+ "meditatePaused": {
+  "voice": "narrator",
+  "file": "narrator/meditatePaused.mp3",
+  "seconds": 1.18
+ },
+ "meditateDone": {
+  "voice": "narrator",
+  "file": "narrator/meditateDone.mp3",
+  "seconds": 1.25
+ },
+ "resumed": {
+  "voice": "narrator",
+  "file": "narrator/resumed.mp3",
+  "seconds": 1.49
+ },
+ "plantSeedHelp": {
+  "voice": "firefly",
+  "file": "firefly/plantSeedHelp.mp3",
+  "seconds": 2.42
+ },
+ "pickCanHelp": {
+  "voice": "firefly",
+  "file": "firefly/pickCanHelp.mp3",
+  "seconds": 2.35
+ },
+ "tiltCanHelp": {
+  "voice": "firefly",
+  "file": "firefly/tiltCanHelp.mp3",
+  "seconds": 2.04
+ },
+ "pickShearsHelp": {
+  "voice": "firefly",
+  "file": "firefly/pickShearsHelp.mp3",
+  "seconds": 2.09
+ },
+ "touchShootHelp": {
+  "voice": "firefly",
+  "file": "firefly/touchShootHelp.mp3",
+  "seconds": 2.38
+ },
+ "plantSeedDwell": {
+  "voice": "firefly",
+  "file": "firefly/plantSeedDwell.mp3",
+  "seconds": 2.59
+ },
+ "pickCanDwell": {
+  "voice": "firefly",
+  "file": "firefly/pickCanDwell.mp3",
+  "seconds": 1.94
+ },
+ "tiltCanDwell": {
+  "voice": "firefly",
+  "file": "firefly/tiltCanDwell.mp3",
+  "seconds": 2.02
+ },
+ "pickShearsDwell": {
+  "voice": "firefly",
+  "file": "firefly/pickShearsDwell.mp3",
+  "seconds": 2.09
+ },
+ "restDwell": {
+  "voice": "narrator",
+  "file": "narrator/restDwell.mp3",
+  "seconds": 3.31
+ },
+ "meditateHintDwell": {
+  "voice": "narrator",
+  "file": "narrator/meditateHintDwell.mp3",
+  "seconds": 1.37
+ },
+ "meditatePausedDwell": {
+  "voice": "narrator",
+  "file": "narrator/meditatePausedDwell.mp3",
+  "seconds": 1.18
+ },
+ "putBack": {
+  "voice": "firefly",
+  "file": "firefly/putBack.mp3",
+  "seconds": 2.21
+ },
+ "plantSeedGaze": {
+  "voice": "firefly",
+  "file": "firefly/plantSeedGaze.mp3",
+  "seconds": 2.26
+ },
+ "pickCanGaze": {
+  "voice": "firefly",
+  "file": "firefly/pickCanGaze.mp3",
+  "seconds": 2.45
+ },
+ "pickShearsGaze": {
+  "voice": "firefly",
+  "file": "firefly/pickShearsGaze.mp3",
+  "seconds": 2.14
+ },
+ "restGaze": {
+  "voice": "narrator",
+  "file": "narrator/restGaze.mp3",
+  "seconds": 0.98
+ },
+ "watchTool": {
+  "voice": "firefly",
+  "file": "firefly/watchTool.mp3",
+  "seconds": 1.49
+ },
+ "handsMissing": {
+  "voice": "firefly",
+  "file": "firefly/handsMissing.mp3",
+  "seconds": 2.62
+ },
+ "controllersOn": {
+  "voice": "firefly",
+  "file": "firefly/controllersOn.mp3",
+  "seconds": 2.78
+ },
+ "handsBack": {
+  "voice": "firefly",
+  "file": "firefly/handsBack.mp3",
+  "seconds": 1.18
+ },
+ "comfortHint": {
+  "voice": "firefly",
+  "file": "firefly/comfortHint.mp3",
+  "seconds": 2.35
+ },
+ "breakInvite": {
+  "voice": "firefly",
+  "file": "firefly/breakInvite.mp3",
+  "seconds": 1.99
+ },
+ "breakSkip": {
+  "voice": "firefly",
+  "file": "firefly/breakSkip.mp3",
+  "seconds": 1.7
+ },
+ "breakLater": {
+  "voice": "firefly",
+  "file": "firefly/breakLater.mp3",
+  "seconds": 1.56
+ },
+ "breakDone": {
+  "voice": "firefly",
+  "file": "firefly/breakDone.mp3",
+  "seconds": 1.85
+ },
+ "dailyGift": {
+  "voice": "firefly",
+  "file": "firefly/dailyGift.mp3",
+  "seconds": 2.62
+ },
+ "levelUp": {
+  "voice": "firefly",
+  "file": "firefly/levelUp.mp3",
+  "seconds": 1.58
+ },
+ "tooMuchWater": {
+  "voice": "firefly",
+  "file": "firefly/tooMuchWater.mp3",
+  "seconds": 2.38
+ },
+ "letItDrain": {
+  "voice": "firefly",
+  "file": "firefly/letItDrain.mp3",
+  "seconds": 2.21
+ },
+ "tenseBreathe": {
+  "voice": "firefly",
+  "file": "firefly/tenseBreathe.mp3",
+  "seconds": 2.42
+ },
+ "tenseBreatheDwell": {
+  "voice": "firefly",
+  "file": "firefly/tenseBreatheDwell.mp3",
+  "seconds": 2.45
+ },
+ "recovered": {
+  "voice": "narrator",
+  "file": "narrator/recovered.mp3",
+  "seconds": 2.28
+ },
+ "wrongCut": {
+  "voice": "firefly",
+  "file": "firefly/wrongCut.mp3",
+  "seconds": 2.76
+ },
+ "rainStarts": {
+  "voice": "narrator",
+  "file": "narrator/rainStarts.mp3",
+  "seconds": 1.63
+ },
+ "breezeStarts": {
+  "voice": "narrator",
+  "file": "narrator/breezeStarts.mp3",
+  "seconds": 1.7
+ },
+ "breakInviteTense": {
+  "voice": "firefly",
+  "file": "firefly/breakInviteTense.mp3",
+  "seconds": 2.14
+ },
+ "levelPot": {
+  "voice": "firefly",
+  "file": "firefly/levelPot.mp3",
+  "seconds": 2.35
+ },
+ "levelLantern": {
+  "voice": "firefly",
+  "file": "firefly/levelLantern.mp3",
+  "seconds": 3.1
+ },
+ "levelStream": {
+  "voice": "firefly",
+  "file": "firefly/levelStream.mp3",
+  "seconds": 2.42
+ },
+ "levelBreath": {
+  "voice": "firefly",
+  "file": "firefly/levelBreath.mp3",
+  "seconds": 2.59
+ },
+ "sharedIntro": {
+  "voice": "firefly",
+  "file": "firefly/sharedIntro.mp3",
+  "seconds": 3.26
+ },
+ "sharedThanks": {
+  "voice": "firefly",
+  "file": "firefly/sharedThanks.mp3",
+  "seconds": 1.8
+ },
+ "sharedOffline": {
+  "voice": "firefly",
+  "file": "firefly/sharedOffline.mp3",
+  "seconds": 2.93
+ }
+}

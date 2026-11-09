@@ -2,8 +2,9 @@ import { AudioContext as SharedAudioContext } from '@iwsdk/core';
 
 /**
  * All garden sounds are synthesised live with WebAudio: no audio files, so
- * nothing to license and nothing to download. Uses the same AudioContext as
- * Three/IWSDK so only one context exists on the headset.
+ * nothing to license and nothing to download. The guide's recorded voice
+ * (src/audio/voice.ts) plays through the `voice` bus. Uses the same
+ * AudioContext as Three/IWSDK so only one context exists on the headset.
  *
  * Every method is a no-op while the context is suspended or missing, so no
  * sounds queue up and burst out together when audio resumes.
@@ -18,6 +19,10 @@ interface NoiseLoop {
 /** The music's low-pass: open (inaudible) and muffled (eyes closed). */
 const OPEN_HZ = 18000;
 const MUFFLED_HZ = 650;
+/** The guide's voice level (its files peak near -2.5 dBFS). */
+const VOICE_GAIN = 0.8;
+/** The music's level while the narrator speaks (about -8 dB). */
+const DUCKED = 0.4;
 
 export class SoundEngine {
   readonly ctx: AudioContext | null;
@@ -28,6 +33,11 @@ export class SoundEngine {
   readonly music: GainNode | null = null;
   private muffler: BiquadFilterNode | null = null;
   private muffled = 0;
+  /** Lowers the music under the narrator's voice. */
+  private ducker: GainNode | null = null;
+  private ducked = false;
+  /** The guide's voice: straight to the master, never muffled, so it stays clear with closed eyes. */
+  readonly voice: GainNode | null = null;
   readonly sfx: GainNode | null = null;
   private noise: AudioBuffer | null = null;
   /** Loop nodes exist only while sounding, so silence costs nothing. */
@@ -63,7 +73,11 @@ export class SoundEngine {
     this.muffler = ctx.createBiquadFilter();
     this.muffler.type = 'lowpass';
     this.muffler.frequency.value = OPEN_HZ;
-    this.music.connect(this.muffler).connect(this.master);
+    this.ducker = ctx.createGain();
+    this.music.connect(this.ducker).connect(this.muffler).connect(this.master);
+    this.voice = ctx.createGain();
+    this.voice.gain.value = VOICE_GAIN;
+    this.voice.connect(this.master);
     this.sfx = ctx.createGain();
     this.sfx.gain.value = 0.7;
     this.sfx.connect(this.master);
@@ -194,6 +208,14 @@ export class SoundEngine {
     // Exponential between the two cut-offs: an even-sounding sweep.
     const hz = OPEN_HZ * Math.pow(MUFFLED_HZ / OPEN_HZ, amount);
     this.muffler.frequency.setTargetAtTime(hz, this.ctx.currentTime, 0.25);
+  }
+
+  /** Dips the music while the narrator speaks (true) and brings it back (false). Acts on change only. */
+  duckMusic(on: boolean): void {
+    if (!this.ctx || !this.ducker || on === this.ducked) return;
+    this.ducked = on;
+    // Quick to dip, slow to come back, so short pauses between lines do not pump.
+    this.ducker.gain.setTargetAtTime(on ? DUCKED : 1, this.ctx.currentTime, on ? 0.12 : 0.6);
   }
 
   /** Rain on leaves and sand: a soft, wide hiss (0 = off). */

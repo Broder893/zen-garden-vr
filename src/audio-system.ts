@@ -22,6 +22,19 @@ const ALWAYS_SPOKEN = new Set<LineId>([
   'breatheIntro', 'breatheIntroEyes', 'openEyes', 'breatheIn', 'breatheHold', 'breatheOut',
   'breatheSoften', 'breatheNotice', 'meditatePaused', 'meditatePausedDwell', 'meditateDone',
 ]);
+/**
+ * Recordings fetched first: the greetings and everything the guide says in the
+ * first five minutes (planting, watering, the first trim, hands and comfort hints).
+ * The rest follows in manifest order.
+ */
+const FIRST_LINES: readonly LineId[] = [
+  'plantSeed', 'plantSeedDwell', 'plantSeedGaze', 'welcomeBack', 'welcomeGift', 'resumed',
+  'comfortHint', 'plantSeedHelp', 'planted', 'pickCan', 'pickCanDwell', 'pickCanGaze',
+  'tiltCan', 'tiltCanDwell', 'moveSpout', 'pouring', 'pickCanHelp', 'tiltCanHelp', 'watchTool',
+  'putBack', 'handsMissing', 'controllersOn', 'handsBack', 'grewYoung', 'pickShears',
+  'pickShearsDwell', 'pickShearsGaze', 'touchShoot', 'snip', 'pickShearsHelp', 'touchShootHelp',
+  'rest', 'restDwell', 'restGaze', 'meditateHint', 'meditateHintDwell',
+];
 const SCALE = GardenMusic.scale;
 const PLANT_NOTES = [SCALE[0], SCALE[2], SCALE[4]];
 const GROW_NOTES = [SCALE[0], SCALE[1], SCALE[2], SCALE[3], SCALE[4]];
@@ -44,7 +57,7 @@ export class GardenAudioSystem extends createSystem({
 }) {
   private engine!: SoundEngine;
   private music!: GardenMusic;
-  private voice!: GuideVoice;
+  private voice!: GuideVoice<LineId>;
   private guide?: GuideSystem;
   private watering?: WateringSystem;
   private pruning?: PruningSystem;
@@ -74,7 +87,7 @@ export class GardenAudioSystem extends createSystem({
   init(): void {
     this.engine = new SoundEngine();
     this.music = new GardenMusic(this.engine);
-    this.voice = new GuideVoice();
+    this.voice = new GuideVoice(this.engine, LINES);
     this.guide = this.world.getSystem(GuideSystem);
     this.watering = this.world.getSystem(WateringSystem);
     this.pruning = this.world.getSystem(PruningSystem);
@@ -84,7 +97,11 @@ export class GardenAudioSystem extends createSystem({
     this.weather = this.world.getSystem(WeatherSystem);
 
     // Browsers only start audio after a user gesture; the Enter VR click counts.
-    const unlock = () => this.engine.unlock();
+    // The same gesture starts fetching the voice recordings (in the background).
+    const unlock = () => {
+      this.engine.unlock();
+      this.voice.load(FIRST_LINES);
+    };
     for (const type of ['pointerdown', 'keydown', 'touchend'] as const) {
       window.addEventListener(type, unlock);
       this.cleanupFuncs.push(() => window.removeEventListener(type, unlock));
@@ -111,6 +128,7 @@ export class GardenAudioSystem extends createSystem({
         ctx: this.engine.ctx,
         master: this.engine.master,
         renderer: this.renderer,
+        voice: this.voice,
       };
     }
   }
@@ -121,6 +139,8 @@ export class GardenAudioSystem extends createSystem({
     if (running && !this.wasRunning) {
       log('context running');
       this.music.start();
+      // Audio may run without a gesture (autoplay allowed): the voices load then too.
+      this.voice.load(FIRST_LINES);
     }
     this.wasRunning = running;
 
@@ -241,7 +261,7 @@ export class GardenAudioSystem extends createSystem({
     const last = this.spokenAt.get(line);
     if (!ALWAYS_SPOKEN.has(line) && last !== undefined && this.time - last < REPEAT_SECONDS) return;
     this.spokenAt.set(line, this.time);
-    this.voice.say(LINES[line]);
+    this.voice.say(line);
     log(`say ${line}`);
   }
 }

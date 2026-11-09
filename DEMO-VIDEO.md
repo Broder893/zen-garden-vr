@@ -35,12 +35,12 @@ follow its new cut points; older recordings show the earlier procedural tree.
 What is in the clips:
 - the 3D view only, in 1920×1080, with **no emulator badges or panels**;
 - the app's **music and sounds** (chimes, water, shears, singing bowls);
+- the guide's **voice**: recorded lines generated with Kokoro TTS (Apache 2.0, see
+  `CREDITS.md`), so they are fine in a public video;
 - the **English subtitles**, which are part of the scene.
 
-What is not in them: the spoken voice. On a Mac it is Apple's system voice,
-which is probably licensed for personal use only, so leaving it out of a public
-video is the safe choice; the subtitles carry every line. If you want a voice,
-record your own English narration over the video.
+Clips recorded before 9 November have no voice (the guide used the device's speech
+then, which the recorder cannot capture): record them again to have it.
 
 The recorder only exists in the dev server (`npm run dev`), not in the published app.
 
@@ -75,5 +75,4 @@ Suggested cut, about 2:50:
 
 ## If you get access to a Quest later
 
-Recording on the headset (Meta button → Camera → Record video) shows real hands
-and the headset's own voice. `QUEST-TEST.md` has the checklist for that session.
+Recording on the headset (Meta button → Camera → Record video) shows real hands. `QUEST-TEST.md` has the checklist for that session.

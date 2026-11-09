@@ -6,8 +6,8 @@
 #   npx @iwsdk/cli dev up --allow-browser-automation   (or: dev restart --allow-browser-automation)
 # Then:  npm run demo:record
 #
-# The device voice is not recorded (it is system speech, not Web Audio);
-# music, sounds and the in-scene subtitles are.
+# Music, sounds, the guide's recorded voice (Web Audio) and the in-scene
+# subtitles are recorded. The device-voice fallback is not (it is system speech).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

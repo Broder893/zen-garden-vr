@@ -22,7 +22,7 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 - [ ] There is an **Enter VR** button (top). Press it.
 - [ ] The table is **in front of you**, at a comfortable height for someone seated. If it's turned or off-center: hold the **Meta button** on your right hand to recenter.
 - [ ] The visit starts with **closed eyes**: about a second of dark, then two eyelids open over about 2 seconds while the light **warms up** and the firefly arrives from the distance. Comfortable, or unsettling?
-- [ ] You hear the **music** (soft drone + chimes) and the **voice** reading the first subtitle. *(If there's no voice but the subtitles are there: note it, it's an important point.)*
+- [ ] You hear the **music** (soft drone + chimes) and the **voice** reading the first subtitle: a calm recorded voice, not the headset's robotic one. *(If there's no voice but the subtitles are there, or the robotic voice: note it, it's an important point.)*
 
 ## 2. Tutorial: seed and water
 
@@ -54,6 +54,7 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 - [ ] Press the **Meta button** (system menu) during the meditation: **sound stops** and the session pauses. Come back: everything is quiet until you pinch the stone.
 - [ ] At the start the firefly says "Close your eyes. Let us breathe together." and two **eyelids** close over about 2 seconds; the music softens. The breathing light, its words and the subtitles stay visible through them. Any discomfort with the lids fixed to your view?
 - [ ] At the end, with the eyes still closed, a deeper bell, "Open your eyes.", the lids open in about 2 seconds, then "Well done…".
+- [ ] While the narrator speaks the music **dips** a little; with the eyes closed the music is muffled but her voice stays **clear**. Does every spoken line match its subtitle?
 - [ ] During a closed-eye session, hold up an **open hand** (palm out): the eyes open at once and the session goes on. Next session: **look up** at the small ring of light above (2 seconds): same.
 - [ ] If the tree was about to grow (or a level was reached) during the session, the change is simply there when the eyes open.
 - [ ] Press the **Meta button** with the eyes closed: back in the garden, the eyes are open (or open within a second).
