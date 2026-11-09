@@ -106,7 +106,7 @@ never required.
   trunk at least 9 cm from every glowing shoot. `?bonsai=classic` shows the earlier
   procedural tree. Everything else is procedural (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. Models merge their parts per material and
-  particles are instanced; idle sparkles are not drawn: at most about 77 draw calls and
+  particles are instanced; idle sparkles are not drawn: at most about 75 draw calls and
   33k triangles per eye, with every unlock, the tree in bloom and the shared tree in
   blossom at night in the rain. The garden's own textures take about 15 MB.
 - **Performance and quality** (`src/perf.ts`): the Comfort panel's *Visual quality* is
@@ -126,7 +126,7 @@ never required.
   device at High and Medium and fails above 80 draw calls or 100k triangles per eye, or
   64 MB of GPU textures (measured at the WebGL uploads; the emulator's controller
   models, about 43 MB, are shown apart: a Quest used with hands never loads them).
-  Last run: 77 calls, 33k triangles, 57 MB (14.5 MB of it the garden's).
+  Last run: 75 calls, 33k triangles, 57 MB (14.5 MB of it the garden's).
 - **Shared tree service** (`server/shared-tree/`): a Cloudflare Worker with a D1
   database, a few dozen lines; anonymous counts, daily caps per garden, a rate limit per
   connection kept only in memory, CORS limited to the app. The app reads its address from

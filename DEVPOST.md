@@ -48,7 +48,7 @@ Zen Garden is that ritual in a headset: a little garden on a table in front of y
 
 Zen Garden is a WebXR app built with Meta's Immersive Web SDK (IWSDK) and Three.js: it opens from a link in the Quest browser, nothing to install. The logic is a set of small ECS systems, each with one job.
 
-Everything is original. The bonsai is five low-poly Blender models, one per stage, tinted by code; the rest is procedural, merged per material: at most about 77 draw calls and 33k triangles per eye, checked by a script on the emulator's Quest 3 profile. Quality starts conservative and lowers itself if the headset struggles. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved locally with a versioned, validated format. The shared tree talks to a tiny Cloudflare Worker that only counts anonymous cares; if it is unreachable, the garden carries on offline.
+Everything is original. The bonsai is five low-poly Blender models, one per stage, tinted by code; the rest is procedural, merged per material: at most about 75 draw calls and 33k triangles per eye, checked by a script on the emulator's Quest 3 profile. Quality starts conservative and lowers itself if the headset struggles. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved locally with a versioned, validated format. The shared tree talks to a tiny Cloudflare Worker that only counts anonymous cares; if it is unreachable, the garden carries on offline.
 
 We had no headset, so everything was built and tested in IWER, IWSDK's WebXR emulator, with scripted hands playing every step.
 

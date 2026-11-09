@@ -65,6 +65,9 @@ const PLACES: Record<number, { shoots: [string, string][]; healthy: [string, V3,
   },
 };
 
+/** Parts every stage model repeats; only the pot model's copy is used. */
+const SHARED_POT_PARTS = new Set(['pot', 'soil', 'moss', 'glow', 'seed']);
+
 /** Excess water at which the model's puddle starts to show, and where it is full size. */
 const PUDDLE_FROM = 0.1;
 const PUDDLE_FULL = 0.5;
@@ -197,7 +200,8 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
           continue;
         }
         const mesh = child as Mesh;
-        if (!mesh.isMesh) continue;
+        // Every model repeats the pot, soil and moss: the shared ones from the seed model are enough.
+        if (!mesh.isMesh || SHARED_POT_PARTS.has(child.name)) continue;
         const mat = mesh.material as Material;
         // Health and season tint materials by these names (a copy: the cached model stays as loaded).
         if (/^foliage/.test(mat.name)) mesh.material = Object.assign(mat.clone(), { name: 'Leaf' });
