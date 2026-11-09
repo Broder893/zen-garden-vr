@@ -1,4 +1,4 @@
-# Devpost submission: Zen Garden
+# Devpost submission: Bloom Break
 
 Text ready to paste into the Devpost form. Fields in the order the form asks for them.
 
@@ -6,11 +6,11 @@ Text ready to paste into the Devpost form. Fields in the order the form asks for
 
 ## Name
 
-Zen Garden
+Bloom Break
 
 ## Tagline (max 140 characters)
 
-A pocket zen garden for your work breaks: grow a bonsai with your bare hands, breathe with a firefly, and come back to watch it bloom.
+Take a breathing break with a bonsai: tend it with your bare hands, breathe with a firefly, and come back to watch it bloom.
 
 ## Category / Division
 
@@ -31,7 +31,7 @@ A pocket zen garden for your work breaks: grow a bonsai with your bare hands, br
 
 We take our breaks on the screen we work on, and come back more tired. We wanted a real break: hands busy with something small and alive, and a moment to breathe.
 
-Zen Garden is that ritual in a headset: a little garden on a table in front of you, where a bonsai grows from a seed to bloom. It fits in a five to ten minute break, sitting down.
+Bloom Break is that ritual in a headset: a little garden on a table in front of you, where a bonsai grows from a seed to bloom. It fits in a five to ten minute break, sitting down.
 
 ### What it does
 
@@ -46,7 +46,7 @@ Zen Garden is that ritual in a headset: a little garden on a table in front of y
 
 ### How we built it
 
-Zen Garden is a WebXR app built with Meta's Immersive Web SDK (IWSDK) and Three.js: it opens from a link in the Quest browser, nothing to install. The logic is a set of small ECS systems, each with one job.
+Bloom Break is a WebXR app built with Meta's Immersive Web SDK (IWSDK) and Three.js: it opens from a link in the Quest browser, nothing to install. The logic is a set of small ECS systems, each with one job.
 
 Everything is original. The bonsai is five low-poly Blender models, one per stage, tinted by code; the rest is procedural, merged per material: at most about 75 draw calls and 33k triangles per eye, checked by a script on the emulator's Quest 3 profile. Quality starts conservative and lowers itself if the headset struggles. All sound is synthesised live with the Web Audio API, so the app ships no audio files; the guide speaks through the device's speech synthesis. Progress is saved locally with a versioned, validated format. The shared tree talks to a tiny Cloudflare Worker that only counts anonymous cares; if it is unreachable, the garden carries on offline.
 

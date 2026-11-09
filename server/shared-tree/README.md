@@ -1,6 +1,6 @@
 # Shared tree service
 
-The tiny online service behind the Zen Garden's shared tree (PROGETTO.md, point 8):
+The tiny online service behind Bloom Break's shared tree (PROGETTO.md, point 8):
 a Cloudflare Worker with a D1 (SQLite) database. Free tier, no credit card.
 
 Live at `https://zen-shared-tree.zen-shared-tree.workers.dev` (database `zen-shared-tree`).

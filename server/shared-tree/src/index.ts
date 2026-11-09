@@ -1,6 +1,6 @@
 /**
  * The shared tree's tiny service (PROGETTO.md, point 8): anonymous, asynchronous
- * care counts that every visitor of the Zen Garden adds to.
+ * care counts that every visitor of Bloom Break adds to.
  *
  *   GET  /tree       -> { day, today, gardens, total }
  *   POST /tree/care  { garden, count? } -> { day, today, gardens, total, accepted }

@@ -18,7 +18,7 @@ the can doesn't grab", "subtitle too high"). A phone photo of the notes is fine.
 
 ## 1. Entering
 
-- [ ] The page shows the table and the "Zen Garden" card.
+- [ ] The page shows the table and the "Bloom Break" card.
 - [ ] There is an **Enter VR** button (top). Press it.
 - [ ] The table is **in front of you**, at a comfortable height for someone seated. If it's turned or off-center: hold the **Meta button** on your right hand to recenter.
 - [ ] The light **warms up** gently (a few seconds), the firefly arrives from the distance.

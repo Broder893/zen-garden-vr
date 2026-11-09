@@ -54,8 +54,8 @@ Suggested cut, about 2:50:
 | Time | From | Add as text on screen |
 | --- | --- | --- |
 | (montage, optional) | the same garden by day, sunset and night (`?time=`), autumn leaves, the snowy tree (`?season=winter`), a shower (`?weather=rain`) | *A garden that follows your day and the seasons.* |
-| (opening, optional) | look around the garden at sunset, then fingertips raking the sand | *A pocket zen garden for your work breaks* |
-| 0:00–0:08 | start of `demo-main` (lights warming up) | *Zen Garden — a pocket garden for your work breaks* |
+| (opening, optional) | look around the garden at sunset, then fingertips raking the sand | *A breathing break with a bonsai* |
+| 0:00–0:08 | start of `demo-main` (lights warming up) | *Bloom Break — a breathing break with a bonsai* |
 | 0:08–0:30 | planting (keep the ghost pinch next to the seed in frame) | *Hands only. The firefly shows the gesture in light.* |
 | 0:30–1:00 | first watering, growth | *Tilt to pour. The tree grows when it's cared for.* |
 | 1:00–1:40 | pruning, watering, bloom (speed up 1.5–2× if long) | *Trim the wild shoots to shape your bonsai.* |
@@ -69,7 +69,7 @@ Suggested cut, about 2:50:
 ## 3. Publish
 
 - YouTube: visibility **Public**, English title, e.g.
-  *Zen Garden — hands-only VR bonsai & breathing (Meta VR Start 2026)*.
+  *Bloom Break — hands-only VR bonsai & breathing (Meta VR Start 2026)*.
 - In the description: the app link and the tagline.
 - Paste the video link into `DEVPOST.md` and the Devpost form.
 

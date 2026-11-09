@@ -1,7 +1,7 @@
-# Zen Garden
+# Bloom Break
 
-A pocket zen garden for your work breaks: grow a bonsai with your bare hands,
-breathe with a firefly, and come back to watch it bloom.
+Take a breathing break with a bonsai: tend it with your bare hands, breathe with a
+firefly, and come back to watch it bloom.
 
 **Try it on Meta Quest:** open **https://broder893.github.io/zen-garden-vr/** in the
 Quest Browser and press **Enter VR**. Hands only, seated, 5 to 10 minutes, sound on.
