@@ -10,8 +10,9 @@ import { mergeByMaterial } from './lib/merge.js';
 /**
  * A small flower that grows in the sand, one per return visit.
  * Origin at the sand contact (y = 0). Envelope ~0.06 x 0.09 x 0.06 m.
- * Runtime contract: the "Petals" material is recoloured per placement
- * (VisitFlowerSystem clones it), so petals keep their own mesh.
+ * Runtime contract: VisitFlowerSystem draws every placed flower as one
+ * instanced mesh per merged part, tinting the meshes under "Petals" per
+ * instance (their material stays white), so petals keep their own mesh.
  */
 export function createVisitFlower(): Group {
   const root = new Group();

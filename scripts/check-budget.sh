@@ -68,13 +68,15 @@ device=$(cli xr status | grep -o '"deviceName": "[^"]*"' | head -1 | cut -d'"' -
 echo "[budget] emulated device: ${device:-unknown}"
 RESULTS=$(mktemp)
 
-# The heaviest garden: every unlock, the tree in bloom, the shared tree in full
-# blossom (counts seeded on this device), at night in the rain.
+# The heaviest garden: every unlock, the tree in bloom, all 7 visit flowers, the
+# shared tree in full blossom (counts seeded on this device), at night in the rain.
 worst_garden() {
   js "localStorage.setItem('zen-garden-vr/shared', JSON.stringify({v:1, garden: crypto.randomUUID(), introShown: true, pending: 0, cache: {day: new Date().toISOString().slice(0,10), today: 40, gardens: 9, total: 400}}))"
   goto_metered "$1"; enter; seat; sleep 3
   B=$(entity Bonsai)
   set_bonsai planted true; set_bonsai xp 400; set_bonsai prunedMask 255; set_bonsai water 1
+  # A regular: 8 visits, so all 7 visit flowers are in the sand.
+  js "__zen.persistence.save.visits = 8"
   # New unlocks wait for closed eyes (src/eyelids.ts): close them a moment so they land.
   js "__zen.lids.holdFor('test', 1)"
   sleep 5

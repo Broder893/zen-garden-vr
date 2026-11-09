@@ -125,8 +125,9 @@ never required.
   beyond the hills, so no edge of the world shows in any direction.
   Everything else is procedural (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. Models merge their parts per material and
-  particles are instanced; idle sparkles are not drawn: at most about 79 draw calls and
-  36k triangles per eye, with every unlock, the tree in bloom and the shared tree in
+  particles and the seven visit flowers are instanced (3 draw calls however many have
+  grown); idle sparkles are not drawn: about 79-81 draw calls and 42k triangles per eye,
+  with every unlock, the tree in bloom, all seven visit flowers and the shared tree in
   blossom at night in the rain. The garden's own textures take about 15 MB.
 - **Eyelids** (`src/eyelids.ts`, `src/eyelid-shader.ts`): one quad fixed to the headset,
   15 cm in front of the eyes, with a shader drawing two almond-edged lids (or a plain
@@ -150,11 +151,12 @@ never required.
   the worst frame, draw calls, triangles and the level behind the table.
 - **Budget check on the Quest 3 profile** (`npm run check:budget`, which keeps and
   restores the developer's saved garden;
-  `scripts/check-budget.sh`): plays the heaviest moments in the emulator's Meta Quest 3
+  `scripts/check-budget.sh`): plays the heaviest moments (8 visits, so all seven flowers) in the emulator's Meta Quest 3
   device at High and Medium and fails above 80 draw calls or 100k triangles per eye, or
   64 MB of GPU textures (measured at the WebGL uploads; the emulator's controller
   models, about 43 MB, are shown apart: a Quest used with hands never loads them).
-  Last run: 79 calls, 36k triangles, 57 MB (14.5 MB of it the garden's).
+  Last run: 81 calls at High and 79 at Medium, 42k triangles, 57 MB (14.5 MB of it the
+  garden's).
 - **Shared tree service** (`server/shared-tree/`): a Cloudflare Worker with a D1
   database, a few dozen lines; anonymous counts, daily caps per garden, a rate limit per
   connection kept only in memory, CORS limited to the app. The app reads its address from
