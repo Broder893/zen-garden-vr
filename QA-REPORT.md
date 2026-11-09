@@ -174,6 +174,7 @@ computer (their names do not resolve here), so nothing was sent to them.
    recording, so one line can come in a different voice.
 9. First load about 2.2 MB compressed: about 14 s on slow 4G, with the card shown and
    no progress indicator.
+    **Fixed:** the card shows "Loading your garden…" from the first moment, then the share of the garden's files loaded (models, sounds: the engine's LoadingManager), and hides it when the garden runs, or for the error line (`index.html`, `src/loading-line.ts`; commit 241a251). Emulator, files slowed: 0% → 8% … 99% over 2 s, then hidden; a failed start, hidden with the error line shown. The code download comes before the percentage can show: the line stays without a number until then. Budget 78-79.
 10. The frame time is not capped: after a long pause the first frame can be minutes
     long. Nothing broke when tested; capping it (about 0.1 s) would be safer.
 11. The service's GET is not rate-limited (cost only; the data is public counts).
