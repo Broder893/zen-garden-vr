@@ -9,11 +9,10 @@ noticeable, **P2** is minor (listed, not fixed).
 | | P0 | P1 | P2 |
 |---|---|---|---|
 | Found | 0 | 1 | 15 |
-| Fixed | 0 | 1 (`d2a44a0`) | listed only |
+| Fixed | 0 | 1 (`d2a44a0`, `7df2a09`) | listed only |
 
-**Decision needed (P1-1, second part):** if the start fails twice in a row, the page
-still stays on its card with no message. A short line on the card would need new
-text: see [Decision](#decision-a-message-when-the-garden-cannot-start).
+P1-1 is fixed in two parts: the failed start is retried once, and if it fails again
+the card says so (decided on 9 November).
 
 ## Phase 1: automatic checks
 
@@ -151,8 +150,8 @@ computer (their names do not resolve here), so nothing was sent to them.
 - **Why:** the models are loaded as critical assets before the world starts, and
   `World.create(...)` in `src/index.ts` has no `catch`. (The Blender bonsai's own
   fallback to the procedural tree never runs in this case.)
-- **Fix:** the start is retried once (see Fixes); a message for a second failure
-  needs your decision.
+- **Fix:** the start is retried once, and a second failure shows a line on the card
+  (see Fixes).
 
 ### P2 (listed, not fixed)
 
@@ -191,19 +190,16 @@ One commit per problem, each after typecheck, build, `npm test` and check:budget
 | Problem | Commit | Fix | Checked |
 |---|---|---|---|
 | P1-1 | `d2a44a0` | `src/index.ts` catches the failed start, logs it and reloads once, 1.5 s later; the retry time is kept for the tab, so a start that keeps failing is retried at most once every 10 minutes (no loop). No change to the look or the texts. | emulator: one failed model, the second load starts the garden (3 s); a model that always fails, two loads and then it stops; a new failure within 10 minutes, no retry. Budget 77-79, within. |
+| P1-1, message | `7df2a09` | a hidden line on the card (`#load-error`), shown when the start fails with no retry left (or the retry cannot be tracked). | emulator: a model that always fails, two loads then the line; one failure, no line; a normal load, no line. Budget 77-79, within. |
 
 Other commits of this check: `e0e9896` (unit tests, the change queue moved to a pure
 module), `f488b06` (QA helpers `goto-watch.mjs` and `net.mjs`).
 
 ## Decision: a message when the garden cannot start
 
-After the retry, a start that fails again still leaves the card without a button.
-Options:
-
-1. **A line on the card** (my suggestion), shown only in that case, e.g. "The garden
-   could not load. Check the connection and reload the page." New text, so it is
-   your call.
-2. **Leave it**: a second failure in a row is rare on a working connection.
+Decided: a line on the card, shown only when the start fails again after its retry:
+"The garden could not load. Check the connection and reload the page." (`index.html`,
+`src/index.ts`; `artifacts/qa/load-error.png`).
 
 ## Not verified here
 
