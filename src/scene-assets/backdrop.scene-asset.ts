@@ -18,9 +18,21 @@ import { mergeByMaterial } from './lib/merge.js';
  * a bamboo fence behind. Origin on the floor under the table's centre, -Z is
  * away from the player. Everything is plain geometry; the raking is drawn by
  * the ground's shader (no textures). About 3k triangles, 4 draw calls.
+ *
+ * The ground is one disc wide enough to pass under the whole forest: raked
+ * sand in the middle, the season's grass or snow from about 6-8 m out (its
+ * material colour, set by SeasonSystem), fading into the sky beyond the hills
+ * (DomeFade on the scene node). Nowhere to see the edge of the world.
  */
 
-const GROUND_RADIUS = 8;
+/** Out past the forest's farthest trunks (13 m) and the foot of its hills (19.5 m). */
+const GROUND_RADIUS = 21;
+/** The ground disc's material: its colour is the season's (src/season.ts). */
+export const GROUND_MATERIAL = 'ground_season';
+/** The raked sand in the middle (the material colour is the grass around it). */
+const SAND = '#d6c7a3';
+/** Sand gives way to the ground between these distances (m), with a wavy edge. */
+const SAND_EDGE: [number, number] = [5.6, 8];
 /** Rocks: [x, z, radius] in the asset's frame (also ringed by the rake pattern). */
 const ROCKS: [number, number, number][] = [
   [-1.9, -2.2, 0.42],
@@ -31,9 +43,14 @@ const FENCE_RADIUS = 4.2;
 const FENCE_HALF_ANGLE = (70 * Math.PI) / 180;
 const POLE_SPACING = 0.12;
 
-/** Sand whose shader draws raked grooves: rings around the centre and around each rock. */
+/**
+ * The ground: raked sand in the middle (grooves ringing the centre and each
+ * rock), the season's ground colour (material colour) around it.
+ */
 function rakedSandMaterial(): MeshStandardMaterial {
-  const mat = new MeshStandardMaterial({ color: '#d6c7a3', roughness: 1, metalness: 0 });
+  const mat = new MeshStandardMaterial({ color: '#4f7f3a', roughness: 1, metalness: 0 });
+  mat.name = GROUND_MATERIAL;
+  const sand = new Color(SAND);
   const rocks = ROCKS.map(([x, z, r]) => `vec3(${x.toFixed(2)}, ${z.toFixed(2)}, ${r.toFixed(2)})`).join(', ');
   mat.onBeforeCompile = (shader) => {
     shader.vertexShader = shader.vertexShader
@@ -44,7 +61,8 @@ function rakedSandMaterial(): MeshStandardMaterial {
         '#include <common>',
         `#include <common>
 varying vec2 vRakePos;
-const vec3 RAKE_ROCKS[3] = vec3[3](${rocks});`,
+const vec3 RAKE_ROCKS[3] = vec3[3](${rocks});
+const vec3 RAKE_SAND = vec3(${sand.r.toFixed(4)}, ${sand.g.toFixed(4)}, ${sand.b.toFixed(4)});`,
       )
       .replace(
         '#include <color_fragment>',
@@ -61,7 +79,11 @@ const vec3 RAKE_ROCKS[3] = vec3[3](${rocks});`,
   float g = fract(ring / 0.13);
   float groove = smoothstep(0.3, 0.5, g) * (1.0 - smoothstep(0.5, 0.7, g));
   groove *= 1.0 - smoothstep(4.5, 7.5, d);
-  diffuseColor.rgb *= 1.0 - 0.2 * groove;
+  // Sand in the middle, the season's ground (diffuseColor) around it; a wavy, soft border.
+  float a = atan(p.y, p.x);
+  float edge = d + 0.35 * sin(a * 7.0) + 0.2 * sin(a * 13.0 + 1.3);
+  float sandMix = 1.0 - smoothstep(${SAND_EDGE[0].toFixed(1)}, ${SAND_EDGE[1].toFixed(1)}, edge);
+  diffuseColor.rgb = mix(diffuseColor.rgb, RAKE_SAND * (1.0 - 0.2 * groove), sandMix);
 }`,
       );
   };
@@ -70,7 +92,7 @@ const vec3 RAKE_ROCKS[3] = vec3[3](${rocks});`,
 }
 
 function createGround(): Mesh {
-  const geo = new CircleGeometry(GROUND_RADIUS, 48);
+  const geo = new CircleGeometry(GROUND_RADIUS, 72);
   geo.rotateX(-Math.PI / 2); // lay it flat: the shader reads position.xz
   const ground = new Mesh(geo, rakedSandMaterial());
   ground.name = 'Ground';

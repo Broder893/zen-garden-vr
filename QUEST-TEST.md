@@ -80,7 +80,8 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 ## 4d. Atmosphere
 
 - [ ] The sky matches the time of day (day 8-17, sunset 6-8 and 17-20, night otherwise); at night fireflies drift around the garden. Comfortable brightness by day?
-- [ ] The tree's colours match the season (in November: red autumn leaves, and a few fallen leaves on the soil). Open `...?season=winter` with a grown tree: snow on the canopy. The forest beyond the fence changes too (spring pink, summer green, autumn rust, winter frost).
+- [ ] The tree's colours match the season (in November: red autumn leaves, and a few fallen leaves on the soil). Open `...?season=winter` with a grown tree: snow on the canopy. The forest beyond the fence changes too (spring pink, summer green, autumn rust, winter frost), and so does the ground under it (green, brown in autumn, snow in winter).
+- [ ] Look all around, up and down: the trees and hills always stand on ground, with no gap or edge below them.
 - [ ] Each stage is its own model (sprout, young, mature, in bloom): does every growth step read clearly as the same tree getting bigger? Before planting, a warm glow in the empty pot.
 - [ ] Open `...?weather=rain`: after a few seconds rain falls, you hear it, the firefly says "A gentle rain. It is watering your tree." and the soil darkens.
 - [ ] Open `...?weather=breeze`: the tree sways gently, wind in the bamboo. No discomfort?

@@ -118,6 +118,9 @@ never required.
   procedural tree. The forest around the garden is a Blender model too
   (`public/models/forest.glb`, two meshes, vertex colours, no textures): its canopy
   turns blossom pink, green, rust or frosty white with the season (`src/season.ts`).
+  The ground is one 42 m disc under the whole forest, the same mesh as the raked sand:
+  sand in the middle, then grass or snow in the season's colour, fading into the sky
+  beyond the hills, so no edge of the world shows in any direction.
   Everything else is procedural (`src/scene-assets/`), composed in
   `public/scenes/main.iwsdk.scene.json`. Models merge their parts per material and
   particles are instanced; idle sparkles are not drawn: at most about 79 draw calls and

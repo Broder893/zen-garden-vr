@@ -69,8 +69,8 @@
       },
       "components": {
         "com.iwsdk.components.DomeFade": {
-          "start": 5,
-          "end": 8
+          "start": 15,
+          "end": 21
         }
       }
     },
