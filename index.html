@@ -61,6 +61,15 @@
         font-size: 13px;
         color: #ffd76a;
       }
+      /* While the garden loads (src/loading-line.ts adds the percentage). */
+      .intro .loading {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #e9ddc0;
+      }
+      .intro .loading[hidden] {
+        display: none;
+      }
       /* Shown only when the garden cannot start, even after one retry (src/index.ts). */
       .intro .load-error {
         margin-top: 10px;
@@ -86,6 +95,7 @@
         <li>5 to 10 minutes</li>
         <li>Sound on</li>
       </ul>
+      <p id="loading" class="loading" aria-live="polite">Loading your garden…</p>
       <p id="load-error" class="load-error" role="alert" hidden>
         The garden could not load. Check the connection and reload the page.
       </p>

@@ -10,6 +10,7 @@ import { DayNightSystem } from './day-night.js';
 import { EntranceSystem } from './entrance.js';
 import { EyelidSystem } from './eyelids.js';
 import { FirstMomentsSystem } from './first-moments.js';
+import { startLoadingLine } from './loading-line.js';
 import { GuideSystem } from './guide.js';
 import { GazeCareSystem } from './gaze-care.js';
 import { HealthSystem } from './health.js';
@@ -33,10 +34,13 @@ const RETRY_KEY = 'zen-garden-vr/start-retry';
 /** A failed start is retried once, unless one was retried this recently (no reload loop). */
 const RETRY_GAP_MS = 10 * 60 * 1000;
 
+const loading = startLoadingLine();
+
 World.create(
   document.getElementById('scene-container') as HTMLDivElement,
   projectOptions,
 ).then((world) => {
+  loading.stop();
   try {
     sessionStorage.removeItem(RETRY_KEY);
   } catch {
@@ -104,6 +108,7 @@ World.create(
   // start: try the whole start once more, a moment later. A second failure shows a
   // line on the page's card (index.html).
   console.error('[zen] the garden could not start', err);
+  loading.stop();
   let retried = true;
   try {
     retried = Date.now() - Number(sessionStorage.getItem(RETRY_KEY) ?? 0) < RETRY_GAP_MS;
