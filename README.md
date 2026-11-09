@@ -39,6 +39,13 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   hand (left or right: both tools move to that side) and **hold to select**, which
   replaces every pinch with a hand held still beside the object (or a steady look at the
   seed or stone). Settings are saved separately from the garden.
+- **No hands? Look.** If hand tracking is off or controllers are in use, the firefly
+  says so in one line ("I cannot see your hands. Look at things to use them.") and the
+  garden switches to gaze care: a steady two-second look plants the seed, sends the can
+  over the tree to pour, sends the shears to trim the next glowing shoot, pours into the
+  shared tree's basin, or starts the breathing session. A ring of light fills while you
+  look, so a glance never triggers anything; all lines speak of looking. When hands come
+  back, so do the pinch lines.
 - **A zen garden around you.** The table stands in a raked sand garden with mossy rocks,
   a bamboo fence and a stone lantern. It follows the real clock (clear day 8-17, golden
   sunset 6-8 and 17-20, night with fireflies) and the season (spring blossoms, summer
@@ -140,7 +147,8 @@ Address options for demos: `?fresh` starts a new garden, `?nextvisit` counts the
 next VR entry as a return visit without waiting (both are removed from the address
 right after use); `?season=spring|summer|autumn|winter`, `?time=day|sunset|night` and
 `?weather=rain|breeze` force the atmosphere; `?quality=high|medium|low` forces the visual
-quality and `?debug` shows the performance readout.
+quality and `?debug` shows the performance readout; `?input=none|controllers` acts as
+if hand tracking were off (gaze care) or controllers were in use.
 
 ## Credits
 

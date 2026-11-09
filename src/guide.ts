@@ -31,6 +31,7 @@ import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { BreathBreakSystem } from './breath-break.js';
 import { ComfortSystem } from './comfort.js';
 import { HealthSystem } from './health.js';
+import { InputModeSystem } from './input-mode.js';
 import { SharedTreeSystem } from './shared-tree.js';
 import { WeatherSystem } from './weather.js';
 import { Health, HealthState } from './save/plant-health.js';
@@ -91,6 +92,15 @@ export const LINES = {
   meditateHintDwell: 'Any time, look at the glowing stone to breathe.',
   meditatePausedDwell: 'Paused. Look at the stone to continue.',
   putBack: 'Lower the tool to the table to let it go.',
+  // Gaze care (src/input-mode.ts, src/gaze-care.ts): no tracked hands.
+  plantSeedGaze: 'Welcome. Look at the glowing seed to plant it.',
+  pickCanGaze: 'Look at the can for a moment: it will water the tree.',
+  pickShearsGaze: 'Look at the shears for a moment: they will trim.',
+  restGaze: 'Rest, or look at the glowing stone to breathe.',
+  watchTool: 'Watch: the tool does the work.',
+  handsMissing: 'I cannot see your hands. Look at things to use them.',
+  controllersOn: 'Put the controllers down for your hands, or look at things.',
+  handsBack: 'There are your hands again.',
   comfortHint: 'No pinch? Poke Comfort, then Hold to select.',
   // Breathing breaks during care (BreathBreakSystem).
   breakInvite: 'Let us pause a moment to breathe together.',
@@ -145,6 +155,27 @@ const DWELL: Partial<Record<LineId, LineId>> = {
   meditateHint: 'meditateHintDwell',
   meditatePaused: 'meditatePausedDwell',
   tenseBreathe: 'tenseBreatheDwell',
+};
+/** Lines that need hands, and what to say instead when the garden is used by looking. */
+const GAZE: Partial<Record<LineId, LineId>> = {
+  plantSeed: 'plantSeedGaze',
+  plantSeedHelp: 'plantSeedGaze',
+  pickCan: 'pickCanGaze',
+  pickCanHelp: 'pickCanGaze',
+  tiltCan: 'pickCanGaze',
+  tiltCanHelp: 'pickCanGaze',
+  moveSpout: 'pickCanGaze',
+  pickShears: 'pickShearsGaze',
+  pickShearsHelp: 'pickShearsGaze',
+  touchShoot: 'pickShearsGaze',
+  touchShootHelp: 'pickShearsGaze',
+  putBack: 'watchTool',
+  rest: 'restGaze',
+  meditateHint: 'meditateHintDwell',
+  meditatePaused: 'meditatePausedDwell',
+  tenseBreathe: 'tenseBreatheDwell',
+  // An open hand cannot be shown: the invitation simply stands.
+  breakSkip: 'breakInvite',
 };
 const NO_SHOOTS: string[] = [];
 /** Excess water above which the firefly asks to wait rather than care. */
@@ -258,6 +289,8 @@ export class GuideSystem extends createSystem({
   private persistence?: PersistenceSystem;
   private entrance?: EntranceSystem;
   private comfort?: ComfortSystem;
+  private inputMode?: InputModeSystem;
+  private inputChanges = 0;
   private breathBreak?: BreathBreakSystem;
 
   init(): void {
@@ -399,7 +432,7 @@ export class GuideSystem extends createSystem({
     const help = HELP[this.task];
     this.line = help && this.taskTime >= STUCK_SECONDS ? help : this.task;
     // A player who cannot pinch never plants the seed: show them the Comfort panel.
-    if (this.task === 'plantSeed' && this.taskTime >= COMFORT_HINT_SECONDS && !this.comfort?.settings.dwell) {
+    if (this.task === 'plantSeed' && this.taskTime >= COMFORT_HINT_SECONDS && !this.comfort?.settings.dwell && !this.inputMode?.gaze) {
       this.line = 'comfortHint';
       const opener = this.comfort?.openerObject;
       if (opener) this.targetOf(opener, 0.02);
@@ -447,7 +480,7 @@ export class GuideSystem extends createSystem({
       }
       if (kind === 'pinch' && this.taskTime < PINCH_HINT_DELAY) kind = null;
       // Hands-free players neither pinch nor tilt: the dwell ring guides them instead.
-      if (this.comfort?.settings.dwell) kind = null;
+      if (this.comfort?.settings.dwell || this.inputMode?.gaze) kind = null;
     }
     if (kind && obj) {
       obj.getWorldPosition(this.hintAt);
@@ -477,6 +510,14 @@ export class GuideSystem extends createSystem({
   }
 
   private watchEvents(bonsai: Entity): void {
+    // Hands gone (tracking off) or controllers picked up: say once how to carry on.
+    this.inputMode ??= this.world.getSystem(InputModeSystem);
+    const changes = this.inputMode?.changes ?? 0;
+    if (changes !== this.inputChanges) {
+      this.inputChanges = changes;
+      const mode = this.inputMode?.mode;
+      this.showEvent(mode === 'none' ? 'handsMissing' : mode === 'controllers' ? 'controllersOn' : 'handsBack', EVENT_SECONDS + 2);
+    }
     const stage = bonsai.getValue(Bonsai, 'stage') ?? 0;
     if (this.lastStage >= 0 && stage !== this.lastStage) {
       if (stage === BonsaiStage.Young) this.showEvent('grewYoung', EVENT_SECONDS + 1);
@@ -637,7 +678,9 @@ export class GuideSystem extends createSystem({
   }
 
   private setLine(lineId: LineId): void {
-    const id = (this.comfort?.settings.dwell && DWELL[lineId]) || lineId;
+    const id = this.inputMode?.gaze
+      ? GAZE[lineId] ?? DWELL[lineId] ?? lineId
+      : (this.comfort?.settings.dwell && DWELL[lineId]) || lineId;
     const text = LINES[id];
     if (text === this.shownText) return;
     this.shownText = text;

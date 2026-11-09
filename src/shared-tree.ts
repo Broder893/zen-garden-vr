@@ -103,7 +103,8 @@ export class SharedTreeSystem extends createSystem({
   private shownKey = -1;
   private thanked = false;
   private calm = 0;
-  private basinPos = new Vector3();
+  /** The basin's water surface (world), updated every frame once the basin is found. */
+  readonly basinPos = new Vector3();
   private treeTop = new Vector3();
   private from = new Vector3();
   private head = new Vector3();
@@ -152,6 +153,11 @@ export class SharedTreeSystem extends createSystem({
   /** The guide registers itself (it is created after this system). */
   attachGuide(guide: Guide): void {
     this.guide = guide;
+  }
+
+  /** True once the basin is in the scene (basinPos is then valid). */
+  get hasBasin(): boolean {
+    return !!this.basin;
   }
 
   /** True when `at` (a spout) is over the basin: for hands-free pouring (DwellSystem). */

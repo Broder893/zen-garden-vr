@@ -23,6 +23,7 @@ import {
 } from './garden-components.js';
 import { GuideSystem } from './guide.js';
 import { MeditationSystem } from './meditation.js';
+import { InputModeSystem } from './input-mode.js';
 import { SharedTreeSystem } from './shared-tree.js';
 
 /** Seconds a hand must stay by an object to select it. */
@@ -109,6 +110,7 @@ export class DwellSystem extends createSystem({
   private center = new Vector3();
   private toward = new Vector3();
   private shared?: SharedTreeSystem;
+  private inputMode?: InputModeSystem;
   private ringAt = new Vector3();
   private m = new Matrix4();
   private m2 = new Matrix4();
@@ -140,8 +142,11 @@ export class DwellSystem extends createSystem({
 
   update(delta: number): void {
     const on = this.comfort?.settings.dwell ?? false;
+    // Without tracked hands the seed and stone answer a look even with "hold to select" off.
+    this.inputMode ??= this.world.getSystem(InputModeSystem);
+    const gaze = on || !!this.inputMode?.gaze;
     this.player.head.getWorldPosition(this.head);
-    if (!on) {
+    if (!gaze) {
       this.releaseAll();
       this.ring.update(delta, 0, this.ringAt, this.head, RING_COLOR);
       this.progress = 0;
@@ -150,8 +155,14 @@ export class DwellSystem extends createSystem({
     this.player.head.getWorldQuaternion(this.headQuat);
     this.forward.set(0, 0, -1).applyQuaternion(this.headQuat);
 
+    // The setting turned off while a tool was held: let it go (looks keep working).
+    if (!on && (this.holds[0] || this.holds[1])) {
+      if (this.holds[0]) this.release(0);
+      if (this.holds[1]) this.release(1);
+    }
     this.frameBest = 0;
-    for (let side = 0; side < 2; side++) {
+    // Hands (or controllers) hold to select only with the setting on.
+    for (let side = 0; side < 2 && on; side++) {
       const space = side === 0 ? this.player.gripSpaces.left : this.player.gripSpaces.right;
       const allowed = this.comfort?.usesHand(side === 0 ? 'left' : 'right') ?? true;
       const tracked = allowed && this.trackedHand(space);

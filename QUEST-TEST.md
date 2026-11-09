@@ -111,6 +111,17 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] **Visual quality Low**: fewer fireflies at night, fewer raindrops, the rocks and the far lantern disappear. **Med** is in between; **High** brings everything back; **Auto** is the default and steps down by itself if the frame rate drops (with `?debug` the readout shows e.g. `medium (auto)`).
 - [ ] Reload the page: the settings are kept.
 
+## 5b. Without hands (hand tracking off, or controllers)
+
+- [ ] Turn hand tracking off in the Quest settings (or just pick up the controllers). Within about 3 seconds the firefly says "I cannot see your hands. Look at things to use them." (or, with controllers, "Put the controllers down for your hands, or look at things.").
+- [ ] Look at the seed for 2 seconds: a ring fills and it is planted.
+- [ ] Look at the can: it flies over the tree, tips and pours, then glides home.
+- [ ] Look at the shears when shoots glow: they come down onto a shoot and trim it.
+- [ ] Look at the stone basin: the can pours into it and a light flies to the shared tree.
+- [ ] Look at the stone: the breathing session starts.
+- [ ] Put the controllers down / turn hand tracking back on: "There are your hands again." and the pinch lines return.
+- [ ] In the emulator the same can be tried with `...?input=none` or `...?input=controllers`.
+
 ## 6. Comfort and fluidity
 
 - [ ] Everything you need to touch is **within reach** without getting up or leaning forward a lot.

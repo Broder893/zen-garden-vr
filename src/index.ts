@@ -9,7 +9,9 @@ import { DayNightSystem } from './day-night.js';
 import { EntranceSystem } from './entrance.js';
 import { FirstMomentsSystem } from './first-moments.js';
 import { GuideSystem } from './guide.js';
+import { GazeCareSystem } from './gaze-care.js';
 import { HealthSystem } from './health.js';
+import { InputModeSystem } from './input-mode.js';
 import { LevelBadgeSystem } from './level-badge.js';
 import { UnlocksSystem } from './unlocks.js';
 import { MeditationSystem } from './meditation.js';
@@ -45,9 +47,11 @@ World.create(
     // After PersistenceSystem: ?fresh clears the kept sand before it is loaded.
     .registerSystem(RakeSystem)
     .registerSystem(ComfortSystem)
+    .registerSystem(InputModeSystem)
     .registerSystem(BreathBreakSystem)
     .registerSystem(GuideSystem)
     .registerSystem(DwellSystem)
+    .registerSystem(GazeCareSystem)
     .registerSystem(GardenAudioSystem)
     .registerSystem(VisitFlowerSystem)
     .registerSystem(LevelBadgeSystem)
@@ -71,6 +75,8 @@ World.create(
       dayNight: world.getSystem(DayNightSystem),
       weather: world.getSystem(WeatherSystem),
       perf: world.getSystem(PerfSystem),
+      input: world.getSystem(InputModeSystem),
+      gazeCare: world.getSystem(GazeCareSystem),
       shared: world.getSystem(SharedTreeSystem),
       watering: world.getSystem(WateringSystem),
     };
