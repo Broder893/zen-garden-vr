@@ -49,22 +49,40 @@ The recorder only exists in the dev server (`npm run dev`), not in the published
 YouTube accepts `.webm` directly; editors that refuse it can import a copy
 converted by an online converter or by VLC (Media → Convert).
 
-Suggested cut, about 2:50:
+### Rules for this video
+- **No voice-over of your own.** The app's music, sounds and recorded guide voice carry
+  the video; the captions below explain. It keeps the pace calm and the English simple.
+- **Hook in the first 5 seconds**: dark, then the eyelids open onto the garden. No logos
+  or long titles first.
+- Captions: white, large, at most 8 words each, on screen for 2.5-3.5 seconds.
+- Keep it **2:30-2:50**. Judges see many videos: cut anything slow (speed up growth 2×).
+- Only real footage of the app. Do not add AI-generated clips or images.
 
-| Time | From | Add as text on screen |
+### Shot list and captions (about 2:45)
+
+| Time | Shot (clip / how to get it) | Caption |
 | --- | --- | --- |
-| (montage, optional) | the same garden by day, sunset and night (`?time=`), autumn leaves, the snowy tree (`?season=winter`), a shower (`?weather=rain`) | *A garden that follows your day and the seasons.* |
-| (opening, optional) | look around the garden at sunset, then fingertips raking the sand | *A breathing break with a bonsai* |
-| 0:00–0:08 | start of `demo-main` (lights warming up) | *Bloom Break — a breathing break with a bonsai* |
-| 0:08–0:30 | planting (keep the ghost pinch next to the seed in frame) | *Hands only. The firefly shows the gesture in light.* |
-| 0:30–1:00 | first watering, growth | *Tilt to pour. The tree grows when it's cared for.* |
-| 1:00–1:40 | pruning, watering, bloom (speed up 1.5–2× if long) | *Trim the wild shoots to shape your bonsai.* |
-| 1:40–2:05 | `09-breathing-break` (the invitation, then one or two breaths in front of the eyes) | *Every few minutes, the firefly offers a short break. Close your eyes, breathe; the garden changes while they are closed.* |
-| (short, optional) | a wilted tree (overwater or a wrong cut) recovering during a breathing break | *Mistakes show, but the tree never dies. Breathing with it brings it back.* |
-| 2:05–2:25 | `08-comfort-hold-to-select` (speed up the pokes, keep the can pouring by itself) | *No pinch? Hold to select. Also: one hand, high contrast, large text, breathing pace.* |
-| 2:25–2:40 | `07-return-new-flower`: the new flower, the daily gift, the level badge (the firefly-follows-hand clip 06 is a spare) | *Come back tomorrow: care earns levels. A glazed pot, a lantern, a stream...* |
-| (short) | `npm run demo:record`-style: pour into the stone basin, the light flies to the shared tree, the sign counts up | *One tree, shared by everyone who visits.* |
-| 2:40–2:50 | last frame held | *Hands only · Seated · 5–10 minutes · Built with IWSDK* + `broder893.github.io/zen-garden-vr` |
+| 0:00–0:06 | Black, then the eyelids open on the sunset garden (`?time=sunset`, start of `01-arrive-and-plant`) | *Bloom Break* |
+| 0:06–0:25 | The firefly flies to the seed; the ghost pinch; the seed is planted (`01`) | *Hands only. No controllers.* / *The firefly shows each gesture in light.* |
+| 0:25–0:55 | Water, sprout, trim the glowing shoots, bloom (`02`, `03`, `04`; speed 2×) | *Tilt to pour. Trim to shape.* / *Your bonsai grows with your care.* |
+| 0:55–1:25 | Breathing break: the invitation, eyelids close, the light orb, "Open your eyes", something has changed (`09`) | *Every few minutes, a short break.* / *Close your eyes. Breathe.* / *The garden changes while you rest.* |
+| 1:25–1:45 | Four quick shots, 3 s each, of the same bonsai and forest: `?season=spring`, `summer`, `autumn`, `winter`; then night with `?weather=rain` | *A forest and a garden that follow the seasons.* |
+| 1:45–2:10 | `08-comfort-hold-to-select`: Comfort panel, high contrast, hold to select (ring filling), can pouring by itself; then a quick shot in one-hand mode and the subtitles | *No pinch? Hold to select.* / *One hand. High contrast. Subtitles always on.* |
+| 2:10–2:20 | A wilted tree (overwater or a wrong cut) recovering during a breath | *Mistakes show. The tree never dies.* |
+| 2:20–2:38 | `07-return-new-flower`: the new flower, the daily gift, the level badge; 3 seconds of the shared tree (`?` clip with the basin) | *Come back: care earns levels.* / *One tree, shared by every visitor.* |
+| 2:38–2:48 | Last frame held, slow fade | *Hands only · Seated · 5-10 minutes* + `broder893.github.io/zen-garden-vr` |
+
+If it runs over 3:00, cut in this order: the wilted tree, the shared tree, the second
+half of the seasons shots, then the pruning detail.
+
+### Order of work on 15 November
+1. Wait for the feature freeze (14 November); `npm run check:budget` and `npm test`.
+2. `npx @iwsdk/cli dev restart --allow-browser-automation`, then `npm run demo:record`
+   (all clips are stale after the Blender bonsai, the forest and the new voices).
+3. Record the extra shots by hand with the URL options above (`?season=`, `?time=`,
+   `?weather=`), and the wilted-tree recovery.
+4. Cut to the table above; add the captions; export 1080p MP4.
+5. Watch it once with sound off (captions must carry it) and once with sound on.
 
 ## 3. Publish
 
