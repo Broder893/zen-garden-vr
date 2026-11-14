@@ -61,7 +61,8 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
 - **A zen garden around you.** The table stands in a raked sand garden with mossy rocks,
   a bamboo fence and a stone lantern. It follows the real clock (clear day 8-17, golden
   sunset 6-8 and 17-20, night with fireflies) and the season (spring blossoms, summer
-  green, red autumn leaves, cool winter green). Now and then a gentle rain waters the tree
+  green, red autumn leaves, cool winter green; the blooming tree shows its blossoms in spring
+  and autumn only, so a green summer tells the seasons apart). Now and then a gentle rain waters the tree
   or a breeze sways it and dries the soil, each with its own sound. The table's own sand starts raked in
   lines and rings; **touch it with your fingertips and drag** to draw grooves (three
   fingers make a little rake). Your patterns are saved for the next visit.

@@ -98,6 +98,8 @@ interface StageParts {
   ground: Group;
   fallen: Object3D | null;
   puddle: Object3D | null;
+  /** The blooming model's blossoms: shown in spring and autumn only, so summer reads green. */
+  flowers: Object3D | null;
 }
 
 /**
@@ -109,7 +111,8 @@ interface StageParts {
  * foliage ('Leaf') and blossom ('Flower') take the season and health tints,
  * 'Soil' darkens when watered, 'PotShell' glazes. Glowing shoots and healthy
  * branches stay code-made and move onto each model (PLACES). The models'
- * snow shows in winter, fallen leaves in autumn, the puddle with excess water.
+ * snow shows in winter, fallen leaves in autumn, the puddle with excess water;
+ * the blossoms show in spring and autumn only.
  */
 export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bonsai] } }) {
   /** 'classic' (procedural tree), 'blender', or 'failed' (a model missing: procedural). */
@@ -156,6 +159,8 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
       if (!shown) continue;
       if (parts.snow) parts.snow.visible = season === 'winter';
       if (parts.fallen) parts.fallen.visible = season === 'autumn';
+      // Blossoms in spring and autumn; a green summer and a snowy winter tell the seasons apart.
+      if (parts.flowers) parts.flowers.visible = season !== 'summer' && season !== 'winter';
       if (parts.puddle) {
         parts.puddle.visible = k > 0;
         // It spreads over the soil as the water pools (scaled flat: its height stays on the soil),
@@ -213,7 +218,7 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
       ground.name = `Ground_${name}`;
       ground.visible = false;
       root.add(ground);
-      const parts: StageParts = { cuts: new Map(), snow: null, ground, fallen: null, puddle: null };
+      const parts: StageParts = { cuts: new Map(), snow: null, ground, fallen: null, puddle: null, flowers: null };
       for (const child of [...scene.children]) {
         if (/^cut_\d+$/.test(child.name)) {
           parts.cuts.set(child.name, child.position.clone());
@@ -242,6 +247,7 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
           parts[kind] = mesh;
         } else {
           group.add(mesh);
+          if (kind === 'flowers') parts.flowers = mesh;
           if (kind === 'snow') {
             mesh.visible = false;
             parts.snow = mesh;
