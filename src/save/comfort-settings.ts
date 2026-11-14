@@ -19,6 +19,22 @@ export interface ComfortSettings {
   quality: Quality;
   /** Closed-eye moments fade slowly instead of showing eyelids. */
   softTransitions: boolean;
+  /** The table, relative to the eyes (m): + higher, - lower (TABLE_STEP steps, at most TABLE_MAX). */
+  tableHeight: number;
+  /** The table, relative to the body (m): + nearer, - farther. */
+  tableNear: number;
+}
+
+/** The table moves in steps of 2.5 cm, at most 15 cm either way. */
+export const TABLE_STEP = 0.025;
+export const TABLE_MAX = 0.15;
+
+/** A table offset kept on the 2.5 cm grid and within reach of ±15 cm. */
+export function clampTable(x: unknown): number {
+  if (typeof x !== 'number' || !Number.isFinite(x)) return 0;
+  const steps = Math.round(x / TABLE_STEP);
+  const max = Math.round(TABLE_MAX / TABLE_STEP);
+  return (Math.min(max, Math.max(-max, steps)) * TABLE_STEP) || 0;
 }
 
 /** Breath timings per pace, in seconds; with intro and outro a session lasts about 75-95 s. */
@@ -32,7 +48,10 @@ const KEY = 'zen-garden-vr/comfort';
 const VERSION = 1;
 
 export function defaultSettings(): ComfortSettings {
-  return { breathPace: 'medium', highContrast: false, largeText: false, hands: 'both', dwell: false, quality: 'auto', softTransitions: false };
+  return {
+    breathPace: 'medium', highContrast: false, largeText: false, hands: 'both', dwell: false, quality: 'auto',
+    softTransitions: false, tableHeight: 0, tableNear: 0,
+  };
 }
 
 export function loadSettings(): ComfortSettings {
@@ -74,5 +93,8 @@ export function parseSettings(raw: string): ComfortSettings {
   // Added later: older stored settings simply keep the default (auto).
   if (d.quality === 'auto' || d.quality === 'high' || d.quality === 'medium' || d.quality === 'low') s.quality = d.quality;
   s.softTransitions = d.softTransitions === true;
+  // Added later: older stored settings keep the table where it was authored.
+  s.tableHeight = clampTable(d.tableHeight);
+  s.tableNear = clampTable(d.tableNear);
   return s;
 }

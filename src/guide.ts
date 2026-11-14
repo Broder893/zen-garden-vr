@@ -132,6 +132,16 @@ export const LINES = {
   sharedIntro: 'Every visitor shares that big tree. Water it at the basin.',
   sharedThanks: 'Your water flows to the shared tree.',
   sharedOffline: 'Your water flows to the tree. Others will see it later.',
+  // Comfort: the table (src/comfort.ts).
+  tableHint: 'Table too high or far? Poke Comfort to move it.',
+  // The break's length and its end (src/break-timer.ts).
+  breakLengthAsk: 'How long is your break today? Choose a time.',
+  breakAlmostOver: 'One more minute. Finish what you are doing.',
+  breakEnd: 'Your break is over. Take this calm with you.',
+  seeYouTomorrow: 'See you tomorrow. Your tree will be waiting.',
+  keepGoing: 'Want more time? You can stay as long as you like.',
+  // Days in a row (src/save/streak.ts).
+  streakUp: 'Another day in a row! Your tree loves the routine.',
 } as const;
 export type LineId = keyof typeof LINES;
 
@@ -219,6 +229,20 @@ const EVENT_SECONDS = 3;
 const REST_SHOW_SECONDS = 8;
 const REST_LINES = new Set<LineId>(['rest', 'restDwell', 'restGaze']);
 const SNIP_SECONDS = 1.6;
+/**
+ * The table hint (Comfort: move the table), first visit only, once, after the
+ * seed is planted and never in the tutorial's first minute: when a hand often
+ * reaches farther than REACH_FAR from the eyes (REACHES times), or the eyes sit
+ * far above or below where they were expected over the table for HEIGHT_SECONDS.
+ */
+const TABLE_HINT_AFTER = 60;
+const REACH_FAR = 0.55;
+const REACH_BACK = 0.48;
+const REACHES = 3;
+const TABLE_TOP = 0.77;
+const EYES_OVER_TABLE = 0.43;
+const EYES_OFF = 0.13;
+const HEIGHT_SECONDS = 5;
 
 /**
  * Tutorial and guidance. Each frame it reads the garden state, picks the one
@@ -261,6 +285,8 @@ export class GuideSystem extends createSystem({
   private pillOpacity = 1;
   private shownOpacity = 1;
   private event: LineId | null = null;
+  /** One-off lines waiting their turn: each shows once the line before it (and any session) is over. */
+  private queue: { id: LineId; seconds: number; target: Object3D | null }[] = [];
   /** Where the firefly goes while the one-off line plays (null: it keeps to the task). */
   private eventTarget: Object3D | null = null;
   private eventLeft = 0;
@@ -304,6 +330,11 @@ export class GuideSystem extends createSystem({
   private inputMode?: InputModeSystem;
   private inputChanges = 0;
   private breathBreak?: BreathBreakSystem;
+  private greetedAt = 0;
+  private tableHintDone = false;
+  private reaches = 0;
+  private reaching = [false, false];
+  private heightOff = 0;
 
   init(): void {
     this.watering = this.world.getSystem(WateringSystem);
@@ -375,6 +406,7 @@ export class GuideSystem extends createSystem({
     const inVR = this.world.visibilityState.peek() === VisibilityState.Visible;
     if (!this.greeted && inVR && (this.entrance?.lit ?? true)) {
       this.greeted = true;
+      this.greetedAt = this.time;
       const p = this.persistence;
       if (p?.newFlowerThisVisit) this.showEvent('welcomeGift', EVENT_SECONDS + 1);
       else if (p?.returning) this.showEvent('welcomeBack', EVENT_SECONDS + 1);
@@ -385,6 +417,12 @@ export class GuideSystem extends createSystem({
     if (this.giftPending && this.eventLeft <= 0) {
       this.giftPending = false;
       this.showEvent('dailyGift', EVENT_SECONDS + 1);
+    }
+    if (inVR) this.watchTable(delta, bonsai);
+    // Queued lines: after the welcome and the gift, never over a line or a session.
+    if (this.queue.length > 0 && this.greeted && !this.giftPending && this.eventLeft <= 0 && !this.meditation?.active && !this.breathBreak?.inviteLine) {
+      const next = this.queue.shift()!;
+      this.showEvent(next.id, next.seconds, next.target);
     }
     // After the first growth event, point out the stone once, straight after
     // the event line so no task line flashes (and gets half-spoken) in between.
@@ -542,11 +580,52 @@ export class GuideSystem extends createSystem({
     return this.eventLeft > 0;
   }
 
+  /**
+   * Queues a one-off line: it shows after the welcome and the daily gift, once
+   * the line before it is over and no breathing session or invitation is on.
+   */
+  queueEvent(id: LineId, seconds = EVENT_SECONDS + 1, target: Object3D | null = null): void {
+    this.queue.push({ id, seconds, target });
+  }
+
+  /** True while queued lines are still waiting. */
+  get queued(): number {
+    return this.queue.length;
+  }
+
   /** Shows a one-off line for `seconds`, then the current task line returns; `target` draws the firefly there meanwhile. */
   showEvent(id: LineId, seconds: number, target: Object3D | null = null): void {
     this.event = id;
     this.eventLeft = seconds;
     this.eventTarget = target;
+  }
+
+  /** Says once, in the first visit, that the table can be moved (see TABLE_HINT_AFTER). */
+  private watchTable(delta: number, bonsai: Entity): void {
+    if (this.tableHintDone) return;
+    if (this.persistence?.returning || this.comfort?.tableAdjusted) {
+      this.tableHintDone = true;
+      return;
+    }
+    if (!(bonsai.getValue(Bonsai, 'planted') ?? false)) return;
+    // Reaches: a tracked hand going past REACH_FAR (counted again once it comes back).
+    for (let side = 0; side < 2; side++) {
+      const space = side === 0 ? this.player.gripSpaces.left : this.player.gripSpaces.right;
+      if (!space) continue;
+      space.getWorldPosition(this.toward);
+      const d = this.toward.distanceTo(this.head);
+      if (d > HAND_MAX || d < HAND_MIN) continue;
+      if (!this.reaching[side] && d > REACH_FAR) {
+        this.reaching[side] = true;
+        this.reaches++;
+      } else if (this.reaching[side] && d < REACH_BACK) this.reaching[side] = false;
+    }
+    const off = Math.abs(this.head.y - TABLE_TOP - EYES_OVER_TABLE) > EYES_OFF;
+    this.heightOff = off ? this.heightOff + delta : 0;
+    if (this.time - this.greetedAt < TABLE_HINT_AFTER) return;
+    if (this.reaches < REACHES && this.heightOff < HEIGHT_SECONDS) return;
+    this.tableHintDone = true;
+    this.queueEvent('tableHint', EVENT_SECONDS + 2, this.comfort?.openerObject ?? null);
   }
 
   private watchEvents(bonsai: Entity): void {

@@ -5,7 +5,7 @@
     align-items: stretch;
     justify-content: flex-end;
     width: 30;
-    height: 78;
+    height: 94;
     gap: 1;
   }
   .opener {
@@ -107,6 +107,16 @@
       <div id="quality-high" class="btn"><span id="quality-high-t" class="btn-text">High</span></div>
       <div id="quality-medium" class="btn"><span id="quality-medium-t" class="btn-text">Med</span></div>
       <div id="quality-low" class="btn"><span id="quality-low-t" class="btn-text">Low</span></div>
+    </div>
+    <span class="label">Table</span>
+    <div class="row">
+      <div id="table-lower" class="btn"><span id="table-lower-t" class="btn-text">Lower</span></div>
+      <div id="table-higher" class="btn"><span id="table-higher-t" class="btn-text">Higher</span></div>
+    </div>
+    <div class="row">
+      <div id="table-nearer" class="btn"><span id="table-nearer-t" class="btn-text">Nearer</span></div>
+      <div id="table-farther" class="btn"><span id="table-farther-t" class="btn-text">Farther</span></div>
+      <div id="table-recenter" class="btn"><span id="table-recenter-t" class="btn-text">Recenter</span></div>
     </div>
   </div>
   <div id="comfort-open" class="opener">

@@ -4,6 +4,7 @@ import {
   Entity,
   MeshStandardMaterial,
   Object3D,
+  Quaternion,
   UIKit,
   UIKitMLAsset,
   Vector3,
@@ -19,11 +20,14 @@ import { MeditationSystem } from './meditation.js';
 import {
   BREATH_PACES,
   BreathPace,
+  clampTable,
   ComfortSettings,
   Hands,
   loadSettings,
   Quality,
   storeSettings,
+  TABLE_MAX,
+  TABLE_STEP,
 } from './save/comfort-settings.js';
 
 type Choice = { id: string; key: keyof ComfortSettings; value: ComfortSettings[keyof ComfortSettings] };
@@ -42,6 +46,10 @@ const CHOICES: Choice[] = [
   { id: 'gentle-off', key: 'softTransitions', value: false },
   { id: 'gentle-on', key: 'softTransitions', value: true },
 ];
+
+/** The Table buttons: actions, not choices (they move the player's origin, src/comfort.ts). */
+const TABLE_BUTTONS = ['table-lower', 'table-higher', 'table-nearer', 'table-farther', 'table-recenter'] as const;
+const UP = new Vector3(0, 1, 0);
 
 /** Panel and subtitle palettes: normal (soft, warm) and high contrast (black, white, yellow). */
 const THEME = {
@@ -114,13 +122,24 @@ export class ComfortSystem extends createSystem({
   private head = new Vector3();
   private meditation?: MeditationSystem;
   private paceApplied: BreathPace | null = null;
+  /** Recenter (this session only): the player's origin turned and shifted so the table is ahead. */
+  private recenterYaw = 0;
+  private recenterX = 0;
+  private recenterZ = 0;
+  private headQuat = new Quaternion();
+  private look = new Vector3();
+  private local = new Vector3();
 
   init(): void {
     this.meditation = this.world.getSystem(MeditationSystem);
     const panel = this.world.getSceneObject<UIKitMLAsset>('comfort-panel');
     this.panel = panel ?? null;
     if (panel) {
-      const ids = ['comfort-body', 'comfort-open', 'comfort-open-text', ...CHOICES.flatMap((c) => [c.id, `${c.id}-t`])];
+      const ids = [
+        'comfort-body', 'comfort-open', 'comfort-open-text',
+        ...CHOICES.flatMap((c) => [c.id, `${c.id}-t`]),
+        ...TABLE_BUTTONS.flatMap((id) => [id, `${id}-t`]),
+      ];
       for (const id of ids) {
         const el = panel.getElementById<UIKit.Text>(id);
         if (!el) continue;
@@ -129,6 +148,11 @@ export class ComfortSystem extends createSystem({
       }
       this.listen('comfort-open', () => this.setOpen(!this.open));
       for (const c of CHOICES) this.listen(c.id, () => this.choose(c));
+      this.listen('table-lower', () => this.nudgeTable('tableHeight', -1));
+      this.listen('table-higher', () => this.nudgeTable('tableHeight', 1));
+      this.listen('table-nearer', () => this.nudgeTable('tableNear', 1));
+      this.listen('table-farther', () => this.nudgeTable('tableNear', -1));
+      this.listen('table-recenter', () => this.recenter());
     }
     const sub = this.world.getSceneObject<UIKitMLAsset>('subtitle-panel');
     this.subtitlePanel = sub ?? null;
@@ -184,6 +208,52 @@ export class ComfortSystem extends createSystem({
     this.set(c.key, c.value as never);
   }
 
+  /**
+   * Moves the table one 2.5 cm step (at most 15 cm): by moving the player's
+   * origin the other way, so the table, tools, tree, panels and garden stay
+   * together and every gesture works as before.
+   */
+  nudgeTable(key: 'tableHeight' | 'tableNear', direction: 1 | -1): void {
+    this.set(key, clampTable(this.settings[key] + direction * TABLE_STEP));
+  }
+
+  /**
+   * Puts the table straight ahead of where the head now faces, with the head
+   * back over the seat: turns and shifts the player's origin (this session only).
+   */
+  recenter(): void {
+    const rig = this.player;
+    const head = this.player.head;
+    rig.updateMatrixWorld(true);
+    head.getWorldQuaternion(this.headQuat);
+    this.look.set(0, 0, -1).applyQuaternion(this.headQuat);
+    // The head's yaw within the rig: facing -Z is 0.
+    const facing = Math.atan2(-this.look.x, -this.look.z);
+    this.recenterYaw = -(facing - rig.rotation.y);
+    head.getWorldPosition(this.local);
+    rig.worldToLocal(this.local);
+    this.local.y = 0;
+    this.local.applyAxisAngle(UP, this.recenterYaw);
+    this.recenterX = -this.local.x;
+    this.recenterZ = -this.local.z;
+    this.version++;
+    this.applyRig();
+  }
+
+  /** The player's origin: the recenter, the table's height (+ higher: the eyes go down) and distance. */
+  private applyRig(): void {
+    const s = this.settings;
+    const rig = this.player;
+    rig.position.set(this.recenterX, -s.tableHeight, this.recenterZ - s.tableNear);
+    rig.rotation.set(0, this.recenterYaw, 0);
+  }
+
+  /** True once the table was moved or recentered (the guide's hint is then not needed). */
+  get tableAdjusted(): boolean {
+    const s = this.settings;
+    return s.tableHeight !== 0 || s.tableNear !== 0 || this.recenterYaw !== 0 || this.recenterX !== 0 || this.recenterZ !== 0;
+  }
+
   private listen(id: string, fn: () => void): void {
     const el = this.elements.get(id);
     if (!el) return;
@@ -216,6 +286,20 @@ export class ComfortSystem extends createSystem({
       });
       this.elements.get(`${c.id}-t`)?.setProperties({ color: on ? t.onText : t.text });
     }
+    // The Table buttons: plain, dimmed at their limit.
+    const limit = (v: number, sign: number) => sign * v >= TABLE_MAX - 1e-6;
+    const atLimit: Record<(typeof TABLE_BUTTONS)[number], boolean> = {
+      'table-lower': limit(s.tableHeight, -1),
+      'table-higher': limit(s.tableHeight, 1),
+      'table-nearer': limit(s.tableNear, 1),
+      'table-farther': limit(s.tableNear, -1),
+      'table-recenter': false,
+    };
+    for (const id of TABLE_BUTTONS) {
+      this.elements.get(id)?.setProperties({ backgroundColor: t.btn, borderColor: t.btnBorder });
+      this.elements.get(`${id}-t`)?.setProperties({ color: t.text, opacity: atLimit[id] ? 0.35 : 1 });
+    }
+    this.applyRig();
     this.panel?.scale.setScalar(s.largeText ? PANEL_SCALE.large : PANEL_SCALE.normal);
     // On the side of the hand in use (left by default).
     if (this.panel) this.panel.position.x = PANEL_X * (s.hands === 'right' ? -1 : 1);

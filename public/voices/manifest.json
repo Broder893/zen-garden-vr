@@ -353,5 +353,40 @@
   "voice": "firefly",
   "file": "firefly/sharedOffline.mp3",
   "seconds": 2.93
+ },
+ "breakLengthAsk": {
+  "voice": "firefly",
+  "file": "firefly/breakLengthAsk.mp3",
+  "seconds": 2.18
+ },
+ "breakAlmostOver": {
+  "voice": "firefly",
+  "file": "firefly/breakAlmostOver.mp3",
+  "seconds": 2.11
+ },
+ "breakEnd": {
+  "voice": "narrator",
+  "file": "narrator/breakEnd.mp3",
+  "seconds": 1.8
+ },
+ "seeYouTomorrow": {
+  "voice": "firefly",
+  "file": "firefly/seeYouTomorrow.mp3",
+  "seconds": 2.09
+ },
+ "keepGoing": {
+  "voice": "firefly",
+  "file": "firefly/keepGoing.mp3",
+  "seconds": 2.45
+ },
+ "streakUp": {
+  "voice": "firefly",
+  "file": "firefly/streakUp.mp3",
+  "seconds": 2.64
+ },
+ "tableHint": {
+  "voice": "firefly",
+  "file": "firefly/tableHint.mp3",
+  "seconds": 2.66
  }
 }
