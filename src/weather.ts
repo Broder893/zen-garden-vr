@@ -135,6 +135,12 @@ export class WeatherSystem extends createSystem({
     this.rain(delta);
   }
 
+  /** The bloom: a shower of petals around the tree (not in the rain: it has the sky). */
+  showerPetals(center: Vector3): void {
+    if (this.weather === 'rain' || this.rainLevel > 0) return;
+    this.fall.shower(center);
+  }
+
   /** The season in the air: only in clear weather (or a breeze) with open eyes. */
   private seasonFall(delta: number, visible: boolean): void {
     this.season ??= this.world.getSystem(SeasonSystem);
@@ -149,7 +155,8 @@ export class WeatherSystem extends createSystem({
     const gentle = this.comfort?.settings.softTransitions ?? false;
     // At least half even at the lightest quality: 20-40 instances are one cheap draw call.
     const effects = Math.max(MIN_SEASON_EFFECTS, this.perf?.effects ?? 1);
-    const shown = this.seasonLevel * SEASON_PARTICLES * effects * (gentle ? GENTLE_COUNT : 1);
+    const level = this.fall.showering && !lidsClosing ? 1 : this.seasonLevel;
+    const shown = level * SEASON_PARTICLES * effects * (gentle ? GENTLE_COUNT : 1);
     this.fall.update(delta, shown, 0.3 + this.windLevel, gentle ? GENTLE_PACE : 1);
   }
 

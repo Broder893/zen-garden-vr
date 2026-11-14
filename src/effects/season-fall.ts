@@ -23,6 +23,11 @@ const EYES = new Vector3(0, 1.2, 0);
 const EYES_CLEAR = 1.4;
 const TOP_MIN = 2.6;
 const TOP_MAX = 4.6;
+/** The bloom's shower of petals: around the tree, for this long, smaller (they are near) and quicker. */
+const SHOWER_SECONDS = 4;
+const SHOWER_SIZE = 0.35;
+const SHOWER_FALL = 1.6;
+const TABLE_TOP = 0.78;
 
 interface Look {
   geometry: BufferGeometry;
@@ -69,6 +74,9 @@ export class SeasonFall {
   private q = new Quaternion();
   private e = new Euler();
   private s = new Vector3(1, 1, 1);
+  /** Seconds left of the bloom's shower (0: the season's own particles). */
+  private showerLeft = 0;
+  private showerAt = new Vector3();
 
   constructor() {
     this.mesh = new InstancedMesh(LOOKS.summer.geometry, this.material, SEASON_PARTICLES);
@@ -79,14 +87,34 @@ export class SeasonFall {
     for (let i = 0; i < SEASON_PARTICLES; i++) this.spawn(i, TOP_MIN + Math.random() * (TOP_MAX - TOP_MIN) * 1.5 - 1.5);
   }
 
+  /** True while the bloom's shower of petals falls. */
+  get showering(): boolean {
+    return this.showerLeft > 0;
+  }
+
+  /**
+   * The bloom: every particle becomes a petal around the tree at `center` and
+   * falls onto the table for a few seconds, then the season's own return.
+   */
+  shower(center: Vector3): void {
+    this.showerLeft = SHOWER_SECONDS;
+    this.showerAt.copy(center);
+    this.dress(LOOKS.spring);
+    for (let i = 0; i < SEASON_PARTICLES; i++) this.spawnNear(i, Math.random() * 0.35);
+  }
+
   /** Dresses the particles for a season (geometry and colour; no new draw call). */
   setSeason(season: Season): void {
-    if (season === this.season) return;
+    if (season === this.season || this.showering) return;
     this.season = season;
-    this.look = LOOKS[season];
-    this.mesh.geometry = this.look.geometry;
-    this.material.color.set(this.look.color);
-    this.material.emissive.set(this.look.color).multiplyScalar(this.look.emissive);
+    this.dress(LOOKS[season]);
+  }
+
+  private dress(look: Look): void {
+    this.look = look;
+    this.mesh.geometry = look.geometry;
+    this.material.color.set(look.color);
+    this.material.emissive.set(look.color).multiplyScalar(look.emissive);
   }
 
   /**
@@ -97,21 +125,37 @@ export class SeasonFall {
     const n = Math.min(SEASON_PARTICLES, Math.round(shown));
     this.mesh.count = n;
     this.mesh.visible = n > 0;
+    if (this.showerLeft > 0) {
+      this.showerLeft -= delta;
+      if (this.showerLeft <= 0) {
+        // Over: back to the season, everything from the top, far away.
+        const season = this.season;
+        this.season = null;
+        this.setSeason(season ?? 'summer');
+        for (let i = 0; i < SEASON_PARTICLES; i++) this.spawn(i, TOP_MIN + Math.random() * (TOP_MAX - TOP_MIN));
+      }
+    }
     if (n === 0) return;
     this.time += delta;
     const L = this.look;
+    const near = this.showerLeft > 0;
+    this.s.setScalar(near ? SHOWER_SIZE : 1);
     const t = this.time;
     for (let i = 0; i < n; i++) {
       const o = i * 8;
       const st = this.state;
       const ph = st[o + 3];
-      const k = st[o + 6] * pace;
+      const k = st[o + 6] * pace * (near ? SHOWER_FALL : 1);
       st[o + 1] -= L.fall * k * delta;
       st[o] += (L.drift * wind * 0.5 + Math.cos(t * 0.7 + ph) * L.flutter * 0.6) * k * delta;
       st[o + 2] += Math.sin(t * 0.9 + ph * 1.3) * L.flutter * 0.5 * k * delta;
       // Down, or drifted too near the eyes or too far: back to the top, somewhere else.
       this.p.set(st[o], st[o + 1], st[o + 2]);
-      if (st[o + 1] < 0 || this.p.distanceTo(EYES) < EYES_CLEAR || Math.hypot(st[o], st[o + 2] - TABLE_Z) > FAR + 1) {
+      if (near) {
+        // The shower: petals settle on the table and start again above the tree.
+        if (st[o + 1] < TABLE_TOP) this.spawnNear(i, 0);
+        this.p.set(st[o], st[o + 1], st[o + 2]);
+      } else if (st[o + 1] < 0 || this.p.distanceTo(EYES) < EYES_CLEAR || Math.hypot(st[o], st[o + 2] - TABLE_Z) > FAR + 1) {
         this.spawn(i, TOP_MIN + Math.random() * (TOP_MAX - TOP_MIN));
         this.p.set(st[o], st[o + 1], st[o + 2]);
       }
@@ -121,6 +165,20 @@ export class SeasonFall {
       this.mesh.setMatrixAt(i, this.m);
     }
     this.mesh.instanceMatrix.needsUpdate = true;
+  }
+
+  /** Above the tree, within a hand's width or two of it, on its far side (never toward the eyes). */
+  private spawnNear(i: number, lift: number): void {
+    const o = i * 8;
+    const a = Math.PI / 2 + Math.random() * Math.PI;
+    const r = 0.04 + Math.random() * 0.2;
+    this.state[o] = this.showerAt.x + Math.sin(a) * r;
+    this.state[o + 1] = this.showerAt.y + 0.12 + Math.random() * 0.25 + lift;
+    this.state[o + 2] = this.showerAt.z + Math.cos(a) * r;
+    this.state[o + 3] = Math.random() * Math.PI * 2;
+    this.state[o + 4] = 0.5 + Math.random();
+    this.state[o + 5] = 0.5 + Math.random();
+    this.state[o + 6] = 0.7 + Math.random() * 0.6;
   }
 
   private spawn(i: number, y: number): void {

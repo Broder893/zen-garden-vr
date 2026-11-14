@@ -1,9 +1,12 @@
-import { Color, createSystem, Entity, Material, Mesh, MeshStandardMaterial, Object3D, Vector3 } from '@iwsdk/core';
+import { Color, createSystem, Entity, Material, Matrix4, Mesh, MeshStandardMaterial, Object3D, Vector3 } from '@iwsdk/core';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { Sparkles } from './effects/sparkles.js';
 import { EyelidSystem } from './eyelids.js';
 import { Bonsai, BonsaiStage } from './garden-components.js';
+import { ComfortSystem } from './comfort.js';
 import { MeditationSystem } from './meditation.js';
+import { WeatherSystem } from './weather.js';
+import { openCanopy } from './wind.js';
 import { stageFor, XP } from './save/growth-levels.js';
 
 const MATURE_SHOOTS = ['Overgrowth_Mature_0', 'Overgrowth_Mature_1', 'Overgrowth_Mature_2'];
@@ -33,6 +36,16 @@ function bits(mask: number): number {
 /** Growing in view: from this size to full over GROW_SECONDS, with a warm glow. */
 const GROW_FROM = 0.92;
 const GROW_SECONDS = 1.2;
+/** Planting: the sprout springs up from nothing with a small bounce (a plain ease with Gentle transitions). */
+const SPROUT_SECONDS = 0.7;
+const SPROUT_BOUNCE = 1.8;
+/** ...and the soil darkens a little, pressed in around the seed. */
+const PLANTED_WETNESS = 0.45;
+/** A cut shoot falls (turning slowly), then shrinks away (seconds; m/s²; rad/s). */
+const FALL_SECONDS = 0.6;
+const SHRINK_SECONDS = 0.3;
+const FALL_GRAVITY = 1.2;
+const FALL_SPIN = 3.5;
 const GLOW = new Color('#fff0c2');
 const GLOW_PEAK = 0.2;
 const DRY = new Color('#8a6a4c');
@@ -60,6 +73,13 @@ export class BonsaiGrowthSystem extends createSystem({
   private shownStage = -1;
   private shownMask = -1;
   private pop = 1;
+  /** True while the pop is the sprout springing up from the seed (else the gentle growth). */
+  private sprouting = false;
+  private comfort?: ComfortSystem;
+  private weather?: WeatherSystem;
+  /** Cut shoots on their way down: copies sharing the shoot's geometry and materials. */
+  private falling: { obj: Object3D; t: number; vy: number; axis: Vector3; scale: number }[] = [];
+  private fallM = new Matrix4();
   private parts = new Map<string, Object3D>();
   private soil: MeshStandardMaterial | null = null;
   /** Soil darkness shown, 0 dry .. 1 wet; follows water up fast, dries slowly. */
@@ -163,19 +183,34 @@ export class BonsaiGrowthSystem extends createSystem({
         else {
           this.pop = 0;
           this.glowFrom(this.stageGroup(stage));
+          this.comfort ??= this.world.getSystem(ComfortSystem);
+          const gentle = this.comfort?.settings.softTransitions ?? false;
+          // Just planted: the sprout springs up and the soil darkens. Later stages: the canopy opens in turn.
+          this.sprouting = this.shownStage === -2;
+          if (this.sprouting) this.wetness = Math.max(this.wetness, PLANTED_WETNESS);
+          openCanopy(gentle);
         }
       }
+      // A shoot just cut (same stage): a copy of it falls before the shoot is hidden.
+      if (stage === this.shownStage && this.shownMask >= 0) this.dropCut(entity, stage, mask & ~this.shownMask);
       this.applyVisibility(stage, mask);
       this.applyStumps(stage, stumps);
       this.shownStage = stage;
       this.shownMask = mask;
     }
     this.updateSoil(delta, stage, water, entity.getValue(Bonsai, 'overwater') ?? 0);
+    if (this.falling.length > 0) this.fall(delta);
 
     if (this.pop < 1) {
-      this.pop = Math.min(1, this.pop + delta / GROW_SECONDS);
-      const s = GROW_FROM + (1 - GROW_FROM) * (1 - (1 - this.pop) ** 3);
-      this.scaleStage(stage, s);
+      this.pop = Math.min(1, this.pop + delta / (this.sprouting ? SPROUT_SECONDS : GROW_SECONDS));
+      const m = this.pop - 1;
+      let s: number;
+      if (this.sprouting) {
+        // An ease out with an overshoot (none with Gentle transitions): it springs up, then settles.
+        const back = this.comfort?.settings.softTransitions ? 0 : SPROUT_BOUNCE;
+        s = 1 + (back + 1) * m * m * m + back * m * m;
+      } else s = GROW_FROM + (1 - GROW_FROM) * (1 - (1 - this.pop) ** 3);
+      this.scaleStage(stage, Math.max(0.001, s));
       this.glow(this.pop);
     }
   }
@@ -242,6 +277,53 @@ export class BonsaiGrowthSystem extends createSystem({
     root.getWorldPosition(this.burstAt);
     this.burstAt.y += stage === BonsaiStage.Sprout ? 0.06 : 0.16;
     this.sparkles.burst(this.burstAt, stage === BonsaiStage.Blooming ? 40 : 24, stage === BonsaiStage.Sprout ? 0.05 : 0.12);
+    // The bloom: a shower of petals around the tree (the season's particles, for a few seconds).
+    if (stage === BonsaiStage.Blooming) {
+      this.weather ??= this.world.getSystem(WeatherSystem);
+      this.weather?.showerPetals(this.burstAt);
+    }
+  }
+
+  /** Copies of the shoots in `bits` (just cut) fall from where they were, beside the tree. */
+  private dropCut(entity: Entity, stage: number, bits: number): void {
+    const root = entity.object3D;
+    const shoots = SHOOTS_BY_STAGE[stage] ?? [];
+    if (!root || bits === 0) return;
+    this.comfort ??= this.world.getSystem(ComfortSystem);
+    const gentle = this.comfort?.settings.softTransitions ?? false;
+    root.updateMatrixWorld(true);
+    for (let i = 0; i < shoots.length; i++) {
+      const shoot = this.parts.get(shoots[i]);
+      if (!(bits & (1 << i)) || !shoot || !shoot.visible || this.falling.length >= 3) continue;
+      const copy = shoot.clone(true);
+      copy.visible = true;
+      // Where the shoot is, in the tree's own space.
+      this.fallM.copy(root.matrixWorld).invert().multiply(shoot.matrixWorld);
+      this.fallM.decompose(copy.position, copy.quaternion, copy.scale);
+      copy.matrixAutoUpdate = true;
+      root.add(copy);
+      const axis = new Vector3(Math.random() - 0.5, 0.3, Math.random() - 0.5).normalize();
+      this.falling.push({ obj: copy, t: gentle ? FALL_SECONDS : 0, vy: 0, axis, scale: copy.scale.x });
+    }
+  }
+
+  /** Down a little, turning (not with Gentle transitions: those only shrink), then gone. */
+  private fall(delta: number): void {
+    for (let i = this.falling.length - 1; i >= 0; i--) {
+      const f = this.falling[i];
+      f.t += delta;
+      if (f.t < FALL_SECONDS) {
+        f.vy += FALL_GRAVITY * delta;
+        f.obj.position.y -= f.vy * delta;
+        f.obj.rotateOnAxis(f.axis, FALL_SPIN * delta);
+      }
+      const k = Math.min(1, Math.max(0, (f.t - FALL_SECONDS) / SHRINK_SECONDS));
+      f.obj.scale.setScalar(f.scale * (1 - k));
+      if (k >= 1) {
+        f.obj.removeFromParent();
+        this.falling.splice(i, 1);
+      }
+    }
   }
 
   /** A small burst of sparkles above the tree (a reward from another system). */

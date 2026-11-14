@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { breathFactor, isTrunk, SWAY_STRIDE, swayData, windStrength } from '../src/wind-sway';
+import { breathFactor, isTrunk, padData, SWAY_STRIDE, swayData, windStrength } from '../src/wind-sway';
 
 /** One triangle per part: [x, y, z] corners. */
 function mesh(parts: number[][][]) {
@@ -56,5 +56,17 @@ describe('the garden breathes', () => {
     expect(breathFactor(0, 1)).toBeCloseTo(0.75);
     expect(breathFactor(0, 0)).toBe(1);
     expect(breathFactor(1, 0.5)).toBeCloseTo(1.125);
+  });
+});
+
+describe('canopy lumps', () => {
+  it('gives each lump its centre and a turn, lowest first', () => {
+    const position = [
+      0, 2, 0, 1, 2, 0, 0, 3, 0, // high lump
+      0, 0, 0, 1, 0, 0, 0, 1, 0, // low lump
+    ];
+    const d = padData(position, null);
+    expect(Array.from(d.slice(0, 4)).map((v) => +v.toFixed(3))).toEqual([0.333, 2.333, 0, 1]);
+    expect(Array.from(d.slice(12, 16)).map((v) => +v.toFixed(3))).toEqual([0.333, 0.333, 0, 0]);
   });
 });

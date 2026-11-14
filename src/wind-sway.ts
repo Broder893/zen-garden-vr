@@ -27,34 +27,7 @@ export function swayData(
   still: (r: number, g: number, b: number) => boolean = () => false,
 ): Float32Array {
   const count = position.length / 3;
-  const parent = new Int32Array(count);
-  for (let i = 0; i < count; i++) parent[i] = i;
-  const find = (x: number): number => {
-    while (parent[x] !== x) {
-      parent[x] = parent[parent[x]];
-      x = parent[x];
-    }
-    return x;
-  };
-  const join = (a: number, b: number) => {
-    const ra = find(a);
-    const rb = find(b);
-    if (ra !== rb) parent[ra] = rb;
-  };
-  // Flat-shaded models repeat a corner once per face: same place, same part.
-  const seen = new Map<string, number>();
-  for (let i = 0; i < count; i++) {
-    const key = `${Math.round(position[i * 3] * 1000)},${Math.round(position[i * 3 + 1] * 1000)},${Math.round(position[i * 3 + 2] * 1000)}`;
-    const first = seen.get(key);
-    if (first === undefined) seen.set(key, i);
-    else join(i, first);
-  }
-  const corners = index ? index.length : count;
-  for (let t = 0; t + 2 < corners; t += 3) {
-    const a = index ? index[t] : t;
-    join(a, index ? index[t + 1] : t + 1);
-    join(a, index ? index[t + 2] : t + 2);
-  }
+  const find = partsOf(position, index);
   // Bounds and mean colour of each part.
   const parts = new Map<number, { x0: number; x1: number; y0: number; z0: number; z1: number; r: number; g: number; b: number; n: number }>();
   for (let i = 0; i < count; i++) {
@@ -89,6 +62,74 @@ export function swayData(
     out[o + 1] = (p.z0 + p.z1) / 2;
     out[o + 2] = p.y0;
     out[o + 3] = isStill ? 0 : 1;
+  }
+  return out;
+}
+
+/**
+ * The connected parts of an indexed (or not) mesh: returns each vertex's part
+ * id. Faces that share a corner position belong to the same part (flat-shaded
+ * models repeat a corner once per face).
+ */
+export function partsOf(position: ArrayLike<number>, index: ArrayLike<number> | null): (i: number) => number {
+  const count = position.length / 3;
+  const parent = new Int32Array(count);
+  for (let i = 0; i < count; i++) parent[i] = i;
+  const find = (x: number): number => {
+    while (parent[x] !== x) {
+      parent[x] = parent[parent[x]];
+      x = parent[x];
+    }
+    return x;
+  };
+  const join = (a: number, b: number) => {
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent[ra] = rb;
+  };
+  const seen = new Map<string, number>();
+  for (let i = 0; i < count; i++) {
+    const key = `${Math.round(position[i * 3] * 1000)},${Math.round(position[i * 3 + 1] * 1000)},${Math.round(position[i * 3 + 2] * 1000)}`;
+    const first = seen.get(key);
+    if (first === undefined) seen.set(key, i);
+    else join(i, first);
+  }
+  const corners = index ? index.length : count;
+  for (let t = 0; t + 2 < corners; t += 3) {
+    const a = index ? index[t] : t;
+    join(a, index ? index[t + 1] : t + 1);
+    join(a, index ? index[t + 2] : t + 2);
+  }
+  return find;
+}
+
+/** Per-vertex canopy lump data: the lump's centre (x, y, z) and its turn to open (0 first .. 1 last). */
+export const PAD_STRIDE = 4;
+
+/**
+ * For a canopy made of separate lumps: each vertex gets its lump's centre and
+ * a turn, lowest lump first, so a new stage can open them one after another.
+ */
+export function padData(position: ArrayLike<number>, index: ArrayLike<number> | null): Float32Array {
+  const count = position.length / 3;
+  const find = partsOf(position, index);
+  const sums = new Map<number, [number, number, number, number]>();
+  for (let i = 0; i < count; i++) {
+    const r = find(i);
+    const s = sums.get(r) ?? [0, 0, 0, 0];
+    s[0] += position[i * 3];
+    s[1] += position[i * 3 + 1];
+    s[2] += position[i * 3 + 2];
+    s[3]++;
+    sums.set(r, s);
+  }
+  const roots = [...sums.keys()].sort((a, b) => sums.get(a)![1] / sums.get(a)![3] - sums.get(b)![1] / sums.get(b)![3]);
+  const turn = new Map(roots.map((r, k) => [r, roots.length > 1 ? k / (roots.length - 1) : 0]));
+  const out = new Float32Array(count * PAD_STRIDE);
+  for (let i = 0; i < count; i++) {
+    const r = find(i);
+    const s = sums.get(r)!;
+    out.set([s[0] / s[3], s[1] / s[3], s[2] / s[3], turn.get(r)!], i * PAD_STRIDE);
   }
   return out;
 }

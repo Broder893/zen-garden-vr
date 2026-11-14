@@ -3,7 +3,7 @@ import { ComfortSystem } from './comfort.js';
 import { DayNightSystem } from './day-night.js';
 import { MeditationSystem } from './meditation.js';
 import { WeatherSystem } from './weather.js';
-import { breathFactor, isTrunk, SWAY_STRIDE, swayData, windStrength } from './wind-sway.js';
+import { breathFactor, isTrunk, PAD_STRIDE, padData, SWAY_STRIDE, swayData, windStrength } from './wind-sway.js';
 
 /** The forest's materials (public/models/forest.glb) and the bonsai's foliage. */
 const FOREST_LEAF = 'foliage_forest';
@@ -20,7 +20,23 @@ const BREATH_EASE_SECONDS = 2;
 const WIND = {
   uWindTime: { value: 0 },
   uWindStrength: { value: 1 },
+  /** Seconds since the canopy began to open (a new stage); far past its end otherwise. */
+  uPadTime: { value: 99 },
+  /** How far each lump overshoots as it opens (0: none, with Gentle transitions). */
+  uPadBack: { value: 1.7 },
 };
+/** The lumps open one after another over PAD_SPREAD s, each in PAD_SECONDS. */
+const PAD_SPREAD = 0.4;
+const PAD_SECONDS = 0.25;
+
+/**
+ * A new stage: the bonsai's canopy lumps open one after another, lowest first,
+ * in about 0.65 s (a small overshoot each; none with Gentle transitions).
+ */
+export function openCanopy(gentle: boolean): void {
+  WIND.uPadTime.value = 0;
+  WIND.uPadBack.value = gentle ? 0 : 1.7;
+}
 
 /**
  * Sway in the vertex shader. Forest: each tree (aSway: centre x, z, base y,
@@ -29,6 +45,12 @@ const WIND = {
  * the phase from each pad's place. Slow (periods of 5-10 s), small, horizontal.
  */
 const SWAY_GLSL = /* glsl */ `
+#ifdef PAD_OPEN
+  float pk = clamp((uPadTime - aPad.w * ${PAD_SPREAD.toFixed(2)}) / ${PAD_SECONDS.toFixed(2)}, 0.0, 1.0);
+  float pm = pk - 1.0;
+  float ps = 1.0 + (uPadBack + 1.0) * pm * pm * pm + uPadBack * pm * pm;
+  transformed = aPad.xyz + (transformed - aPad.xyz) * ps;
+#endif
 #ifdef WIND_FOREST
   float wPh = fract(sin(dot(aSway.xy, vec2(12.9898, 78.233))) * 43758.5453) * 6.2832;
   float wY = max(transformed.y, 0.0);
@@ -87,6 +109,7 @@ export class WindSystem extends createSystem({}) {
     const step = delta / BREATH_EASE_SECONDS;
     this.breathing = breathing > this.breathing ? Math.min(1, this.breathing + step) : Math.max(0, this.breathing - step);
     WIND.uWindStrength.value = this.strength * breathFactor(med?.fullness ?? 0.5, this.breathing);
+    if (WIND.uPadTime.value < 99) WIND.uPadTime.value = Math.min(99, WIND.uPadTime.value + delta);
     // Wrapped so the float keeps its precision on long visits.
     WIND.uWindTime.value = (WIND.uWindTime.value + delta) % 3600;
   }
@@ -109,6 +132,11 @@ export class WindSystem extends createSystem({}) {
       );
       g.setAttribute('aSway', new BufferAttribute(data, SWAY_STRIDE));
     }
+    // The bonsai's canopy: each lump's centre and turn, so a new stage can open them in order.
+    if (!forest && !mesh.geometry.getAttribute('aPad')) {
+      const g = mesh.geometry;
+      g.setAttribute('aPad', new BufferAttribute(padData(g.getAttribute('position').array, g.index?.array ?? null), PAD_STRIDE));
+    }
     if (this.patched.has(mat)) return;
     this.patched.add(mat);
     mesh.getWorldScale(this.scale);
@@ -119,10 +147,12 @@ export class WindSystem extends createSystem({}) {
       shader.uniforms.uWindTime = WIND.uWindTime;
       shader.uniforms.uWindStrength = WIND.uWindStrength;
       shader.uniforms.uWindScale = scale;
+      shader.uniforms.uPadTime = WIND.uPadTime;
+      shader.uniforms.uPadBack = WIND.uPadBack;
       shader.vertexShader = shader.vertexShader
         .replace(
           'void main() {',
-          `${forest ? '#define WIND_FOREST\nattribute vec4 aSway;\n' : ''}uniform float uWindTime;\nuniform float uWindStrength;\nuniform float uWindScale;\nvoid main() {`,
+          `${forest ? '#define WIND_FOREST\nattribute vec4 aSway;\n' : '#define PAD_OPEN\nattribute vec4 aPad;\n'}uniform float uWindTime;\nuniform float uWindStrength;\nuniform float uWindScale;\nuniform float uPadTime;\nuniform float uPadBack;\nvoid main() {`,
         )
         .replace('#include <begin_vertex>', `#include <begin_vertex>\n${SWAY_GLSL}`);
     };
