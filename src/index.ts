@@ -31,6 +31,7 @@ import { BirdsSystem } from './birds.js';
 import { BreakTimerSystem } from './break-timer.js';
 import { ArrivalSystem } from './arrival.js';
 import { GoalGhostSystem } from './goal-ghost.js';
+import { SproutBreathSystem } from './sprout-breath.js';
 import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
@@ -89,6 +90,7 @@ World.create(
     .registerSystem(GuideSystem)
     .registerSystem(ArrivalSystem)
     .registerSystem(GoalGhostSystem)
+    .registerSystem(SproutBreathSystem)
     .registerSystem(DwellSystem)
     .registerSystem(GazeCareSystem)
     .registerSystem(GardenAudioSystem)
@@ -120,6 +122,7 @@ World.create(
       breakTimer: world.getSystem(BreakTimerSystem),
       arrival: world.getSystem(ArrivalSystem),
       ghost: world.getSystem(GoalGhostSystem),
+      sproutBreath: world.getSystem(SproutBreathSystem),
       perf: world.getSystem(PerfSystem),
       input: world.getSystem(InputModeSystem),
       gazeCare: world.getSystem(GazeCareSystem),

@@ -111,6 +111,8 @@ export const LINES = {
   breakSkip: 'Not now? Show me an open hand.',
   breakLater: 'Of course. We will breathe later.',
   breakDone: 'Lovely. Your tree grew a little with you.',
+  // The first visit's first breath, right after the first growth (src/sprout-breath.ts).
+  sproutBreath: 'Breathe in with your sprout...',
   // Levels (src/save/growth-levels.ts).
   dailyGift: 'A daily gift: your tree grew stronger overnight.',
   levelUp: 'Your garden reached a new level.',

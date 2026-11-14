@@ -284,6 +284,8 @@ export class GardenAudioSystem extends createSystem({
     if (line === 'breakInvite' || line === 'breakInviteTense') this.engine.musicChime(SCALE[4], 0.05);
     // The break is over: a soft bell before the words.
     if (line === 'breakEnd') this.engine.bowl(SCALE[2], 0.12);
+    // The sprout's first breath: a soft high chime before the words.
+    if (line === 'sproutBreath') this.engine.musicChime(SCALE[4], 0.04);
     const last = this.spokenAt.get(line);
     if (!ALWAYS_SPOKEN.has(line) && last !== undefined && this.time - last < REPEAT_SECONDS) return;
     this.spokenAt.set(line, this.time);

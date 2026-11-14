@@ -26,6 +26,8 @@ export class FirstMomentsSystem extends createSystem({
   private lids?: EyelidSystem;
   /** Something to marvel at, set by the arrival (src/arrival.ts); until then the eyes opening. */
   wonderShown = false;
+  /** The first breath, set by the sprout's breath (src/sprout-breath.ts); else a session's first inhale. */
+  breathShown = false;
   private startStage = -1;
   private startPlanted = false;
 
@@ -56,7 +58,7 @@ export class FirstMomentsSystem extends createSystem({
       if (stage >= 2 && this.startStage < 2) this.mark('mature');
       if (stage >= 3 && this.startStage < 3) this.mark('bloom');
     }
-    if ((this.meditation?.phase ?? 'idle') === 'in') this.mark('firstBreath');
+    if (this.breathShown || (this.meditation?.phase ?? 'idle') === 'in') this.mark('firstBreath');
   }
 
   private mark(moment: Moment): void {
