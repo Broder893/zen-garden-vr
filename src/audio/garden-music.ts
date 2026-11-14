@@ -1,13 +1,19 @@
+import { MusicDepth, nextPhrase, phraseGap } from './music-layers.js';
 import type { SoundEngine } from './sound-engine.js';
 
 /** D major pentatonic, so any two notes sound calm together. */
 const midi = (n: number) => 440 * Math.pow(2, (n - 69) / 12);
 const CHIME_NOTES = [74, 76, 78, 81, 83, 86, 88, 90].map(midi); // D5..F#6
 const PAD_NOTES = [50, 57, 64].map(midi); // D3, A3, E4: an open, unresolved drone
+/** F#4: the third that warms the drone once the tree is mature, a little more in bloom. */
+const WARM_NOTE = midi(66);
+const WARM_GAIN: Record<MusicDepth, number> = { 0: 0, 1: 0, 2: 0, 3: 0.012, 4: 0.024 };
 
 /**
  * Generative background music: a warm drone plus sparse wind-chime notes.
- * Never loops, never repeats exactly, costs a handful of oscillators.
+ * It grows with the tree (src/audio/music-layers.ts): the drone alone before
+ * planting, then single notes, small arpeggios, short melodies, and a warmer
+ * drone in bloom. Never loops, never repeats exactly, costs a handful of oscillators.
  * During breathing the drone opens and closes with the breath.
  */
 export class GardenMusic {
@@ -18,6 +24,8 @@ export class GardenMusic {
   private nextChime = 2;
   private started = false;
   private filterTarget = 0;
+  private warm: GainNode | null = null;
+  private warmDepth: MusicDepth = 0;
 
   constructor(private readonly engine: SoundEngine) {}
 
@@ -35,6 +43,18 @@ export class GardenMusic {
     this.padGain.gain.setValueAtTime(0, ctx.currentTime);
     this.padGain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 6);
     this.filter.connect(this.padGain).connect(out);
+    // The warm voice: silent until the tree is mature (see WARM_GAIN).
+    this.warm = ctx.createGain();
+    this.warm.gain.value = 0;
+    this.warm.connect(this.filter);
+    for (const detune of [-4, 4]) {
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.value = WARM_NOTE;
+      osc.detune.value = detune;
+      osc.connect(this.warm);
+      osc.start();
+    }
     PAD_NOTES.forEach((f, i) => {
       for (const detune of [-5, 5]) {
         const osc = ctx.createOscillator();
@@ -52,8 +72,9 @@ export class GardenMusic {
   /**
    * @param calm true during a breathing session: fewer chimes.
    * @param breath 0..1 breath fullness, opens the drone's filter.
+   * @param depth how far the music has grown with the tree (0 drone only .. 4 in bloom).
    */
-  tick(delta: number, calm: boolean, breath: number): void {
+  tick(delta: number, calm: boolean, breath: number, depth: MusicDepth = 1): void {
     const ctx = this.engine.ctx;
     if (!this.started || !ctx || !this.filter) return;
     // Re-aim the filter only on a real change, not 72+ times a second.
@@ -63,14 +84,16 @@ export class GardenMusic {
       this.filter.frequency.setTargetAtTime(target, ctx.currentTime, 0.4);
     }
 
+    if (depth !== this.warmDepth && this.warm) {
+      this.warmDepth = depth;
+      this.warm.gain.setTargetAtTime(WARM_GAIN[depth], ctx.currentTime, 2.5);
+    }
+
     this.nextChime -= delta;
     if (this.nextChime > 0) return;
-    this.nextChime = (calm ? 7 : 3.5) + Math.random() * 5;
-    const note = CHIME_NOTES[Math.floor(Math.random() * CHIME_NOTES.length)];
-    this.engine.musicChime(note, 0.05 + Math.random() * 0.04);
-    if (Math.random() < 0.35) {
-      const second = CHIME_NOTES[Math.floor(Math.random() * CHIME_NOTES.length)];
-      this.engine.musicChime(second, 0.035, 0.3 + Math.random() * 0.4);
+    this.nextChime = phraseGap(depth, calm, Math.random);
+    for (const n of nextPhrase(depth, calm, CHIME_NOTES.length, Math.random)) {
+      this.engine.musicChime(CHIME_NOTES[n.note], n.gain, n.delay);
     }
   }
 }

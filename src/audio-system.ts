@@ -1,6 +1,7 @@
 import { createSystem, VisibilityState } from '@iwsdk/core';
 import { GardenAmbience, AmbienceScene } from './audio/ambience.js';
 import { GardenMusic } from './audio/garden-music.js';
+import { depthFor } from './audio/music-layers.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { SoundEngine } from './audio/sound-engine.js';
 import { GuideVoice } from './audio/voice.js';
@@ -156,7 +157,10 @@ export class GardenAudioSystem extends createSystem({
     this.wasRunning = running;
 
     const med = this.meditation;
-    this.music.tick(delta, med?.active ?? false, med?.fullness ?? 0);
+    // The music grows with the tree: the drone alone before planting, a layer more per stage.
+    const tree = this.bonsai.entity;
+    const depth = depthFor(tree?.getValue(Bonsai, 'planted') ?? false, tree?.getValue(Bonsai, 'stage') ?? 0);
+    this.music.tick(delta, med?.active ?? false, med?.fullness ?? 0, depth);
     // Closed eyes: the music is muffled (low-passed), as if heard from inside.
     this.lids ??= this.world.getSystem(EyelidSystem);
     this.engine.setMuffle(Math.round((this.lids?.amount ?? 0) * 10) / 10);
