@@ -35,10 +35,9 @@
   }
   .streak-row {
     display: none;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.8;
+    gap: 0.5;
   }
   .streak {
     font-size: 1.5;
