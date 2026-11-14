@@ -66,7 +66,14 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   sunset 6-8 and 17-20, night with fireflies) and the season (spring blossoms, summer
   green, red autumn leaves, cool winter green; the blooming tree shows its blossoms in spring
   and autumn only, so a green summer tells the seasons apart). Now and then a gentle rain waters the tree
-  or a breeze sways it and dries the soil, each with its own sound. The table's own sand starts raked in
+  or a breeze sways it and dries the soil, each with its own sound. The garden is alive but calm:
+  the forest's canopies, pines and the bonsai's crown sway slowly in the wind (stronger in a
+  breeze, almost still at night), and during a breathing session the wind breathes with you,
+  rising a little with the inhale and settling with the exhale. Soft clouds drift across the
+  sky in its colours at every hour; a few petals, dandelion seeds, leaves or snowflakes drift
+  down far from the table, depending on the season; and now and then by day a small flock of
+  birds crosses the far sky. With *Gentle fades* the wind and the falling particles are
+  smaller and slower. The table's own sand starts raked in
   lines and rings; **touch it with your fingertips and drag** to draw grooves (three
   fingers make a little rake). Your patterns are saved for the next visit.
 - **Come back and level up.** Care earns experience (plant 5, full watering 10, each
@@ -138,6 +145,16 @@ never required.
   so both lanterns save a draw call each); idle sparkles are not drawn: at most about 78 draw calls and 42k triangles per
   eye, with every unlock, the tree in bloom, all seven visit flowers, a subtitle and the
   ghost pinch on screen, and the shared tree in blossom at night in the rain. The garden's own textures take about 15 MB.
+- **Ambient animation**, all cheap: the wind (`src/wind.ts`, `src/wind-sway.ts`) is a few
+  lines in the vertex shader of the forest and bonsai foliage materials; each forest tree's
+  centre, base and weight are found once at load from the mesh's connected parts (trunks
+  and the wide ground and hills get weight 0, so they never move). The clouds
+  (`src/sky-clouds.ts`) are two octaves of value noise added to IWSDK's DomeGradient
+  shader, coloured from its own sky and horizon colours. No new objects or draw calls for
+  either. The season's particles (`src/effects/season-fall.ts`, 20-40) are one instanced
+  draw call owned by the weather system: they leave before the rain shows, so falling things
+  never cost more than one draw call, and none when nothing falls. The flock
+  (`src/birds.ts`, 3-5 two-triangle birds) is one instanced draw call only while it flies.
 - **Eyelids** (`src/eyelids.ts`, `src/eyelid-shader.ts`): one quad fixed to the headset,
   15 cm in front of the eyes, with a shader drawing two almond-edged lids (or a plain
   fade). Hidden while the eyes are open, so it costs no draw call then; drawn last,

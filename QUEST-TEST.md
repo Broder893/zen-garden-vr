@@ -102,6 +102,12 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] Each stage is its own model (sprout, young, mature, in bloom): does every growth step read clearly as the same tree getting bigger? Before planting, a warm glow in the empty pot.
 - [ ] Open `...?weather=rain`: after a few seconds rain falls, you hear it, the firefly says "A gentle rain. It is watering your tree." and the soil darkens.
 - [ ] Open `...?weather=breeze`: the tree sways gently, wind in the bamboo. No discomfort?
+- [ ] **Wind:** by day the forest's treetops, pines and the bonsai's crown sway slowly and a little; trunks and the far hills stay still. With `...?weather=breeze` a bit more; at night (`...?time=night`) almost still. Never fast or large enough to feel unsteady?
+- [ ] **The garden breathes:** during the meditation or a breathing break, the trees sway a little more as you breathe in and less as you breathe out. Noticeable but gentle?
+- [ ] **Clouds:** soft clouds drift slowly across the sky; white by day, rose at sunset, faint at night. Never distracting?
+- [ ] **Season in the air:** a few slow particles drift down far from the table (`...?season=spring` petals, `summer` dandelion seeds, `autumn` orange leaves, `winter` snow). Never right in front of your eyes? They stop when the rain starts (`...?weather=rain`) and while the eyes are closed.
+- [ ] **Birds:** by day, within the first minute and then every 1-2 minutes, a small flock crosses the far sky. Not at sunset or night.
+- [ ] **Gentle fades On** (Comfort): the wind and the falling particles are smaller and slower.
 - [ ] **Ambience** (listen 30 s each, guide quiet): `...?season=spring&time=day` light wind and far birds; `...?season=summer&time=night` crickets and, now and then, a distant owl; `...?season=autumn` rustling leaves; `...?season=winter` almost silent, a thin cold wind. Always under the music, never covering the voice; quieter with the eyes closed.
 - [ ] Frame rate at night with rain (the busiest moment): smooth?
 
