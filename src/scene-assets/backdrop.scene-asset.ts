@@ -43,6 +43,35 @@ const ROCKS: [number, number, number][] = [
   [0.9, -3.2, 0.55],
 ];
 const FENCE_RADIUS = 4.2;
+
+/**
+ * Painted ground shadows (no real-time shadows): soft dark patches under what
+ * stands on the sand, shifted a little toward the back right as if the light
+ * came from the front left. [x, z, radius, strength] in this asset's frame
+ * (world z + 0.5). Besides the rocks (ROCKS), the scene's garden lantern
+ * (-0.9, 0, -3.4), the shared tree (1.6, 0, -3.9) and the stone basin
+ * (0.7, 0, -0.52) of public/scenes/main.iwsdk.scene.json: keep them together.
+ */
+const SHADOW_SHIFT: [number, number] = [0.6, 0.5];
+const SHADOW_BLOBS: [number, number, number, number][] = [
+  // Garden lantern (1 m tall, base 0.5 m wide).
+  [-0.9 + 0.08, -2.9 + 0.07, 0.36, 0.5],
+  // Shared tree: the canopy's wide shade, and the trunk's contact.
+  [1.6 + 0.35, -3.4 + 0.3, 1.25, 0.28],
+  [1.6 + 0.03, -3.4 + 0.03, 0.22, 0.45],
+  // Stone basin.
+  [0.7 + 0.05, -0.02 + 0.05, 0.36, 0.45],
+];
+/** The table: its top (1.0 x 0.7 m, 0.79 m up) and the four legs' feet. */
+const TABLE_HALF: [number, number] = [0.5, 0.35];
+const TABLE_SHADE_SHIFT = 0.13;
+const TABLE_LEGS: [number, number][] = [[-0.45, -0.3], [0.45, -0.3], [-0.45, 0.3], [0.45, 0.3]];
+/**
+ * How strong the painted shadows are (1 = clear day). SeasonSystem lowers it
+ * at sunset and at night and in winter's soft light. One value shared by every
+ * copy of the ground material (DomeFade draws a clone).
+ */
+export const GROUND_SHADOW = { value: 1 };
 const FENCE_HALF_ANGLE = (70 * Math.PI) / 180;
 const POLE_SPACING = 0.12;
 
@@ -55,7 +84,15 @@ function rakedSandMaterial(): MeshStandardMaterial {
   mat.name = GROUND_MATERIAL;
   const sand = new Color(SAND);
   const rocks = ROCKS.map(([x, z, r]) => `vec3(${x.toFixed(2)}, ${z.toFixed(2)}, ${r.toFixed(2)})`).join(', ');
+  const f = (n: number) => n.toFixed(3);
+  const blobs = [
+    ...ROCKS.map(([x, z, r]): [number, number, number, number] => [x + SHADOW_SHIFT[0] * r * 0.35, z + SHADOW_SHIFT[1] * r * 0.35, r * 1.3, 0.5]),
+    ...SHADOW_BLOBS,
+  ];
+  const blobList = blobs.map(([x, z, r, k]) => `vec4(${f(x)}, ${f(z)}, ${f(r)}, ${f(k)})`).join(', ');
+  const legs = TABLE_LEGS.map(([x, z]) => `vec2(${f(x + 0.02)}, ${f(z + 0.02)})`).join(', ');
   mat.onBeforeCompile = (shader) => {
+    shader.uniforms.uShadow = GROUND_SHADOW;
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec2 vRakePos;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvRakePos = position.xz;');
@@ -65,7 +102,30 @@ function rakedSandMaterial(): MeshStandardMaterial {
         `#include <common>
 varying vec2 vRakePos;
 const vec3 RAKE_ROCKS[3] = vec3[3](${rocks});
-const vec3 RAKE_SAND = vec3(${sand.r.toFixed(4)}, ${sand.g.toFixed(4)}, ${sand.b.toFixed(4)});`,
+const vec3 RAKE_SAND = vec3(${sand.r.toFixed(4)}, ${sand.g.toFixed(4)}, ${sand.b.toFixed(4)});
+uniform float uShadow;
+const vec4 SHADE_BLOBS[${blobs.length}] = vec4[${blobs.length}](${blobList});
+const vec2 TABLE_LEGS[4] = vec2[4](${legs});
+// Soft painted shadow at p: 0 (none) .. 1 (full).
+float paintedShadow(vec2 p) {
+  float s = 0.0;
+  for (int i = 0; i < ${blobs.length}; i++) {
+    float t = length(p - SHADE_BLOBS[i].xy) / SHADE_BLOBS[i].z;
+    s = max(s, SHADE_BLOBS[i].w * (1.0 - smoothstep(0.35, 1.0, t)));
+  }
+  // The table top's shade (a rounded box, soft edged), a little toward the back right.
+  vec2 q = abs(p - vec2(${f(SHADOW_SHIFT[0] * TABLE_SHADE_SHIFT)}, ${f(SHADOW_SHIFT[1] * TABLE_SHADE_SHIFT)})) - vec2(${f(TABLE_HALF[0] - 0.05)}, ${f(TABLE_HALF[1] - 0.05)});
+  float box = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
+  s = max(s, 0.32 * (1.0 - smoothstep(-0.1, 0.18, box)));
+  // Darker where each leg meets the sand.
+  for (int i = 0; i < 4; i++) s = max(s, 0.5 * (1.0 - smoothstep(0.02, 0.09, length(p - TABLE_LEGS[i]))));
+  // Along the foot of the fence, on the garden side.
+  float fd = length(p);
+  float fa = abs(atan(p.x, -p.y));
+  float fence = (1.0 - smoothstep(0.0, 0.35, abs(fd - ${f(FENCE_RADIUS - 0.12)}))) * (1.0 - smoothstep(${f(FENCE_HALF_ANGLE - 0.02)}, ${f(FENCE_HALF_ANGLE + 0.05)}, fa));
+  s = max(s, 0.3 * fence);
+  return s;
+}`,
       )
       .replace(
         '#include <color_fragment>',
@@ -87,6 +147,9 @@ const vec3 RAKE_SAND = vec3(${sand.r.toFixed(4)}, ${sand.g.toFixed(4)}, ${sand.b
   float edge = d + 0.35 * sin(a * 7.0) + 0.2 * sin(a * 13.0 + 1.3);
   float sandMix = 1.0 - smoothstep(${SAND_EDGE[0].toFixed(1)}, ${SAND_EDGE[1].toFixed(1)}, edge);
   diffuseColor.rgb = mix(diffuseColor.rgb, RAKE_SAND * (1.0 - 0.2 * groove), sandMix);
+  // Painted shadows, a cool shade rather than grey.
+  float sh = paintedShadow(p) * uShadow;
+  diffuseColor.rgb *= mix(vec3(1.0), vec3(0.55, 0.56, 0.66), sh);
 }`,
       );
   };

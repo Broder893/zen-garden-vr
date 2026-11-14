@@ -2,7 +2,7 @@ import { Color, createSystem, Mesh, MeshStandardMaterial } from '@iwsdk/core';
 import { DayNightSystem } from './day-night.js';
 import { EyelidSystem } from './eyelids.js';
 import { HealthSystem } from './health.js';
-import { GROUND_MATERIAL } from './scene-assets/backdrop.scene-asset.js';
+import { GROUND_MATERIAL, GROUND_SHADOW } from './scene-assets/backdrop.scene-asset.js';
 import { overridesFrom, Season, SEASON_COLORS, seasonFor, TimeOfDay } from './save/atmosphere.js';
 
 /** The forest's tintable canopy material (public/models/forest.glb). */
@@ -14,6 +14,9 @@ const FIXED_LIFT = 3.2;
 const LEAF_LIFT = 1.35;
 /** The snow's own light follows the daylight, so the canopy does not shine at night. */
 const GLOW_BY_TIME: Record<TimeOfDay, number> = { day: 1, sunset: 0.6, night: 0.2 };
+/** The painted ground shadows: full by day, softer at sunset and at night, and in winter's light. */
+const SHADOW_BY_TIME: Record<TimeOfDay, number> = { day: 1, sunset: 0.75, night: 0.45 };
+const WINTER_SHADOW = 0.75;
 /** How often to look for the forest until the level has it (seconds). */
 const LOOKUP_SECONDS = 1;
 /** How often to check whether the real season has turned (seconds). */
@@ -87,6 +90,7 @@ export class SeasonSystem extends createSystem({}) {
     }
     this.fixed?.color.setScalar(FIXED_LIFT);
     (this.ground?.material as MeshStandardMaterial | undefined)?.color.set(c.ground);
+    GROUND_SHADOW.value = SHADOW_BY_TIME[this.glowTime ?? 'day'] * (season === 'winter' ? WINTER_SHADOW : 1);
   }
 
   /** The forest and the ground arrive with the level: find their materials once they are there. */
