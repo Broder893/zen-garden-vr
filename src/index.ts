@@ -25,6 +25,7 @@ import { RakeSystem } from './rake.js';
 import { SeasonSystem } from './season.js';
 import { SharedTreeSystem } from './shared-tree.js';
 import { WeatherSystem } from './weather.js';
+import { WindSystem } from './wind.js';
 import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
@@ -65,6 +66,7 @@ World.create(
     .registerSystem(SeasonSystem)
     .registerSystem(DayNightSystem)
     .registerSystem(WeatherSystem)
+    .registerSystem(WindSystem)
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
     .registerSystem(EntranceSystem)
@@ -103,6 +105,7 @@ World.create(
       season: world.getSystem(SeasonSystem),
       dayNight: world.getSystem(DayNightSystem),
       weather: world.getSystem(WeatherSystem),
+      wind: world.getSystem(WindSystem),
       perf: world.getSystem(PerfSystem),
       input: world.getSystem(InputModeSystem),
       gazeCare: world.getSystem(GazeCareSystem),
