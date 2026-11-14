@@ -26,6 +26,7 @@ import { SeasonSystem } from './season.js';
 import { SharedTreeSystem } from './shared-tree.js';
 import { WeatherSystem } from './weather.js';
 import { WindSystem } from './wind.js';
+import { SkyCloudsSystem } from './sky-clouds.js';
 import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
@@ -67,6 +68,7 @@ World.create(
     .registerSystem(DayNightSystem)
     .registerSystem(WeatherSystem)
     .registerSystem(WindSystem)
+    .registerSystem(SkyCloudsSystem)
     .registerSystem(ReturnHomeSystem)
     .registerSystem(MeditationSystem)
     .registerSystem(EntranceSystem)
