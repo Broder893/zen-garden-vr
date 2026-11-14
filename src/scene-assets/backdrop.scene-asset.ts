@@ -29,8 +29,11 @@ import { mergeByMaterial } from './lib/merge.js';
 const GROUND_RADIUS = 21;
 /** The ground disc's material: its colour is the season's (src/season.ts). */
 export const GROUND_MATERIAL = 'ground_season';
-/** The raked sand in the middle (the material colour is the grass around it). */
-const SAND = '#d6c7a3';
+/**
+ * The raked sand in the middle (the material colour is the grass around it): a warm
+ * sand, so it reads as sand rather than grey under the sky's violet light.
+ */
+export const SAND = '#efc788';
 /** Sand gives way to the ground between these distances (m), with a wavy edge. */
 const SAND_EDGE: [number, number] = [5.6, 8];
 /** Rocks: [x, z, radius] in the asset's frame (also ringed by the rake pattern). */

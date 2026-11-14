@@ -19,7 +19,7 @@ import {
   Vector2,
   Vector3,
 } from '@iwsdk/core';
-import { mergeGeometries, rockGeometry } from './backdrop.scene-asset.js';
+import { mergeGeometries, rockGeometry, SAND } from './backdrop.scene-asset.js';
 import { makeRandom } from './lib/hardsurface.js';
 import { mergeByMaterial } from './lib/merge.js';
 
@@ -264,7 +264,7 @@ function pebbles(rand: () => number): BufferGeometry[] {
 export function createStream(): Group {
   const root = new Group();
   root.name = 'Stream';
-  const sandEdge = new Color('#d6c7a3').multiplyScalar(0.93);
+  const sandEdge = new Color(SAND).multiplyScalar(0.93);
   const damp = new Color('#ae9b76');
   const wet = new Color('#7d6a4b');
   const half = STREAM_WIDTH / 2 + BANK;
