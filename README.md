@@ -58,8 +58,11 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   shared tree's basin, or starts the breathing session. A ring of light fills while you
   look, so a glance never triggers anything; all lines speak of looking. When hands come
   back, so do the pinch lines.
-- **A zen garden around you.** The table stands in a raked sand garden with mossy rocks,
-  a bamboo fence and a stone lantern. It follows the real clock (clear day 8-17, golden
+- **A zen garden around you.** The table stands in a raked sand garden laid out as a
+  karesansui: a group of three half-buried mossy rocks (one main stone) and two single
+  ones, a stone lantern by the water, stepping stones toward the stream and from the
+  stone basin to the shared tree, and a bamboo fence. Soft shadows are painted on the
+  sand and on the objects' feet (no real-time shadows). It follows the real clock (clear day 8-17, golden
   sunset 6-8 and 17-20, night with fireflies) and the season (spring blossoms, summer
   green, red autumn leaves, cool winter green; the blooming tree shows its blossoms in spring
   and autumn only, so a green summer tells the seasons apart). Now and then a gentle rain waters the tree
