@@ -5,11 +5,13 @@ import {
   Group,
   Material,
   Mesh,
+  MeshStandardMaterial,
   Object3D,
   Quaternion,
   Vector3,
 } from '@iwsdk/core';
 import { Bonsai, BonsaiStage } from './garden-components.js';
+import type { Season } from './save/atmosphere.js';
 import { SeasonSystem } from './season.js';
 
 type V3 = [number, number, number];
@@ -90,6 +92,23 @@ const PUDDLE_MIN = 0.35;
 const PUDDLE_MAX = 0.78;
 /** Healthy branches were made for the larger procedural tree. */
 const BRANCH_SCALE = 0.75;
+/** The models' own shoots to trim: shoot_NN_<season> sits on cut_NN, one look per season. */
+const SHOOT_MESH = /^shoot_(\d+)_(spring|summer|autumn|winter)$/;
+/**
+ * The shoots' glow breathes so they read as "cut me" in every season: the
+ * model's soft emissive, times this range (vertex colours stay as modelled).
+ */
+const SHOOT_GLOW_MIN = 1;
+const SHOOT_GLOW_MAX = 4.5;
+const SHOOT_GLOW_RATE = 2.2;
+
+/** One seasonal look of a model's shoot, worn by a glowing shoot group (Overgrowth_*). */
+interface ShootSkin {
+  group: Object3D;
+  stage: number;
+  season: Season;
+  mesh: Mesh;
+}
 
 interface StageParts {
   cuts: Map<string, Vector3>;
@@ -98,6 +117,8 @@ interface StageParts {
   ground: Group;
   fallen: Object3D | null;
   puddle: Object3D | null;
+  /** The model's shoots by number (cut_NN), one mesh per season. */
+  shoots: Map<string, Map<Season, Mesh>>;
   /** The blooming model's blossoms: shown in spring and autumn only, so summer reads green. */
   flowers: Object3D | null;
 }
@@ -124,6 +145,12 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
   /** The same, as a list for the per-frame loop. */
   private stageList: { stage: number; parts: StageParts }[] = [];
   private glow: Object3D | null = null;
+  /** The models' shoots on the glowing shoot groups, and the code-made look each group keeps as a fallback. */
+  private skins: ShootSkin[] = [];
+  private codeShoots = new Map<Object3D, Object3D[]>();
+  private shootMats = new Set<MeshStandardMaterial>();
+  private skinned = '';
+  private time = 0;
   private placedStage = -2;
   private season?: SeasonSystem;
   private turn = new Quaternion();
@@ -138,9 +165,10 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
     for (const e of this.queries.bonsai.entities) this.build(e);
   }
 
-  update(): void {
+  update(delta: number): void {
     const e = this.entity;
     if (!e || !this.root || this.status !== 'blender') return;
+    this.time += delta;
     const planted = e.getValue(Bonsai, 'planted') ?? false;
     const stage = planted ? (e.getValue(Bonsai, 'stage') ?? 0) : -1;
     if (this.glow) this.glow.visible = !planted;
@@ -150,6 +178,7 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
     }
     this.season ??= this.world.getSystem(SeasonSystem);
     const season = this.season?.season;
+    this.wearShoots(stage, season ?? 'summer');
     const over = e.getValue(Bonsai, 'overwater') ?? 0;
     const k = Math.min(1, Math.max(0, (over - PUDDLE_FROM) / (PUDDLE_FULL - PUDDLE_FROM)));
     for (let i = 0; i < this.stageList.length; i++) {
@@ -218,7 +247,7 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
       ground.name = `Ground_${name}`;
       ground.visible = false;
       root.add(ground);
-      const parts: StageParts = { cuts: new Map(), snow: null, ground, fallen: null, puddle: null, flowers: null };
+      const parts: StageParts = { cuts: new Map(), snow: null, ground, fallen: null, puddle: null, shoots: new Map(), flowers: null };
       for (const child of [...scene.children]) {
         if (/^cut_\d+$/.test(child.name)) {
           parts.cuts.set(child.name, child.position.clone());
@@ -227,6 +256,16 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
         const mesh = child as Mesh;
         // Every model repeats the pot, soil and moss: the shared ones from the seed model are enough.
         if (!mesh.isMesh || SHARED_POT_PARTS.has(child.name)) continue;
+        const shoot = SHOOT_MESH.exec(child.name);
+        if (shoot) {
+          // Worn by the glowing shoot groups below (moved there after this loop).
+          const bySeason = parts.shoots.get(shoot[1]) ?? new Map<Season, Mesh>();
+          bySeason.set(shoot[2] as Season, mesh);
+          parts.shoots.set(shoot[1], bySeason);
+          mesh.name = `${name}_${child.name}`;
+          mesh.visible = false;
+          continue;
+        }
         const mat = mesh.material as Material;
         // Health and season tint materials by these names (a copy: the cached model stays as loaded).
         if (/^foliage/.test(mat.name)) mesh.material = Object.assign(mat.clone(), { name: 'Leaf' });
@@ -257,6 +296,7 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
       this.stages.set(stage, parts);
       this.stageList.push({ stage, parts });
     }
+    this.dressShoots(root);
     // The procedural blossoms belong to the procedural tree; the blooming model has its own.
     root.getObjectByName('Flowers')?.removeFromParent();
     // Healthy branches take the model's bark and foliage, so they read as part of the same tree.
@@ -275,6 +315,49 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
     this.placedStage = -2;
   }
 
+  /**
+   * Hangs each model's shoots (shoot_NN_<season>) on the glowing shoot group
+   * placed at the same cut point (cut_NN), so pruning, cut points and showing
+   * or hiding stay the group's. The group's code-made shoot stays as the
+   * fallback where a model has none.
+   */
+  private dressShoots(root: Object3D): void {
+    for (const [stage, where] of Object.entries(PLACES)) {
+      const parts = this.stages.get(Number(stage));
+      if (!parts) continue;
+      for (const [groupName, cutName] of where.shoots) {
+        const group = root.getObjectByName(groupName);
+        const looks = parts.shoots.get(cutName.slice(4));
+        if (!group || !looks) continue;
+        if (!this.codeShoots.has(group)) {
+          this.codeShoots.set(group, group.children.filter((c) => (c as Mesh).isMesh));
+        }
+        for (const [season, mesh] of looks) {
+          group.add(mesh);
+          this.skins.push({ group, stage: Number(stage), season, mesh });
+          const mat = mesh.material as MeshStandardMaterial;
+          if (mat.emissive) this.shootMats.add(mat);
+        }
+      }
+    }
+  }
+
+  /** Shows the model's shoot for this stage and season (or the code-made one), and breathes their glow. */
+  private wearShoots(stage: number, season: Season): void {
+    const key = `${stage}:${season}`;
+    if (key !== this.skinned) {
+      this.skinned = key;
+      const dressed = new Set<Object3D>();
+      for (const s of this.skins) {
+        s.mesh.visible = s.stage === stage && s.season === season;
+        if (s.mesh.visible) dressed.add(s.group);
+      }
+      for (const [group, code] of this.codeShoots) for (const m of code) m.visible = !dressed.has(group);
+    }
+    const k = 0.5 - 0.5 * Math.cos(this.time * SHOOT_GLOW_RATE);
+    for (const mat of this.shootMats) mat.emissiveIntensity = SHOOT_GLOW_MIN + (SHOOT_GLOW_MAX - SHOOT_GLOW_MIN) * k;
+  }
+
   /** Moves the glowing shoots and healthy branches onto this stage's model. */
   private place(stage: number): void {
     const where = PLACES[stage];
@@ -287,6 +370,8 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
       const cut = parts.cuts.get(cutName);
       if (!g || !base || !cut) continue;
       g.position.set(cut.x - base[0], cut.y - base[1], cut.z - base[2]);
+      // The model's shoots are modelled in the tree's space: undo the group's offset.
+      for (const s of this.skins) if (s.group === g && s.stage === stage) s.mesh.position.set(-g.position.x, -g.position.y, -g.position.z);
     }
     for (const [name, from, to] of where.healthy) {
       const g = root.getObjectByName(name);

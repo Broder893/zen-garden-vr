@@ -113,8 +113,12 @@ never required.
   (`public/models/`), loaded before the garden appears; `src/blender-bonsai.ts` swaps
   them in for each stage under the names the other systems use (stage groups, `Leaf`
   and `Flower` materials, `Soil`, `PotShell`), so season, wilt, wet soil and the glazed
-  pot still come from code. The glowing shoots start at each model's `cut_NN` points;
-  the healthy branches (a wrong cut leaves their stump) are code-made and set on the
+  pot still come from code. The shoots to trim are modelled too, one look per season
+  (`shoot_NN_<season>`, vertex colours, on the model's `cut_NN` point): each is worn by
+  the glowing shoot group at that point, so pruning, cut zones and regrowth are
+  unchanged, and its soft glow breathes to say "cut me" (the code-made shoot remains
+  only as a fallback for a model without one). The five bonsai files weigh 1.5 MB. The
+  healthy branches (a wrong cut leaves their stump) are code-made and set on the
   trunk at least 9 cm from every glowing shoot. `?bonsai=classic` shows the earlier
   procedural tree. The forest around the garden is a Blender model too
   (`public/models/forest.glb`, two meshes, vertex colours, no textures): its canopy
