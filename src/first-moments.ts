@@ -1,10 +1,11 @@
 import { createSystem, VisibilityState } from '@iwsdk/core';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { Bonsai } from './garden-components.js';
+import { EyelidSystem } from './eyelids.js';
 import { MeditationSystem } from './meditation.js';
 
 /** The rewarding moments of a first visit, in the order they usually happen. */
-export type Moment = 'planted' | 'firstGrowth' | 'mature' | 'bloom' | 'firstBreath';
+export type Moment = 'wonder' | 'planted' | 'firstGrowth' | 'mature' | 'bloom' | 'firstBreath';
 
 /**
  * A stopwatch for the "first five minutes": seconds in VR from entering the
@@ -22,6 +23,9 @@ export class FirstMomentsSystem extends createSystem({
   private started = false;
   private bonsai!: FirstEntity;
   private meditation?: MeditationSystem;
+  private lids?: EyelidSystem;
+  /** Something to marvel at, set by the arrival (src/arrival.ts); until then the eyes opening. */
+  wonderShown = false;
   private startStage = -1;
   private startPlanted = false;
 
@@ -43,6 +47,9 @@ export class FirstMomentsSystem extends createSystem({
       this.startStage = planted ? stage : -1;
     }
     this.clock += delta;
+    // The first wonder: the eyes open on the garden (and the arrival, once it begins).
+    this.lids ??= this.world.getSystem(EyelidSystem);
+    if (this.wonderShown || (this.clock > 0.5 && (this.lids?.open ?? true))) this.mark('wonder');
     if (planted && !this.startPlanted) this.mark('planted');
     if (stage > this.startStage && planted) {
       if (stage >= 1 && this.startStage < 1) this.mark('firstGrowth');

@@ -639,6 +639,23 @@
       }
     },
     {
+      "id": "title-panel",
+      "name": "Title Panel",
+      "framingRole": "content",
+      "content": {
+        "type": "asset",
+        "asset": "title-panel"
+      },
+      "transform": {
+        "position": [
+          0,
+          1.76,
+          -1.9
+        ],
+        "scale": 1.0
+      }
+    },
+    {
       "id": "break-panel",
       "name": "Break Panel",
       "framingRole": "content",

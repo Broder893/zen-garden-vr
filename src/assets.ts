@@ -52,5 +52,6 @@ export default defineAssets({
   'breath-panel': ui('breath.uikitml', 'Breath Panel'),
   'level-badge': ui('level.uikitml', 'Level Badge'),
   'break-panel': ui('break.uikitml', 'Break Panel'),
+  'title-panel': ui('title.uikitml', 'Title Panel'),
   'shared-sign': ui('shared.uikitml', 'Shared Sign'),
 });
