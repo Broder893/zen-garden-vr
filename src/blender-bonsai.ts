@@ -95,12 +95,29 @@ const BRANCH_SCALE = 0.75;
 /** The models' own shoots to trim: shoot_NN_<season> sits on cut_NN, one look per season. */
 const SHOOT_MESH = /^shoot_(\d+)_(spring|summer|autumn|winter)$/;
 /**
- * The shoots' glow breathes so they read as "cut me" in every season: the
- * model's soft emissive, times this range (vertex colours stay as modelled).
+ * The shoots' glow breathes so they read as "cut me" in every season. It
+ * glows in the shoot's own vertex colour (green in spring and summer, orange
+ * in autumn, brown twig and snow in winter), never white: a white glow washed
+ * the colours out. A narrow pulse, so the colour always reads.
  */
-const SHOOT_GLOW_MIN = 1;
-const SHOOT_GLOW_MAX = 4.5;
+const SHOOT_GLOW_MIN = 0.12;
+const SHOOT_GLOW_MAX = 0.4;
 const SHOOT_GLOW_RATE = 2.2;
+
+/** Makes a shoot material glow in its vertex colour: emissive (white) times the vertex colour. */
+function glowInOwnColour(mat: MeshStandardMaterial): void {
+  if (mat.userData.ownColourGlow) return;
+  mat.userData.ownColourGlow = true;
+  mat.emissive.setRGB(1, 1, 1);
+  mat.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <emissivemap_fragment>',
+      '#include <emissivemap_fragment>\n#ifdef USE_COLOR\n\ttotalEmissiveRadiance *= vColor.rgb;\n#endif',
+    );
+  };
+  mat.customProgramCacheKey = () => 'shoot-own-colour-glow';
+  mat.needsUpdate = true;
+}
 
 /** One seasonal look of a model's shoot, worn by a glowing shoot group (Overgrowth_*). */
 interface ShootSkin {
@@ -336,7 +353,10 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
           group.add(mesh);
           this.skins.push({ group, stage: Number(stage), season, mesh });
           const mat = mesh.material as MeshStandardMaterial;
-          if (mat.emissive) this.shootMats.add(mat);
+          if (mat.emissive && mat.vertexColors) {
+            glowInOwnColour(mat);
+            this.shootMats.add(mat);
+          }
         }
       }
     }
@@ -386,6 +406,8 @@ export class BlenderBonsaiSystem extends createSystem({ bonsai: { required: [Bon
       g.scale.setScalar(BRANCH_SCALE);
       this.tmp.set(was[0], was[1], was[2]).multiplyScalar(BRANCH_SCALE).applyQuaternion(this.turn);
       g.position.set(from[0] - this.tmp.x, from[1] - this.tmp.y, from[2] - this.tmp.z);
+      // The leaf cloud stays level, like the crowns, whichever way the branch now points.
+      g.getObjectByName('LeafCloud')?.quaternion.copy(this.turn).invert();
     }
   }
 }

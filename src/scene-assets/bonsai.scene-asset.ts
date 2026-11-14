@@ -52,6 +52,16 @@ flowerMat.name = 'Flower';
 wildMat.name = 'Wild';
 
 const padGeo = new IcosahedronGeometry(1, 1);
+/** Faceted lump for the healthy branches' leaf clouds (flat normals, like the model's crowns). */
+const lumpGeo = new IcosahedronGeometry(1, 1);
+lumpGeo.deleteAttribute('normal');
+lumpGeo.computeVertexNormals();
+/** A small flattened leaf cloud: one wide lump and two smaller ones beside it (centre, size). */
+const CLOUD_LUMPS: [Vector3, Vector3][] = [
+  [new Vector3(0, 0, 0), new Vector3(0.022, 0.0085, 0.019)],
+  [new Vector3(0.017, -0.003, 0.006), new Vector3(0.014, 0.0065, 0.013)],
+  [new Vector3(-0.015, -0.002, -0.007), new Vector3(0.013, 0.006, 0.012)],
+];
 const flowerGeo = new IcosahedronGeometry(0.011, 0);
 const knuckleGeo = new SphereGeometry(1, 10, 8);
 
@@ -146,7 +156,7 @@ function createSprout(): Group {
 
 /**
  * A healthy branch (not glowing): cutting it is a mistake. The base stays as a
- * stump; 'Leafy' (the outer twig and its leaf pad) is hidden when it is cut.
+ * stump; 'Leafy' (the outer twig and its leaf cloud) is hidden when it is cut.
  * Its CutPoint sits along the twig, at least 10 cm from every glowing shoot.
  */
 function healthyBranch(name: string, from: Vector3, to: Vector3): Group {
@@ -158,8 +168,20 @@ function healthyBranch(name: string, from: Vector3, to: Vector3): Group {
   const leafy = new Group();
   leafy.name = 'Leafy';
   leafy.add(limb(`${name}_Twig`, [knee, bend, to], 0.0036, 0.0022));
-  leafy.add(pad(`${name}_Pad`, to, v(0.024, 0.013, 0.021)));
   mergeByMaterial(leafy);
+  // The leaf cloud at the tip, flat like the crowns' pads. Its own group, so a
+  // tree model that turns the branch can keep it level ('LeafCloud').
+  const cloud = new Group();
+  cloud.name = 'LeafCloud';
+  cloud.position.copy(to);
+  for (const [c, size] of CLOUD_LUMPS) {
+    const lump = new Mesh(lumpGeo, leafMat);
+    lump.position.copy(c);
+    lump.scale.copy(size);
+    cloud.add(lump);
+  }
+  mergeByMaterial(cloud);
+  leafy.add(cloud);
   g.add(leafy);
   // Where and which way it grows, so a different tree model can move and turn it onto its trunk.
   g.userData.branchFrom = [from.x, from.y, from.z];
