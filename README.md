@@ -50,7 +50,12 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   or click "Comfort"): breathing pace (slow, medium, fast), high contrast, large text, one
   hand (left or right: both tools move to that side) and **hold to select**, which
   replaces every pinch with a hand held still beside the object (or a steady look at the
-  seed or stone). Settings are saved separately from the garden.
+  seed or stone). **Table**: Lower / Higher and Nearer / Farther move it in 2.5 cm steps
+  (up to 15 cm), and Recenter puts it straight ahead of where you now face; this moves
+  your viewpoint, not the objects, so the whole garden stays together. On a first visit,
+  after planting (never in the first minute), the firefly mentions it once if you often
+  reach far or sit much higher or lower than expected. Settings are saved separately
+  from the garden.
 - **No hands? Look.** If hand tracking is off or controllers are in use, the firefly
   says so in one line ("I cannot see your hands. Look at things to use them.") and the
   garden switches to gaze care: a steady two-second look plants the seed, sends the can
@@ -82,7 +87,18 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
   on the garden sand to the front left, rising from under one rock and slipping under another (8) and a deep 4-7-8 breath for the breaks (9). A badge by the table's
   front corner shows the level and progress. The garden is saved on the device; each
   return visit (after a few hours) the soil dries and shoots grow back, the first visit
-  of the day brings a gift, and a new flower grows in the sand, up to seven.
+  of the day brings a gift, and a new flower grows in the sand, up to seven. The badge
+  also counts **days in a row** with a visit ("3 days in a row") with seven small dots for
+  the past week; when the count grows the firefly says "Another day in a row!" after the
+  welcome. A missed day quietly starts again at 1.
+- **A break with an end.** From the second visit on, a small panel asks how long the
+  break is: 3, 5 or 10 minutes (poke, point, hold a hand by it, or look at it for two
+  seconds; with no answer in 8 seconds the last choice is used, 5 at first). The first
+  visit is the tutorial, with no timer. The time stops while the headset is off. A minute
+  before the end the firefly says so (never during a breath); at the end, once any
+  breathing session is over, a soft bowl, "Your break is over. Take this calm with you."
+  and a summary for 15 seconds: minutes, breaths, cares, level and days in a row. Then
+  "See you tomorrow": the garden stays open, and staying on is fine.
 - **A tree shared by everyone.** Behind the fence-line stands one big tree that every
   visitor cares for together. Pour the can into the stone basin beside the table (or hold
   it there hands-free): a light carries the water to the tree, which fills out and

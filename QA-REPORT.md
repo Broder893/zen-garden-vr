@@ -206,6 +206,45 @@ Decided: a line on the card, shown only when the start fails again after its ret
 "The garden could not load. Check the connection and reload the page." (`index.html`,
 `src/index.ts`; `artifacts/qa/load-error.png`).
 
+## 14 November: table, break length, days in a row
+
+Three small features, one commit each (`fc43800`, `d6ddb77`, `a5ec035`, plus the layout
+fix `66224f2`), each after typecheck, `npm test`, build, check:budget and a frame-time
+measure (the heaviest garden at High, 2 x 15 s).
+
+| Check | Result |
+|---|---|
+| `npm test` | 53 tests pass (was 36): comfort settings (table steps and limits, older settings, break length), break summary lines, days in a row (calendar edges, DST, a missed day, a clock set back, the week's dots), save version 3 (a v2 save loads whole, its last gift day as day 1; clamping; v4 refused) |
+| In-app save check (`.iwsdk-scripts/test-save.mjs`) | 8 / 8 |
+| `npm run check:budget` | 62-73 draw calls, unchanged; the break panel adds 3-4 while shown (74 at most); the badge's dots add 46 triangles, no draw call |
+| Frame time | mean 16.67 ms; p99 18.3-19.5 ms, within the noise of the same measure without the changes (18.6-19.8 ms on the same evening) |
+
+Verified in the emulator (Quest 3 profile):
+
+- **Table**: Lower / Higher / Nearer / Farther move the player's origin by 2.5 cm (at
+  most 15 cm), saved with the comfort settings; Recenter after a 59° head turn and a
+  step aside brings the head back over the seat, facing the table. The hint shows once
+  on a first visit, after planting and after the first minute (tested with the eyes
+  25 cm too high), never when the table was moved.
+- **Break**: on a return visit the order is welcome, daily gift, days in a row, then the
+  question with its panel; a 2-second look picks 3 min (and it is remembered); no
+  answer in 8 s takes the last choice; "One more minute" a minute before; at the end
+  the close waits for a breathing session in progress (2 breaths counted), then the
+  bowl, "Your break is over", the summary for 15 s, "See you tomorrow", "Want more
+  time?". The first visit has no panel.
+- **Days in a row**: a v3 save at 2 days up to yesterday becomes 3, saved; "Another day
+  in a row!" after the welcome and the gift; badge "3 days in a row" with the week's
+  dots. Screenshots: `artifacts/features/`.
+
+Notes:
+
+- The emulator's scripted pokes aim at world positions but move the hand relative to
+  the player's origin, so after moving the table a scripted press lands that much off
+  (a press on Nearer hit Lower, just above). On a headset the hands and the panel move
+  together; the table logic itself was checked directly.
+- P2 (existing, not changed): on a return visit "Your tree is feeling better" can cut
+  into the welcome line after about 1.4 s.
+
 ## Not verified here
 
 - A real Quest: hands, frame rate, voice and comfort (see the short list in

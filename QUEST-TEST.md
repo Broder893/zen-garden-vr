@@ -134,6 +134,8 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] **Breathing pace Slow / Fast**: start a session with the stone and check the rhythm changes.
 - [ ] **Gentle fades On**: start a session: instead of eyelids, the view fades slowly to dark (about 3 s). More comfortable than the lids?
 - [ ] **Hands Right** (then **Left**): both tools move to that side and can be picked up with that hand alone. **Both** puts them back.
+- [ ] **Table**: **Higher** / **Lower** move the table 2.5 cm each poke (6 pokes at most each way, then the button dims); **Nearer** / **Farther** the same. Do the tree, tools and panels all move together? Can you now reach everything comfortably? Turn your chair or body about 45°, then **Recenter**: the table is straight ahead again. Close the tab and come back: height and distance are kept (Recenter is not).
+- [ ] On a fresh first visit (`?fresh`), plant the seed and then sit very low or reach far for a while: after the first minute the firefly says once "Table too high or far? Poke Comfort to move it." Not before planting, not twice.
 - [ ] **Hold to select On**, without pinching at all:
   - [ ] Start fresh (`?fresh`) and look at the seed for 2 seconds: a ring of light fills and it is planted.
   - [ ] Hold your open hand still beside the can for about a second: it follows your hand. Hold it over the tree: it tips and pours by itself.
@@ -164,6 +166,10 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] No nausea or eye strain after 10 minutes.
 
 ## 7. Saving and returning
+
+- [ ] **Break length** (any visit after the first, e.g. `...?nextvisit`): after the welcome, a panel ahead asks "How long is your break?" with 3 / 5 / 10 min and the firefly asks too. Pick one by poking; next time try a 2-second look, and with Hold to select a hand held by a button. Waiting 8 s picks the last choice. On the first visit (`?fresh`) there is no panel.
+- [ ] Choose **3 min** and keep caring: at about 2 minutes "One more minute. Finish what you are doing." Start a breathing session near the end: the close waits for it. Then a soft bowl, "Your break is over. Take this calm with you." and a summary for 15 s (minutes, breaths, cares, level, days in a row), then "See you tomorrow..." and "Want more time?...". The garden stays usable. Taking the headset off pauses the time.
+- [ ] **Days in a row**: the level badge shows "1 day in a row" and seven dots (today lit, on the right). Come back the next day: "2 days in a row", the next dot lit, and after the welcome (and the gift) the firefly says "Another day in a row! Your tree loves the routine." Skip a day: back to 1, nothing negative said.
 
 - [ ] Exit VR, **close the browser tab**, reopen the address **without** `?fresh`:
       `https://broder893.github.io/zen-garden-vr/`
