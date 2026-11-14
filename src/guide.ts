@@ -215,6 +215,9 @@ const HAND_MIN = 0.12;
 const HAND_MAX = 0.9;
 
 const EVENT_SECONDS = 3;
+/** Resting lines (nothing to do now) stay this long, then fade; any new line brings the subtitle back. */
+const REST_SHOW_SECONDS = 8;
+const REST_LINES = new Set<LineId>(['rest', 'restDwell', 'restGaze']);
 const SNIP_SECONDS = 1.6;
 
 /**
@@ -252,6 +255,11 @@ export class GuideSystem extends createSystem({
   private shownText = '';
   private subtitle: UIKit.Text | null = null;
   private panel: Object3D | null = null;
+  private pill: UIKit.Component | null = null;
+  /** How long the current resting line has been up, and the subtitle's opacity (fades after it). */
+  private restShown = 0;
+  private pillOpacity = 1;
+  private shownOpacity = 1;
   private event: LineId | null = null;
   /** Where the firefly goes while the one-off line plays (null: it keeps to the task). */
   private eventTarget: Object3D | null = null;
@@ -322,6 +330,7 @@ export class GuideSystem extends createSystem({
     this.panel = panel ?? null;
     this.subtitle = panel?.getElementById<UIKit.Text>('subtitle') ?? null;
     if (this.subtitle) this.subtitle.name = 'subtitle';
+    this.pill = panel?.getElementById<UIKit.Component>('subtitle-pill') ?? null;
 
     const bindGuide = (e: Entity) => {
       // Own the glow materials so recolouring never leaks into the asset prototype.
@@ -422,7 +431,27 @@ export class GuideSystem extends createSystem({
     }
     this.moveFirefly(delta, mood);
     this.updateHint(delta, cue !== null || invite !== null);
+    this.fadeRestLine(delta, cue === null && invite === null && !(this.eventLeft > 0));
     this.billboardPanel();
+  }
+
+  /**
+   * A resting line ("Rest, rake the sand...") is read once, then fades after
+   * REST_SHOW_SECONDS; the subtitle comes back with the next line (a task, an
+   * event, a session). Acts only on changes of opacity.
+   */
+  private fadeRestLine(delta: number, free: boolean): void {
+    const resting = free && REST_LINES.has(this.line) && REST_LINES.has(this.shownLine);
+    this.restShown = resting ? this.restShown + delta : 0;
+    const target = this.restShown > REST_SHOW_SECONDS ? 0 : 1;
+    // Fades out over about 1.5 s; comes back at once with a new line.
+    this.pillOpacity = target > this.pillOpacity ? 1 : Math.max(target, this.pillOpacity - delta / 1.5);
+    const shown = Math.round(this.pillOpacity * 20) / 20;
+    if (shown === this.shownOpacity) return;
+    this.shownOpacity = shown;
+    this.pill?.setProperties({ opacity: shown });
+    // Hidden once faded: no draw calls for an empty subtitle.
+    if (this.panel) this.panel.visible = shown > 0;
   }
 
   /** Plants the seed: on a pinch, or a hands-free selection. */

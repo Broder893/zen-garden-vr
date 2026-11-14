@@ -102,7 +102,8 @@ for quality in high medium; do
     # (subtitle and hint: 3 calls), as most of the time in play: any one-off line
     # (level up...) is ended first, since it hides the hint and would make the count
     # depend on what the guide happens to be saying.
-    js "__zen.guide.eventLeft = 0"
+    # (A resting line fades after 8 s: its timer is reset too, so the subtitle is counted.)
+    js "(__zen.guide.eventLeft = 0, __zen.guide.restShown = 0)"
     sleep 2
     echo "{\"quality\":\"$quality\",\"view\":\"$view\",\"s\":$(sample)}" >> "$RESULTS"
     if [ "$view" = closed ]; then js "__zen.lids.release('test')"; fi

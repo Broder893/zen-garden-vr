@@ -182,7 +182,9 @@ never required.
   gesture, the first five minutes' lines first, and play through Web Audio: the music dips
   under the narrator, and her voice stays clear when the music is muffled behind closed eyes.
   If a file is missing, the device's speech synthesis (Web Speech API) reads that line.
-  Every line is also a subtitle (`public/ui/subtitle.uikitml`).
+  Every line is also a subtitle (`public/ui/subtitle.uikitml`). A resting line ("Rest, rake
+  the sand...") fades after 8 seconds, so nothing hangs in view while you relax; the next
+  line brings the subtitle back.
 - **Saving** to `localStorage` with validation and error handling (`src/save/`).
 
 Developed without a headset, in IWER (IWSDK's WebXR emulator), with scripted hands.
