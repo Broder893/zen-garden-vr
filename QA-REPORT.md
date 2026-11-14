@@ -250,6 +250,43 @@ Notes:
   days in a row, break question, with no "feeling better"; a tense tree healed by a
   breath gives the session's own "Your tree grew a little with you".
 
+## 14 November (evening): the first three minutes
+
+Five points, one commit each (`b76d216` arrival, `8be6760` the goal in light, `cb2a08c`
+answers to gestures, `6423ea5` an early first breath, `48c89de` music that grows), each
+after typecheck, `npm test`, build, check:budget, a frame-time measure and the stopwatch
+from an empty save.
+
+| Moment (`?fresh`, seconds in VR) | Target | Before | After, acting at once | After, watching the whole arrival |
+|---|---|---|---|---|
+| First wonder | 10 s | 3.2 (eyes open) | 1.5 | 1.5 |
+| Seed planted | 15 s | 8.6 | 10.5 | 13.0 |
+| First growth | 30 s | 20.2 | 22.2 | 25.7 |
+| First breath | 70 s | none before the first break (2-4 min) | 26.2 | 29.7 |
+| Bloom | 3 min 30 s | 75.0 | 77.5 | 81.0 |
+
+The scripted player follows the firefly with the demo gestures; run to run the times move
+by about a second (once by 4 s on the seed). The arrival and the silhouette do not block
+anything: the later times come from a player choosing to watch them.
+
+| Check | Result |
+|---|---|
+| `npm test` | 59 tests (was 53): canopy lumps (centre and turn), music layers (depth per stage, phrases, softness, calm) |
+| `npm run check:budget` | 62-74 draw calls; the title and the silhouette show only for their few seconds (the silhouette is one merged mesh), the petal shower reuses the season's instanced draw call |
+| Frame time | unchanged by each point. From point 3 on the emulator ran at 144 Hz (mean 6.9 ms, p99 7.9-9.0 ms), so those numbers compare only with each other: with and without point 3, p99 8.9-9.0 ms |
+| Music level | drone alone -36.7 dB RMS, in bloom -35.8 dB RMS (peaks -23.9 dB) |
+
+Notes:
+
+- The firefly's flight stays 60 cm or more from the eyes and peaks at 1.3 m/s while far.
+- The silhouette first came after the landing; a player waiting for it planted at 14.7 s
+  (0.3 s under the target), so it now shows as the firefly lands: 13.0 s.
+- `sproutBreath` ("Breathe in with your sprout...") has no recording yet: the device voice
+  reads it; the subtitle is always there.
+- The recording (`artifacts/first-minutes/first-minutes.webm`) shows longer times (seed
+  19.9 s, bloom 102.9 s): the capture slows the emulator and the scripted gestures. See
+  `artifacts/first-minutes/times.md`.
+
 ## Not verified here
 
 - A real Quest: hands, frame rate, voice and comfort (see the short list in

@@ -25,11 +25,11 @@ const OUT_SECONDS = 0.7;
 const OPACITY = 0.28;
 /** It rises this much while it appears (m). */
 const RISE = 0.02;
-/** After the firefly lands, a breath before the promise shows. */
-const DELAY_SECONDS = 0.6;
+/** It shows as the firefly comes down onto the seed: this far into the arrival's flight (5.8 s). */
+const ARRIVAL_SECONDS = 4.5;
 
 /**
- * The goal, shown once: while the firefly invites the player to plant (first
+ * The goal, shown once: as the firefly lands and invites the player to plant (first
  * visit only), a soft, see-through silhouette of the tree in bloom rises from
  * the empty pot for about 2 s and fades. Built once from the blooming model,
  * merged into one mesh: one draw call, and only while it shows.
@@ -53,7 +53,6 @@ export class GoalGhostSystem extends createSystem({
   private arrival?: ArrivalSystem;
   private persistence?: PersistenceSystem;
   private blender?: BlenderBonsaiSystem;
-  private waited = 0;
   private baseY = 0;
 
   init(): void {
@@ -75,9 +74,7 @@ export class GoalGhostSystem extends createSystem({
     }
     if (this.t < 0) {
       if (this.blender?.status !== 'blender' || this.guide?.shownLine !== 'plantSeed') return;
-      if (this.arrival && this.arrival.t !== Infinity) return;
-      this.waited += delta;
-      if (this.waited < DELAY_SECONDS) return;
+      if (this.arrival && this.arrival.t < ARRIVAL_SECONDS) return;
       if (!this.build(b.object3D)) return this.finish();
       this.t = 0;
     }
