@@ -3,6 +3,7 @@ import {
   BoxGeometry,
   BufferAttribute,
   BufferGeometry,
+  Color,
   CylinderGeometry,
   DoubleSide,
   Group,
@@ -24,8 +25,24 @@ import { mergeByMaterial } from './lib/merge.js';
  * sand. Both are parentless prototypes with the origin on the sand (y = 0).
  */
 
-const stone = new MeshStandardMaterial({ color: '#9b968b', roughness: 0.92, metalness: 0 });
-const stoneDark = new MeshStandardMaterial({ color: '#7f7a70', roughness: 0.95, metalness: 0 });
+/**
+ * Both stone shades in one material: each part carries its shade as a vertex
+ * colour, so the merged lantern draws its stone in one call (two lanterns in
+ * the garden: two draw calls saved). Dark stone was 0.95 rough, a difference
+ * nobody sees on a 7 cm plinth.
+ */
+const stoneMat = new MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 0.92, metalness: 0 });
+const STONE = new Color('#9b968b');
+const STONE_DARK = new Color('#7f7a70');
+
+/** A stone part: the shared stone material, its shade baked into the vertices. */
+function stoneMesh(geo: BufferGeometry, shade: Color = STONE): Mesh {
+  const n = geo.getAttribute('position').count;
+  const c = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) shade.toArray(c, i * 3);
+  geo.setAttribute('color', new BufferAttribute(c, 3));
+  return new Mesh(geo, stoneMat);
+}
 const glow = new MeshStandardMaterial({
   color: '#ffd38a',
   emissive: '#ffb648',
@@ -48,21 +65,19 @@ export function createStoneLantern(): Group {
   root.name = 'StoneLantern';
 
   // Base: a stepped hexagonal plinth.
-  const base = new Mesh(
+  const base = stoneMesh(
     hexLathe([[0.001, 0], [0.036, 0], [0.036, 0.008], [0.028, 0.012], [0.028, 0.016], [0.001, 0.016]]),
-    stoneDark,
+    STONE_DARK,
   );
   base.name = 'Base';
   // Post: slightly waisted, with a collar into the base and the platform above.
-  const post = new Mesh(
+  const post = stoneMesh(
     hexLathe([[0.001, 0.016], [0.016, 0.016], [0.013, 0.04], [0.014, 0.058], [0.001, 0.058]]),
-    stone,
   );
   post.name = 'Post';
   // Platform (chudai) carrying the firebox.
-  const platform = new Mesh(
+  const platform = stoneMesh(
     hexLathe([[0.001, 0.058], [0.018, 0.058], [0.03, 0.066], [0.03, 0.071], [0.001, 0.071]]),
-    stone,
   );
   platform.name = 'Platform';
 
@@ -72,7 +87,7 @@ export function createStoneLantern(): Group {
   const pillarGeo = new BoxGeometry(0.008, 0.03, 0.008);
   for (let i = 0; i < 6; i++) {
     const a = (i / 6) * Math.PI * 2;
-    const p = new Mesh(pillarGeo, stone);
+    const p = stoneMesh(pillarGeo);
     p.name = `Pillar${i}`;
     p.position.set(Math.cos(a) * 0.021, 0.071 + 0.015, Math.sin(a) * 0.021);
     p.rotation.y = -a;
@@ -84,28 +99,26 @@ export function createStoneLantern(): Group {
   firebox.add(light);
 
   // Roof: wide, low, with eaves that flare upward at the rim.
-  const roof = new Mesh(
+  const roof = stoneMesh(
     hexLathe([
       [0.001, 0.101], [0.024, 0.101], [0.046, 0.097], [0.05, 0.101],
       [0.044, 0.106], [0.022, 0.118], [0.008, 0.124], [0.001, 0.124],
     ]),
-    stone,
   );
   roof.name = 'Roof';
   // Finial (hoju): a small onion on a neck.
-  const finial = new Mesh(
+  const finial = stoneMesh(
     new LatheGeometry(
       [[0.001, 0.124], [0.006, 0.124], [0.005, 0.128], [0.009, 0.133], [0.007, 0.139], [0.002, 0.143], [0.001, 0.143]].map(
         ([r, y]) => new Vector2(r, y),
       ),
       10,
     ),
-    stone,
   );
   finial.name = 'Finial';
 
   root.add(base, post, platform, firebox, roof, finial);
-  // Static decor: one mesh per material (stone, dark stone, glow).
+  // Static decor: one mesh per material (stone in two shades, glow).
   mergeByMaterial(root);
   return root;
 }

@@ -3,8 +3,8 @@ import { BufferAttribute, BufferGeometry, Material, Matrix4, Mesh, Object3D } fr
 /**
  * Replaces the single-material meshes under `group` with one mesh per
  * material, baked into the group's own space. Cuts draw calls for static
- * decorative parts. Only position and normal are kept (enough for
- * untextured materials); names, visibility and userData of merged meshes are
+ * decorative parts. Only position, normal and (when every part has one)
+ * vertex colour are kept (enough for untextured materials); names, visibility and userData of merged meshes are
  * lost, so use it only where those are never needed at runtime. Anything it
  * does not merge (multi-material meshes, empties with children) is kept.
  */
@@ -52,11 +52,19 @@ function concat(geos: BufferGeometry[]): BufferGeometry {
   for (const g of geos) count += g.getAttribute('position').count;
   const pos = new Float32Array(count * 3);
   const nor = new Float32Array(count * 3);
+  // Vertex colours survive when every part has them (several shades, one material).
+  const col = geos.every((g) => g.getAttribute('color')) ? new Float32Array(count * 3) : null;
   let offset = 0;
   for (const g of geos) {
     const p = g.getAttribute('position');
     const nAttr = g.getAttribute('normal');
+    const cAttr = g.getAttribute('color');
     for (let i = 0; i < p.count; i++) {
+      if (col && cAttr) {
+        col[(offset + i) * 3] = cAttr.getX(i);
+        col[(offset + i) * 3 + 1] = cAttr.getY(i);
+        col[(offset + i) * 3 + 2] = cAttr.getZ(i);
+      }
       pos[(offset + i) * 3] = p.getX(i);
       pos[(offset + i) * 3 + 1] = p.getY(i);
       pos[(offset + i) * 3 + 2] = p.getZ(i);
@@ -71,6 +79,7 @@ function concat(geos: BufferGeometry[]): BufferGeometry {
   const out = new BufferGeometry();
   out.setAttribute('position', new BufferAttribute(pos, 3));
   out.setAttribute('normal', new BufferAttribute(nor, 3));
+  if (col) out.setAttribute('color', new BufferAttribute(col, 3));
   out.computeBoundingSphere();
   out.computeBoundingBox();
   return out;
