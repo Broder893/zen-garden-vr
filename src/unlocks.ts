@@ -14,12 +14,12 @@ import { Sparkles } from './effects/sparkles.js';
 import { EyelidSystem } from './eyelids.js';
 import { Bonsai } from './garden-components.js';
 import { isUnlocked, Unlock } from './save/growth-levels.js';
-import { FLOW_DASHES, streamPoint, streamTangent } from './scene-assets/unlocks.scene-asset.js';
+import { DASH_Y, FLOW_DASHES, streamPoint, streamTangent } from './scene-assets/unlocks.scene-asset.js';
 
 /** The glaze the pot gets at level 6: a soft celadon. */
 const GLAZE = new Color('#4f8f86');
 const REVEAL_SECONDS = 1.6;
-const FLOW_SPEED = 0.05; // fraction of the stream per second
+const FLOW_SPEED = 0.04; // fraction of the stream per second (about 8 cm/s)
 const UP = new Vector3(0, 1, 0);
 
 interface Reveal {
@@ -166,7 +166,7 @@ export class UnlocksSystem extends createSystem({
     this.flow = (this.flow + delta * FLOW_SPEED) % 1;
     for (let i = 0; i < FLOW_DASHES; i++) {
       const k = (i / FLOW_DASHES + this.flow) % 1;
-      streamPoint(k, this.p).setY(0.0045);
+      streamPoint(k, this.p).setY(DASH_Y);
       streamTangent(k, this.t);
       this.q.setFromAxisAngle(UP, -Math.atan2(this.t.z, this.t.x));
       const ends = Math.min(1, Math.min(k, 1 - k) * 8);

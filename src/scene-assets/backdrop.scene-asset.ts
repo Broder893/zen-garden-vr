@@ -99,49 +99,53 @@ function createGround(): Mesh {
   return ground;
 }
 
+/**
+ * One low-poly rock: a jittered icosahedron, wider than tall, sunk a little
+ * into the sand at (x, z), moss on its upper faces (vertex colours). Non-indexed,
+ * one normal per face. Also used by the stream's end rocks (unlocks.scene-asset.ts).
+ */
+export function rockGeometry(x: number, z: number, r: number, rand: () => number): BufferGeometry {
+  const stone = new Color('#8c877c');
+  const moss = new Color('#6f8a4a');
+  const geo = new IcosahedronGeometry(1, 1); // already non-indexed: one normal per face
+  const pos = geo.getAttribute('position');
+  const v = new Vector3();
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i);
+    // The same jitter for a shared corner keeps the surface closed: key it on the corner.
+    const k = Math.sin(v.x * 12.9898 + v.y * 78.233 + v.z * 37.719 + r * 10) * 43758.5453;
+    const j = 0.82 + 0.3 * (k - Math.floor(k));
+    v.multiplyScalar(j);
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  // Wider than tall, sunk a little into the sand so it sits, not floats.
+  geo.scale(r * (1 + rand() * 0.3), r * 0.7, r * (0.85 + rand() * 0.3));
+  geo.rotateY(rand() * Math.PI);
+  geo.translate(x, r * 0.32, z);
+  geo.computeVertexNormals();
+  const colors = new Float32Array(pos.count * 3);
+  const c = new Color();
+  for (let i = 0; i < pos.count; i += 3) {
+    // Per face: moss where it faces the sky.
+    const ny = (geo.getAttribute('normal') as BufferAttribute).getY(i);
+    c.copy(ny > 0.75 ? moss : stone);
+    for (let k2 = 0; k2 < 3; k2++) c.toArray(colors, (i + k2) * 3);
+  }
+  geo.setAttribute('color', new BufferAttribute(colors, 3));
+  return geo;
+}
+
 /** Low-poly rocks: jittered icosahedra, flat shaded, moss on their upper faces (vertex colours). */
 function createRocks(): Mesh {
   const rand = makeRandom(7);
-  const stone = new Color('#8c877c');
-  const moss = new Color('#6f8a4a');
-  const group = new Group();
-  for (const [x, z, r] of ROCKS) {
-    const geo = new IcosahedronGeometry(1, 1); // already non-indexed: one normal per face
-    const pos = geo.getAttribute('position');
-    const v = new Vector3();
-    for (let i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i);
-      // The same jitter for a shared corner keeps the surface closed: key it on the corner.
-      const k = Math.sin(v.x * 12.9898 + v.y * 78.233 + v.z * 37.719 + r * 10) * 43758.5453;
-      const j = 0.82 + 0.3 * (k - Math.floor(k));
-      v.multiplyScalar(j);
-      pos.setXYZ(i, v.x, v.y, v.z);
-    }
-    // Wider than tall, sunk a little into the sand so it sits, not floats.
-    geo.scale(r * (1 + rand() * 0.3), r * 0.7, r * (0.85 + rand() * 0.3));
-    geo.rotateY(rand() * Math.PI);
-    geo.translate(x, r * 0.32, z);
-    geo.computeVertexNormals();
-    const colors = new Float32Array(pos.count * 3);
-    const c = new Color();
-    for (let i = 0; i < pos.count; i += 3) {
-      // Per face: moss where it faces the sky.
-      const ny = (geo.getAttribute('normal') as BufferAttribute).getY(i);
-      c.copy(ny > 0.75 ? moss : stone);
-      for (let k2 = 0; k2 < 3; k2++) c.toArray(colors, (i + k2) * 3);
-    }
-    geo.setAttribute('color', new BufferAttribute(colors, 3));
-    group.add(new Mesh(geo));
-  }
-  const geos = group.children.map((m) => (m as Mesh).geometry);
-  const merged = mergeGeometries(geos);
+  const merged = mergeGeometries(ROCKS.map(([x, z, r]) => rockGeometry(x, z, r, rand)));
   const rocks = new Mesh(merged, new MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true }));
   rocks.name = 'Rocks';
   return rocks;
 }
 
 /** Concatenates non-indexed geometries with position, normal and color. */
-function mergeGeometries(geos: BufferGeometry[]): BufferGeometry {
+export function mergeGeometries(geos: BufferGeometry[]): BufferGeometry {
   const out = geos[0].clone();
   for (const name of ['position', 'normal', 'color']) {
     const total = geos.reduce((n, g) => n + g.getAttribute(name).array.length, 0);

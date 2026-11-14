@@ -68,7 +68,7 @@ Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experie
 - **Come back and level up.** Care earns experience (plant 5, full watering 10, each
   trimmed shoot 5, a breathing session 15, a breathing break 10, a daily gift 20). Levels
   1-5 are the tree's stages; then come a glazed pot (6), a stone lantern (7), a stream
-  in the sand (8) and a deep 4-7-8 breath for the breaks (9). A badge by the table's
+  on the garden sand to the front left, rising from under one rock and slipping under another (8) and a deep 4-7-8 breath for the breaks (9). A badge by the table's
   front corner shows the level and progress. The garden is saved on the device; each
   return visit (after a few hours) the soil dries and shoots grow back, the first visit
   of the day brings a gift, and a new flower grows in the sand, up to seven.

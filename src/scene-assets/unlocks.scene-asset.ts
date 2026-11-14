@@ -3,10 +3,11 @@ import {
   BoxGeometry,
   BufferAttribute,
   BufferGeometry,
+  CatmullRomCurve3,
   Color,
   CylinderGeometry,
-  DoubleSide,
   Group,
+  IcosahedronGeometry,
   InstancedMesh,
   LatheGeometry,
   Matrix4,
@@ -18,6 +19,8 @@ import {
   Vector2,
   Vector3,
 } from '@iwsdk/core';
+import { mergeGeometries, rockGeometry } from './backdrop.scene-asset.js';
+import { makeRandom } from './lib/hardsurface.js';
 import { mergeByMaterial } from './lib/merge.js';
 
 /**
@@ -123,68 +126,174 @@ export function createStoneLantern(): Group {
   return root;
 }
 
-/** The stream's course, in its own frame: x from STREAM_X0 to STREAM_X1, a gentle S in z. */
-export const STREAM_X0 = -0.43;
-export const STREAM_X1 = 0.34;
-const STREAM_WIDTH = 0.045;
-const STREAM_SEGMENTS = 48;
+/**
+ * The stream (level 8) lies on the garden sand to the player's front left, off
+ * the table and well out of reach (scene node "zen-stream"). Its course, in its
+ * own frame (origin on the sand): it rises under a rock at the far end, winds
+ * toward the player in a soft S and slips under a second rock. About 2.1 m long.
+ */
+const COURSE = [
+  new Vector3(-0.5, 0, -0.65),
+  new Vector3(0.2, 0, -0.35),
+  new Vector3(-0.05, 0, 0.25),
+  new Vector3(0.5, 0, 0.7),
+];
+/** Water width; the wet bank reaches this far beyond it on each side. */
+const STREAM_WIDTH = 0.13;
+const BANK = 0.065;
+const STREAM_SEGMENTS = 120;
+/** Rocks at the source and the mouth: the ribbon's ends start at their centres. */
+const SOURCE_ROCK = 0.26;
+const MOUTH_ROCK = 0.2;
+/** Heights above the sand: bank, water and the drifting highlights (plus polygonOffset). */
+const BANK_Y = 0.004;
+const WATER_Y = 0.008;
+export const DASH_Y = 0.012;
 /** Highlights drifting downstream (moved at runtime by the unlocks system). */
-export const FLOW_DASHES = 14;
+export const FLOW_DASHES = 24;
+
+/** The course sampled evenly by length: points and unit directions of flow. */
+const COURSE_SAMPLES = 160;
+const coursePts: Vector3[] = new CatmullRomCurve3(COURSE, false, 'centripetal').getSpacedPoints(COURSE_SAMPLES);
+const courseDirs: Vector3[] = coursePts.map((p, i) => {
+  const a = coursePts[Math.max(0, i - 1)];
+  const b = coursePts[Math.min(COURSE_SAMPLES, i + 1)];
+  return b.clone().sub(a).setY(0).normalize();
+});
 
 /** Point on the stream's centre line at t (0 = source, 1 = mouth), written into `out`. */
 export function streamPoint(t: number, out: Vector3): Vector3 {
-  const x = STREAM_X0 + (STREAM_X1 - STREAM_X0) * t;
-  return out.set(x, 0, -0.03 * Math.cos((x * Math.PI) / 0.5));
+  const f = Math.min(1, Math.max(0, t)) * COURSE_SAMPLES;
+  const i = Math.min(COURSE_SAMPLES - 1, Math.floor(f));
+  return out.lerpVectors(coursePts[i], coursePts[i + 1], f - i);
 }
 
 /** Unit direction of flow at t, written into `out`. */
 export function streamTangent(t: number, out: Vector3): Vector3 {
-  const x = STREAM_X0 + (STREAM_X1 - STREAM_X0) * t;
-  const dz = 0.03 * Math.sin((x * Math.PI) / 0.5) * (Math.PI / 0.5);
-  return out.set(1, 0, dz).normalize();
+  const f = Math.min(1, Math.max(0, t)) * COURSE_SAMPLES;
+  const i = Math.min(COURSE_SAMPLES - 1, Math.floor(f));
+  return out.lerpVectors(courseDirs[i], courseDirs[i + 1], f - i).normalize();
 }
 
-/** A flat ribbon along the stream, `width` wide, lifted `y` above the sand. */
-function ribbon(width: number, y: number): BufferGeometry {
+/**
+ * A flat ribbon along the course at height y, facing up: one column of vertices
+ * per entry of `across` (offsets from the centre line, as fractions of `half`),
+ * coloured by `colors` when given. Non-indexed, so it merges with the rocks.
+ */
+function ribbon(half: number, y: number, across: number[], colors?: Color[]): BufferGeometry {
   const pos: number[] = [];
+  const col: number[] = [];
   const index: number[] = [];
   const p = new Vector3();
   const t = new Vector3();
+  const n = across.length;
   for (let i = 0; i <= STREAM_SEGMENTS; i++) {
     const k = i / STREAM_SEGMENTS;
     streamPoint(k, p);
     streamTangent(k, t);
-    // Side vector in the sand plane; ends taper so the stream springs up and sinks away.
-    const taper = Math.min(1, Math.min(k, 1 - k) * 12);
-    const half = (width / 2) * (0.35 + 0.65 * taper);
-    const sx = -t.z * half;
-    const sz = t.x * half;
-    pos.push(p.x - sx, y, p.z - sz, p.x + sx, y, p.z + sz);
+    // A little narrower where it rises and sinks (both ends are under rocks).
+    const h = half * (0.75 + 0.25 * Math.min(1, Math.min(k, 1 - k) * 10));
+    for (let c = 0; c < n; c++) {
+      // Side vector in the sand plane (to the right of the flow).
+      pos.push(p.x - t.z * h * across[c], y, p.z + t.x * h * across[c]);
+      if (colors) col.push(colors[c].r, colors[c].g, colors[c].b);
+    }
     if (i < STREAM_SEGMENTS) {
-      const j = i * 2;
-      // Counter-clockwise seen from above: the ribbon faces up.
-      index.push(j, j + 1, j + 2, j + 1, j + 3, j + 2);
+      for (let c = 0; c < n - 1; c++) {
+        const a = i * n + c;
+        index.push(a, a + n, a + 1, a + 1, a + n, a + n + 1);
+      }
     }
   }
-  const g = new BufferGeometry();
+  let g = new BufferGeometry();
   g.setAttribute('position', new BufferAttribute(new Float32Array(pos), 3));
+  if (colors) g.setAttribute('color', new BufferAttribute(new Float32Array(col), 3));
   g.setIndex(index);
+  g = g.toNonIndexed();
   g.computeVertexNormals();
+  // Face up whichever way the course turns.
+  if ((g.getAttribute('normal') as BufferAttribute).getY(0) < 0) {
+    const ps = g.getAttribute('position') as BufferAttribute;
+    const cs = g.getAttribute('color') as BufferAttribute | undefined;
+    for (let i = 0; i < ps.count; i += 3) {
+      for (const a of [ps, cs]) {
+        if (!a) continue;
+        const x = a.getX(i + 1), yy = a.getY(i + 1), z = a.getZ(i + 1);
+        a.setXYZ(i + 1, a.getX(i + 2), a.getY(i + 2), a.getZ(i + 2));
+        a.setXYZ(i + 2, x, yy, z);
+      }
+    }
+    g.computeVertexNormals();
+  }
   return g;
 }
 
+/** Small pebbles along both banks, half sunk in the wet sand (vertex colours, flat faces). */
+function pebbles(rand: () => number): BufferGeometry[] {
+  const shades = ['#8c877c', '#7a756b', '#a39d90', '#6f6a60'].map((h) => new Color(h));
+  const out: BufferGeometry[] = [];
+  const p = new Vector3();
+  const t = new Vector3();
+  for (let j = 0; j < 18; j++) {
+    const k = 0.14 + 0.72 * rand();
+    const side = rand() < 0.5 ? -1 : 1;
+    const r = 0.012 + rand() * 0.02;
+    const off = STREAM_WIDTH / 2 + r * 0.5 + rand() * 0.035;
+    streamPoint(k, p);
+    streamTangent(k, t);
+    const geo = new IcosahedronGeometry(1, 0);
+    geo.scale(r, r * 0.6, r * (0.8 + rand() * 0.4));
+    geo.rotateY(rand() * Math.PI);
+    geo.translate(p.x - t.z * off * side, r * 0.15, p.z + t.x * off * side);
+    geo.computeVertexNormals();
+    const c = shades[Math.floor(rand() * shades.length)];
+    const colors = new Float32Array(geo.getAttribute('position').count * 3);
+    for (let i = 0; i < colors.length; i += 3) c.toArray(colors, i);
+    geo.setAttribute('color', new BufferAttribute(colors, 3));
+    out.push(geo);
+  }
+  return out;
+}
+
 /**
- * A narrow stream lying on the sand: a pale wet-sand bank, the water on top,
- * and FlowDashes, small light streaks the runtime moves downstream.
- * Origin on the sand at the stream's middle; it spans x -0.43..0.34, z ±0.03.
+ * The stream: the bank (wet sand darkening toward the water, pebbles, and the
+ * two rocks it rises under and slips beneath, one mesh in vertex colours), the
+ * water on top, and FlowDashes, small light streaks the runtime moves
+ * downstream. Three draw calls. Origin on the sand near the middle of the course.
  */
 export function createStream(): Group {
   const root = new Group();
   root.name = 'Stream';
-  const bank = new Mesh(ribbon(STREAM_WIDTH + 0.014, 0.0015), new MeshStandardMaterial({ color: '#c9bea6', roughness: 1, side: DoubleSide }));
+  const sandEdge = new Color('#d6c7a3').multiplyScalar(0.93);
+  const damp = new Color('#ae9b76');
+  const wet = new Color('#7d6a4b');
+  const half = STREAM_WIDTH / 2 + BANK;
+  const inner = STREAM_WIDTH / 2 / half;
+  const bankRibbon = ribbon(half, BANK_Y, [-1, -0.75, -inner, inner, 0.75, 1], [sandEdge, damp, wet, wet, damp, sandEdge]);
+  const rand = makeRandom(11);
+  const src = COURSE[0];
+  const mouth = COURSE[COURSE.length - 1];
+  const parts = [
+    bankRibbon,
+    ...pebbles(rand),
+    rockGeometry(src.x, src.z, SOURCE_ROCK, rand),
+    rockGeometry(mouth.x, mouth.z, MOUTH_ROCK, rand),
+  ];
+  const bank = new Mesh(
+    mergeGeometries(parts),
+    new MeshStandardMaterial({
+      vertexColors: true,
+      roughness: 0.95,
+      flatShading: true,
+      // Lifted a few millimetres and pulled forward in depth: no flicker against the sand.
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -2,
+    }),
+  );
   bank.name = 'Bank';
   const water = new Mesh(
-    ribbon(STREAM_WIDTH, 0.003),
+    ribbon(STREAM_WIDTH / 2, WATER_Y, [-1, 1]),
     new MeshStandardMaterial({
       color: '#5fa9cc',
       emissive: '#1f5873',
@@ -193,12 +302,13 @@ export function createStream(): Group {
       metalness: 0.05,
       transparent: true,
       opacity: 0.88,
-      // Flat decals on the sand: visible whichever way the ribbon was wound.
-      side: DoubleSide,
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -4,
     }),
   );
   water.name = 'Water';
-  const dashGeo = new PlaneGeometry(0.014, 0.0028);
+  const dashGeo = new PlaneGeometry(0.035, 0.007);
   dashGeo.rotateX(-Math.PI / 2);
   const dashes = new InstancedMesh(
     dashGeo,
@@ -216,7 +326,7 @@ export function createStream(): Group {
   const one = new Vector3(1, 1, 1);
   for (let i = 0; i < FLOW_DASHES; i++) {
     const k = (i + 0.5) / FLOW_DASHES;
-    streamPoint(k, p).setY(0.0045);
+    streamPoint(k, p).setY(DASH_Y);
     streamTangent(k, t);
     q.setFromAxisAngle(new Vector3(0, 1, 0), -Math.atan2(t.z, t.x));
     dashes.setMatrixAt(i, m.compose(p, q, one));
