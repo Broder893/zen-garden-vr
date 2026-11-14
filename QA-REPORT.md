@@ -242,7 +242,7 @@ Notes:
   the player's origin, so after moving the table a scripted press lands that much off
   (a press on Nearer hit Lower, just above). On a headset the hands and the panel move
   together; the table logic itself was checked directly.
-- P2, fixed (`see below`): on a return after a day or more away, "Your tree is feeling
+- P2, fixed (`185b448`): on a return after a day or more away, "Your tree is feeling
   better" cut into the welcome after about 1.4 s. The tree's neglect stress (0.4) is
   just over the stressed line (0.35) and eases below it in about 4.5 s, during the
   welcome. Now the line is said only after a tense spell the player saw for 8 s or more,
