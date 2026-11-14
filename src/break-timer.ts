@@ -177,7 +177,8 @@ export class BreakTimerSystem extends createSystem({
       this.state = 'done';
       return;
     }
-    if (!(this.lids?.open ?? true)) return;
+    // After the welcome (and the lines it queued: the gift, the days in a row).
+    if (!(this.lids?.open ?? true) || !g.welcomed) return;
     if (g.shownLine !== 'breakLengthAsk') {
       if (!this.asked) {
         this.asked = true;
@@ -275,7 +276,7 @@ export class BreakTimerSystem extends createSystem({
       xpGained: Math.max(0, xp - this.startXp),
       xp,
       nextXp: next ? next.xp : null,
-      streak: 0,
+      streak: this.persistence?.streak ?? 0,
     };
     const lines = summaryLines(stats);
     this.stats.get('break-minutes')?.setProperties({ text: lines.minutes });

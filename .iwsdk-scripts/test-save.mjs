@@ -19,7 +19,7 @@ export default async function run({ page, frame }) {
     // Version 2 keeps health, clamped.
     const b = parseSave(JSON.stringify({ ...JSON.parse(v1), v: 2, stress: 0.8, overwater: 7, stumpMask: 3 }));
     check('v2 keeps health', b && b.stress === 0.8 && b.overwater === 1 && b.stumpMask === 3, b);
-    check('unknown version rejected', parseSave(JSON.stringify({ v: 3, planted: true })) === null);
+    check('unknown version rejected', parseSave(JSON.stringify({ v: 4, planted: true })) === null);
     check('garbage rejected', parseSave('{oops') === null);
     check('bad values clamped', (() => { const c = parseSave(JSON.stringify({ v: 2, planted: true, stage: 99, stress: -4 })); return c && c.stage === 3 && c.stress === 0; })());
     return { passed: results.filter((r) => r.ok).length, total: results.length, failed: results.filter((r) => !r.ok) };

@@ -412,8 +412,9 @@ export class GuideSystem extends createSystem({
       const p = this.persistence;
       if (p?.newFlowerThisVisit) this.showEvent('welcomeGift', EVENT_SECONDS + 1);
       else if (p?.returning) this.showEvent('welcomeBack', EVENT_SECONDS + 1);
-      // The daily gift is announced right after the welcome.
+      // The daily gift is announced right after the welcome, then the days in a row.
       this.giftPending = p?.dailyGift ?? false;
+      if (p?.streakGrew) this.queueEvent('streakUp', EVENT_SECONDS + 1);
     }
     if (this.eventLeft > 0) this.eventLeft -= delta;
     if (this.giftPending && this.eventLeft <= 0) {
@@ -588,6 +589,11 @@ export class GuideSystem extends createSystem({
    */
   queueEvent(id: LineId, seconds = EVENT_SECONDS + 1, target: Object3D | null = null): void {
     this.queue.push({ id, seconds, target });
+  }
+
+  /** True once the player was greeted (lines queued after this follow the welcome lines). */
+  get welcomed(): boolean {
+    return this.greeted;
   }
 
   /** True while queued lines are still waiting. */

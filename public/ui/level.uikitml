@@ -33,6 +33,28 @@
     background-color: #9fd98a;
     border-radius: 0.45;
   }
+  .streak-row {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8;
+  }
+  .streak {
+    font-size: 1.5;
+    color: #ffe9a8;
+  }
+  .dots {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5;
+  }
+  .dot {
+    width: 1.1;
+    height: 1.1;
+    border-radius: 0.55;
+    background-color: #3a3350;
+  }
   .xp {
     font-size: 1.5;
     color: #cfe8c4;
@@ -45,4 +67,16 @@
     <div id="level-fill" class="fill"></div>
   </div>
   <span id="level-xp" class="xp">0 / 5 XP</span>
+  <div id="streak-row" class="streak-row">
+    <span id="streak-text" class="streak">1 day in a row</span>
+    <div class="dots">
+      <div id="streak-dot-0" class="dot"></div>
+      <div id="streak-dot-1" class="dot"></div>
+      <div id="streak-dot-2" class="dot"></div>
+      <div id="streak-dot-3" class="dot"></div>
+      <div id="streak-dot-4" class="dot"></div>
+      <div id="streak-dot-5" class="dot"></div>
+      <div id="streak-dot-6" class="dot"></div>
+    </div>
+  </div>
 </div>

@@ -12,6 +12,7 @@ import {
   visitGrowsFlower,
 } from './save/garden-save.js';
 import { dayKey, XP } from './save/growth-levels.js';
+import { daysBetween, streakOn, visitOn, weekDots } from './save/streak.js';
 import { NEGLECT_MS, NEGLECT_STRESS } from './save/plant-health.js';
 
 /** How often the garden checks for changes to save. */
@@ -47,6 +48,8 @@ export class PersistenceSystem extends createSystem({
   newVisit = false;
   /** True when this visit brought the daily gift (first visit of the day, tree planted). */
   dailyGift = false;
+  /** True when this visit made the days in a row grow (2 or more): the firefly says so. */
+  streakGrew = false;
   /** Storage refused a write: stop trying, the garden just runs unsaved. */
   private blocked = false;
   private meditation?: MeditationSystem;
@@ -97,6 +100,7 @@ export class PersistenceSystem extends createSystem({
             this.lastKey = ''; // lastVisitAt is not in the change key: force a write
           }
           this.giveDailyGift(now);
+          this.countDay(now);
           flush();
         }
         if (state === VisibilityState.Hidden || state === VisibilityState.VisibleBlurred) flush();
@@ -148,6 +152,35 @@ export class PersistenceSystem extends createSystem({
     this.dailyGift = true;
   }
 
+  /**
+   * A day with a visit: the days in a row grow on the next calendar day and
+   * start again at 1 after a missed one (no message then). ?nextvisit (demos)
+   * counts as the next day.
+   */
+  private countDay(now: number): void {
+    const today = dayKey(now);
+    let s = this.save;
+    if (this.forceVisit && s.lastDay > 0 && daysBetween(s.lastDay, today) <= 0) {
+      s = { ...s, lastDay: dayKey(now - 86_400_000) };
+    }
+    const next = visitOn(s, today);
+    this.save.streak = next.streak;
+    this.save.lastDay = next.lastDay;
+    this.save.dayMask = next.dayMask;
+    this.streakGrew = next.grew;
+    this.lastKey = '';
+  }
+
+  /** Days in a row with a visit, as of today (0 once a day was missed, until the next visit). */
+  get streak(): number {
+    return streakOn(this.save, dayKey(Date.now()));
+  }
+
+  /** The last 7 days, oldest first: true where there was a visit (for the level badge). */
+  get week(): boolean[] {
+    return weekDots(this.save, dayKey(Date.now()));
+  }
+
   /** True when this visit is the one that grows a new flower. */
   get newFlowerThisVisit(): boolean {
     return this.newVisit && visitGrowsFlower(this.save.visits);
@@ -178,7 +211,7 @@ export class PersistenceSystem extends createSystem({
     }
     s.meditations = this.baseMeditations + (this.meditation?.completed ?? 0);
     s.breaks = this.baseBreaks + (this.meditation?.breaksCompleted ?? 0);
-    const key = `${s.planted}|${s.stage}|${s.water}|${s.prunedMask}|${s.visits}|${s.meditations}|${s.breaks}|${s.xp}|${s.stress}|${s.overwater}|${s.stumpMask}`;
+    const key = `${s.planted}|${s.stage}|${s.water}|${s.prunedMask}|${s.visits}|${s.meditations}|${s.breaks}|${s.xp}|${s.stress}|${s.overwater}|${s.stumpMask}|${s.streak}|${s.lastDay}|${s.dayMask}`;
     if (key === this.lastKey) return;
     s.savedAt = Date.now();
     this.lastKey = key;

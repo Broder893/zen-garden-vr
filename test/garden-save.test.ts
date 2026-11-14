@@ -6,12 +6,29 @@ const v2 = {
   v: 2, planted: true, stage: 2, water: 0.5, prunedMask: 3, visits: 4, meditations: 2, breaks: 1, xp: 50,
   lastGiftDay: 20261109, stress: 0.4, overwater: 0.2, stumpMask: 1, lastVisitAt: 1000, savedAt: 2000,
 };
+const v3 = { ...v2, v: 3, streak: 4, lastDay: 20261109, dayMask: 0b1111 };
 
 describe('parseSave', () => {
   it('reads a current save as written', () => {
+    const { v, ...fields } = v3;
+    expect(v).toBe(3);
+    expect(parseSave(JSON.stringify(v3))).toEqual(fields);
+  });
+
+  it('loads a version 2 save (before days in a row) whole, its last gift day as day 1', () => {
     const { v, ...fields } = v2;
     expect(v).toBe(2);
-    expect(parseSave(JSON.stringify(v2))).toEqual(fields);
+    expect(parseSave(JSON.stringify(v2))).toEqual({ ...fields, streak: 1, lastDay: 20261109, dayMask: 1 });
+  });
+
+  it('starts a save that never had a gift with no days counted', () => {
+    const s = parseSave(JSON.stringify({ ...v2, lastGiftDay: 0 }))!;
+    expect([s.streak, s.lastDay, s.dayMask]).toEqual([0, 0, 0]);
+  });
+
+  it('clamps days in a row', () => {
+    const s = parseSave(JSON.stringify({ ...v3, streak: -3, dayMask: 0xfff, lastDay: 'x' }))!;
+    expect([s.streak, s.lastDay, s.dayMask]).toEqual([0, 0, 0x7f]);
   });
 
   it('loads a version 1 save (before health) healthy, keeping xp, visits and flowers', () => {
@@ -58,7 +75,7 @@ describe('parseSave', () => {
     expect(parseSave('{oops')).toBeNull();
     expect(parseSave('null')).toBeNull();
     expect(parseSave('42')).toBeNull();
-    expect(parseSave(JSON.stringify({ ...v2, v: 3 }))).toBeNull();
+    expect(parseSave(JSON.stringify({ ...v3, v: 4 }))).toBeNull();
     expect(parseSave(JSON.stringify({ planted: true }))).toBeNull();
   });
 

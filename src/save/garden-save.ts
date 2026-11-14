@@ -39,6 +39,10 @@ export interface GardenSave {
   stress: number;
   overwater: number;
   stumpMask: number;
+  /** Days in a row (v3, src/save/streak.ts): the count, the last day with a visit, the last 7 days. */
+  streak: number;
+  lastDay: number;
+  dayMask: number;
   /** When the last counted visit began (ms since epoch). */
   lastVisitAt: number;
   /** When the garden was last saved (ms since epoch). */
@@ -60,11 +64,15 @@ export function visitGrowsFlower(visits: number): boolean {
 }
 
 const KEY = 'zen-garden-vr/save';
-/** 2 added health (stress, overwater, stumpMask). Version 1 saves still load, healthy. */
-const VERSION = 2;
+/**
+ * 2 added health (stress, overwater, stumpMask); 3 added days in a row (streak,
+ * lastDay, dayMask). Older saves still load: healthy, and with the day of their
+ * last daily gift as a first day in a row.
+ */
+const VERSION = 3;
 
 export function emptySave(): GardenSave {
-  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, breaks: 0, xp: 0, lastGiftDay: 0, stress: 0, overwater: 0, stumpMask: 0, lastVisitAt: 0, savedAt: 0 };
+  return { planted: false, stage: 0, water: 0, prunedMask: 0, visits: 0, meditations: 0, breaks: 0, xp: 0, lastGiftDay: 0, stress: 0, overwater: 0, stumpMask: 0, streak: 0, lastDay: 0, dayMask: 0, lastVisitAt: 0, savedAt: 0 };
 }
 
 /** Reads the save; null when there is none, it is unreadable, or storage is blocked. */
@@ -131,8 +139,9 @@ export function parseSave(raw: string): GardenSave | null {
   }
   if (typeof data !== 'object' || data === null) return null;
   const d = data as Record<string, unknown>;
-  // Version 1 (before health) loads with a healthy tree and nothing else lost.
-  if (d.v !== VERSION && d.v !== 1) return null;
+  // Version 1 (before health) loads with a healthy tree and nothing else lost;
+  // versions 1 and 2 (before days in a row) start counting from their last gift's day.
+  if (d.v !== VERSION && d.v !== 2 && d.v !== 1) return null;
   const clampInt = (x: unknown, min: number, max: number) =>
     typeof x === 'number' && Number.isFinite(x) ? Math.min(max, Math.max(min, Math.round(x))) : min;
   const planted = d.planted === true;
@@ -147,11 +156,16 @@ export function parseSave(raw: string): GardenSave | null {
       : planted
         ? xpForStage(stage) + bitCount(prunedMask) * XP.cut + (water >= 1 ? XP.waterFull : 0)
         : 0;
+  const lastGiftDay = clampInt(d.lastGiftDay, 0, 99991231);
+  const before3 = d.v !== VERSION;
   return {
     planted,
     stage,
     xp: planted ? Math.max(xp, xpForStage(stage)) : 0,
-    lastGiftDay: clampInt(d.lastGiftDay, 0, 99991231),
+    lastGiftDay,
+    streak: before3 ? (lastGiftDay > 0 ? 1 : 0) : clampInt(d.streak, 0, 1e6),
+    lastDay: before3 ? lastGiftDay : clampInt(d.lastDay, 0, 99991231),
+    dayMask: before3 ? (lastGiftDay > 0 ? 1 : 0) : clampInt(d.dayMask, 0, 0x7f),
     stress: d.v === 1 ? 0 : clamp01(d.stress),
     overwater: d.v === 1 ? 0 : clamp01(d.overwater),
     stumpMask: d.v === 1 ? 0 : clampInt(d.stumpMask, 0, 0xff),
