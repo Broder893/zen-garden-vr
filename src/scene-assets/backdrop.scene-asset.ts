@@ -192,9 +192,12 @@ export function rockGeometry(x: number, z: number, r: number, rand: () => number
   const colors = new Float32Array(pos.count * 3);
   const c = new Color();
   for (let i = 0; i < pos.count; i += 3) {
-    // Per face: moss where it faces the sky.
+    // Per face: moss where it faces the sky; darker toward the sand, where it sits (painted shade).
     const ny = (geo.getAttribute('normal') as BufferAttribute).getY(i);
     c.copy(ny > 0.75 ? moss : stone);
+    const cy = (pos.getY(i) + pos.getY(i + 1) + pos.getY(i + 2)) / 3;
+    const t = Math.min(1, Math.max(0, cy / (r * 0.55)));
+    c.multiplyScalar(0.5 + 0.5 * t * t * (3 - 2 * t));
     for (let k2 = 0; k2 < 3; k2++) c.toArray(colors, (i + k2) * 3);
   }
   geo.setAttribute('color', new BufferAttribute(colors, 3));

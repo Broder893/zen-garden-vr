@@ -6,6 +6,7 @@ import {
   MeshStandardMaterial,
 } from '@iwsdk/core';
 import { mergeByMaterial } from './lib/merge.js';
+import { shadeToGround } from './lib/shade.js';
 
 /**
  * Low wooden garden table with a sand-colored tray on top.
@@ -64,5 +65,7 @@ export function createZenTable(): Group {
   }
   // Static: one draw call per material (wood, sand, rim) instead of ten.
   mergeByMaterial(root);
+  // The legs darken toward the floor (painted shade); the top keeps its colour.
+  for (const m of root.children as Mesh[]) if (m.isMesh && m.material === wood) shadeToGround(m, 0, 0.35, 0.5);
   return root;
 }

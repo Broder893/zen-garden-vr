@@ -22,6 +22,7 @@ import {
 import { mergeGeometries, rockGeometry, SAND } from './backdrop.scene-asset.js';
 import { makeRandom } from './lib/hardsurface.js';
 import { mergeByMaterial } from './lib/merge.js';
+import { shadeToGround } from './lib/shade.js';
 
 /**
  * Garden unlocks (levels 7 and 8): a small stone lantern and a stream in the
@@ -123,6 +124,8 @@ export function createStoneLantern(): Group {
   root.add(base, post, platform, firebox, roof, finial);
   // Static decor: one mesh per material (stone in two shades, glow).
   mergeByMaterial(root);
+  // Darker toward the base it stands on (painted shade).
+  for (const m of root.children as Mesh[]) if (m.isMesh && m.material === stoneMat) shadeToGround(m, 0, 0.05, 0.55);
   return root;
 }
 

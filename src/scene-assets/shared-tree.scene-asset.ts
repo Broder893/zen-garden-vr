@@ -11,6 +11,7 @@ import {
 } from '@iwsdk/core';
 import { alignSpan, makeRandom } from './lib/hardsurface.js';
 import { mergeByMaterial } from './lib/merge.js';
+import { shadeToGround } from './lib/shade.js';
 
 /**
  * The shared tree (point 8): a large garden tree every visitor cares for
@@ -175,6 +176,8 @@ export function createStoneBasin(): Group {
   ];
   body.add(new Mesh(new LatheGeometry(profile.map(([r, y]) => new Vector2(r, y)), 8), stone));
   mergeByMaterial(body);
+  // Darker toward the floor, where it stands (painted shade).
+  for (const m of body.children as Mesh[]) if (m.isMesh) shadeToGround(m, 0, 0.3, 0.55);
   root.add(body);
 
   const kakei = new Group();
