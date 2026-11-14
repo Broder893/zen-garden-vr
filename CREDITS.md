@@ -11,6 +11,7 @@ Audio API (`src/audio/`). The only audio files are the guide's voice lines (belo
 | Water pouring and drops | Generated at runtime (filtered noise, sine drops), `src/audio/sound-engine.ts` | Original, part of this project |
 | Shears snip | Generated at runtime (band-passed noise clicks) | Original, part of this project |
 | Planting / growth / bloom chimes, singing bowl | Generated at runtime (sine partials + synthetic reverb) | Original, part of this project |
+| Seasonal ambience: wind in the trees, far birds (spring and summer days), crickets (summer evenings), rustling leaves (autumn), cold wind (winter), a distant owl (night) | Generated at runtime (filtered noise, short sine chirps and hoots), `src/audio/ambience.ts`; no audio files added | Original, part of this project |
 
 ## Voice guide
 

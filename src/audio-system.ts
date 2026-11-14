@@ -1,4 +1,5 @@
 import { createSystem, VisibilityState } from '@iwsdk/core';
+import { GardenAmbience, AmbienceScene } from './audio/ambience.js';
 import { GardenMusic } from './audio/garden-music.js';
 import { trackFirst, FirstEntity } from './ecs-utils.js';
 import { SoundEngine } from './audio/sound-engine.js';
@@ -12,6 +13,8 @@ import { RakeSystem } from './rake.js';
 import { HealthSystem } from './health.js';
 import { SharedTreeSystem } from './shared-tree.js';
 import { WeatherSystem } from './weather.js';
+import { SeasonSystem } from './season.js';
+import { DayNightSystem } from './day-night.js';
 import { Health, HealthState } from './save/plant-health.js';
 import { WateringSystem } from './watering.js';
 
@@ -57,6 +60,10 @@ export class GardenAudioSystem extends createSystem({
 }) {
   private engine!: SoundEngine;
   private music!: GardenMusic;
+  private ambience!: GardenAmbience;
+  private around: AmbienceScene = { season: 'summer', time: 'sunset', rain: 0, breeze: 0 };
+  private season?: SeasonSystem;
+  private dayNight?: DayNightSystem;
   private voice!: GuideVoice<LineId>;
   private guide?: GuideSystem;
   private watering?: WateringSystem;
@@ -87,6 +94,7 @@ export class GardenAudioSystem extends createSystem({
   init(): void {
     this.engine = new SoundEngine();
     this.music = new GardenMusic(this.engine);
+    this.ambience = new GardenAmbience(this.engine);
     this.voice = new GuideVoice(this.engine, LINES);
     this.guide = this.world.getSystem(GuideSystem);
     this.watering = this.world.getSystem(WateringSystem);
@@ -129,6 +137,8 @@ export class GardenAudioSystem extends createSystem({
         master: this.engine.master,
         renderer: this.renderer,
         voice: this.voice,
+        engine: this.engine,
+        ambience: this.ambience,
       };
     }
   }
@@ -139,6 +149,7 @@ export class GardenAudioSystem extends createSystem({
     if (running && !this.wasRunning) {
       log('context running');
       this.music.start();
+      this.ambience.start();
       // Audio may run without a gesture (autoplay allowed): the voices load then too.
       this.voice.load(FIRST_LINES);
     }
@@ -155,9 +166,22 @@ export class GardenAudioSystem extends createSystem({
     // Weather sounds, in steps so the loop's gain is not re-set every frame.
     this.engine.setRain(Math.round((this.weather?.rainLevel ?? 0) * 10) / 10);
     this.engine.setWind(Math.round((this.weather?.windLevel ?? 0) * (0.75 + 0.25 * Math.sin(this.time * 0.6)) * 10) / 10);
+    this.ambienceTick();
     this.gardenEvents();
     this.meditationEvents();
     this.speak();
+  }
+
+  /** The season's sounds around the garden, under the music and the voices. */
+  private ambienceTick(): void {
+    this.season ??= this.world.getSystem(SeasonSystem);
+    this.dayNight ??= this.world.getSystem(DayNightSystem);
+    const sc = this.around;
+    sc.season = this.season?.season ?? 'summer';
+    sc.time = this.dayNight?.time ?? 'sunset';
+    sc.rain = this.weather?.rainLevel ?? 0;
+    sc.breeze = this.weather?.windLevel ?? 0;
+    this.ambience.tick(sc, this.voice.speaking, this.lids?.amount ?? 0);
   }
 
   private waterSounds(delta: number): void {

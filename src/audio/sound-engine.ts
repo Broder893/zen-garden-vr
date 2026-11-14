@@ -85,6 +85,11 @@ export class SoundEngine {
     this.noise = this.makeNoise(ctx, 2);
   }
 
+  /** Two seconds of white noise, shared by every noise sound (wind, rain, rustles). */
+  get noiseBuffer(): AudioBuffer | null {
+    return this.noise;
+  }
+
   get running(): boolean {
     return this.ctx?.state === 'running';
   }

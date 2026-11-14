@@ -40,6 +40,11 @@ export class GuideVoice<Id extends string> {
     this.clips = new VoiceClips(engine.ctx);
   }
 
+  /** True while a line is being said (its recording or the device voice). */
+  get speaking(): boolean {
+    return this.playing !== null || this.device.speaking;
+  }
+
   get available(): boolean {
     return !!this.engine.voice || this.device.available;
   }
@@ -163,6 +168,10 @@ class DeviceVoice {
     } catch {
       return false; // speech refused: the subtitle still carries the words
     }
+  }
+
+  get speaking(): boolean {
+    return this.available && window.speechSynthesis.speaking;
   }
 
   stop(): void {

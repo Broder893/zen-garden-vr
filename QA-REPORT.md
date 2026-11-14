@@ -20,7 +20,7 @@ the card says so (decided on 9 November).
 |---|---|
 | `npm run typecheck` | passes |
 | `npm run build` | passes (one chunk over 500 kB: Vite's usual warning for IWSDK + Three) |
-| `npm run check:budget` | within budget: 77-78 draw calls seated, 79 with the eyes closed, 42k triangles (14 November, after the lantern merge: 77 seated and 77 with the eyes closed), 57 MB of textures (High and Medium) |
+| `npm run check:budget` | within budget: 77-78 draw calls seated, 79 with the eyes closed, 42k triangles (14 November, after the lantern merge: 76-77 seated and 77-78 with the eyes closed, over two runs), 57 MB of textures (High and Medium) |
 | `npm test` (new) | 31 tests pass: see below |
 | Unused code (`tsc --noUnusedLocals --noUnusedParameters`) | one unused field: P2-1 |
 | `console.log` left | none; the remaining `console.info` lines are dev-only or one line per quality change |

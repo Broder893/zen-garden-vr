@@ -102,6 +102,7 @@ The first break comes after 2 to 4 minutes of care (watering, cutting). To see o
 - [ ] Each stage is its own model (sprout, young, mature, in bloom): does every growth step read clearly as the same tree getting bigger? Before planting, a warm glow in the empty pot.
 - [ ] Open `...?weather=rain`: after a few seconds rain falls, you hear it, the firefly says "A gentle rain. It is watering your tree." and the soil darkens.
 - [ ] Open `...?weather=breeze`: the tree sways gently, wind in the bamboo. No discomfort?
+- [ ] **Ambience** (listen 30 s each, guide quiet): `...?season=spring&time=day` light wind and far birds; `...?season=summer&time=night` crickets and, now and then, a distant owl; `...?season=autumn` rustling leaves; `...?season=winter` almost silent, a thin cold wind. Always under the music, never covering the voice; quieter with the eyes closed.
 - [ ] Frame rate at night with rain (the busiest moment): smooth?
 
 ## 4e. Shared tree
