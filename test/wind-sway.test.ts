@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isTrunk, SWAY_STRIDE, swayData, windStrength } from '../src/wind-sway';
+import { breathFactor, isTrunk, SWAY_STRIDE, swayData, windStrength } from '../src/wind-sway';
 
 /** One triangle per part: [x, y, z] corners. */
 function mesh(parts: number[][][]) {
@@ -47,5 +47,14 @@ describe('wind strength', () => {
     expect(windStrength('night', 0, false)).toBeLessThan(0.2);
     expect(windStrength('day', 1, false)).toBeGreaterThan(2);
     expect(windStrength('day', 0, true)).toBeLessThan(0.5);
+  });
+});
+
+describe('the garden breathes', () => {
+  it('rises with the inhale and settles with the exhale, gently, only while breathing', () => {
+    expect(breathFactor(1, 1)).toBeCloseTo(1.25);
+    expect(breathFactor(0, 1)).toBeCloseTo(0.75);
+    expect(breathFactor(0, 0)).toBe(1);
+    expect(breathFactor(1, 0.5)).toBeCloseTo(1.125);
   });
 });

@@ -1,8 +1,9 @@
 import { BufferAttribute, createSystem, Material, Mesh, Object3D, Vector3 } from '@iwsdk/core';
 import { ComfortSystem } from './comfort.js';
 import { DayNightSystem } from './day-night.js';
+import { MeditationSystem } from './meditation.js';
 import { WeatherSystem } from './weather.js';
-import { isTrunk, SWAY_STRIDE, swayData, windStrength } from './wind-sway.js';
+import { breathFactor, isTrunk, SWAY_STRIDE, swayData, windStrength } from './wind-sway.js';
 
 /** The forest's materials (public/models/forest.glb) and the bonsai's foliage. */
 const FOREST_LEAF = 'foliage_forest';
@@ -12,6 +13,8 @@ const BONSAI_LEAF = 'Leaf';
 const SCAN_SECONDS = 2;
 /** The strength follows its target over about this long (time of day, breeze, comfort). */
 const EASE_SECONDS = 4;
+/** The breathing's hold on the wind fades in and out over about this long. */
+const BREATH_EASE_SECONDS = 2;
 
 /** Shared by every swaying material: one write per frame moves them all. */
 const WIND = {
@@ -45,16 +48,20 @@ const SWAY_GLSL = /* glsl */ `
  * and the bonsai's crown sway gently, all in the vertex shader (no new objects
  * or draw calls). Trunks and the distant hills stay still. Calm by day,
  * softer at sunset, almost still at night, stronger in a breeze, and smaller
- * with Gentle transitions.
+ * with Gentle transitions. During a breath break or the meditation the wind
+ * breathes too, very gently: up with the inhale, down with the exhale.
  */
 export class WindSystem extends createSystem({}) {
   /** The strength now (eased toward the time of day, breeze and comfort). */
   strength = 1;
+  /** How much the breathing leads the wind now (0..1). */
+  breathing = 0;
   private patched = new WeakSet<Material>();
   private sinceScan = SCAN_SECONDS;
   private dayNight?: DayNightSystem;
   private weather?: WeatherSystem;
   private comfort?: ComfortSystem;
+  private meditation?: MeditationSystem;
   private scale = new Vector3();
   private visit = (o: Object3D) => this.patchMesh(o);
 
@@ -73,7 +80,13 @@ export class WindSystem extends createSystem({}) {
       this.comfort?.settings.softTransitions ?? false,
     );
     this.strength += (target - this.strength) * Math.min(1, delta / EASE_SECONDS);
-    WIND.uWindStrength.value = this.strength;
+    // Breathing: applied after the easing, so the wind keeps time with the breath.
+    this.meditation ??= this.world.getSystem(MeditationSystem);
+    const med = this.meditation;
+    const breathing = med && med.phase !== 'idle' && med.phase !== 'outro' ? 1 : 0;
+    const step = delta / BREATH_EASE_SECONDS;
+    this.breathing = breathing > this.breathing ? Math.min(1, this.breathing + step) : Math.max(0, this.breathing - step);
+    WIND.uWindStrength.value = this.strength * breathFactor(med?.fullness ?? 0.5, this.breathing);
     // Wrapped so the float keeps its precision on long visits.
     WIND.uWindTime.value = (WIND.uWindTime.value + delta) % 3600;
   }

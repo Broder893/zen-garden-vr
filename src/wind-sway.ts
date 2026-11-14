@@ -107,3 +107,15 @@ export const GENTLE_FACTOR = 0.45;
 export function windStrength(time: TimeOfDay, breeze: number, gentle: boolean): number {
   return WIND_BY_TIME[time] * (1 + BREEZE_GAIN * breeze) * (gentle ? GENTLE_FACTOR : 1);
 }
+
+/** While breathing, the wind rises with the inhale and settles with the exhale by this much (each way). */
+export const BREATH_SWING = 0.25;
+
+/**
+ * The garden breathes with you: a factor on the wind from the breath's
+ * fullness (0 = empty, 1 = full lungs), weighted by how far into the session
+ * it is (0..1, eased in and out), so it starts and ends at 1.
+ */
+export function breathFactor(fullness: number, weight: number): number {
+  return 1 + BREATH_SWING * 2 * (fullness - 0.5) * weight;
+}
