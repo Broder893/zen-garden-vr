@@ -28,6 +28,7 @@ import { WeatherSystem } from './weather.js';
 import { WindSystem } from './wind.js';
 import { SkyCloudsSystem } from './sky-clouds.js';
 import { BirdsSystem } from './birds.js';
+import { BreakTimerSystem } from './break-timer.js';
 import { VisitFlowerSystem } from './visit-flowers.js';
 import { ReturnHomeSystem } from './return-home.js';
 import { WateringSystem } from './watering.js';
@@ -82,6 +83,7 @@ World.create(
     .registerSystem(ComfortSystem)
     .registerSystem(InputModeSystem)
     .registerSystem(BreathBreakSystem)
+    .registerSystem(BreakTimerSystem)
     .registerSystem(GuideSystem)
     .registerSystem(DwellSystem)
     .registerSystem(GazeCareSystem)
@@ -111,6 +113,7 @@ World.create(
       weather: world.getSystem(WeatherSystem),
       wind: world.getSystem(WindSystem),
       birds: world.getSystem(BirdsSystem),
+      breakTimer: world.getSystem(BreakTimerSystem),
       perf: world.getSystem(PerfSystem),
       input: world.getSystem(InputModeSystem),
       gazeCare: world.getSystem(GazeCareSystem),

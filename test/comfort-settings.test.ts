@@ -22,3 +22,11 @@ describe('comfort settings: the table', () => {
     expect(clampTable(Number.NaN)).toBe(0);
   });
 });
+
+describe('comfort settings: the break length', () => {
+  it('remembers 3, 5 or 10 minutes; 5 by default or when unknown', () => {
+    expect(defaultSettings().breakMinutes).toBe(5);
+    expect(parseSettings(JSON.stringify({ v: 1, breakMinutes: 10 })).breakMinutes).toBe(10);
+    expect(parseSettings(JSON.stringify({ v: 1, breakMinutes: 7 })).breakMinutes).toBe(5);
+  });
+});

@@ -23,7 +23,12 @@ export interface ComfortSettings {
   tableHeight: number;
   /** The table, relative to the body (m): + nearer, - farther. */
   tableNear: number;
+  /** The break length chosen last (minutes), offered again when no choice is made. */
+  breakMinutes: BreakMinutes;
 }
+
+export type BreakMinutes = 3 | 5 | 10;
+export const BREAK_MINUTES: readonly BreakMinutes[] = [3, 5, 10];
 
 /** The table moves in steps of 2.5 cm, at most 15 cm either way. */
 export const TABLE_STEP = 0.025;
@@ -50,7 +55,7 @@ const VERSION = 1;
 export function defaultSettings(): ComfortSettings {
   return {
     breathPace: 'medium', highContrast: false, largeText: false, hands: 'both', dwell: false, quality: 'auto',
-    softTransitions: false, tableHeight: 0, tableNear: 0,
+    softTransitions: false, tableHeight: 0, tableNear: 0, breakMinutes: 5,
   };
 }
 
@@ -96,5 +101,6 @@ export function parseSettings(raw: string): ComfortSettings {
   // Added later: older stored settings keep the table where it was authored.
   s.tableHeight = clampTable(d.tableHeight);
   s.tableNear = clampTable(d.tableNear);
+  if (d.breakMinutes === 3 || d.breakMinutes === 5 || d.breakMinutes === 10) s.breakMinutes = d.breakMinutes;
   return s;
 }

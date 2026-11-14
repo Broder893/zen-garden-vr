@@ -38,6 +38,7 @@ import { WeatherSystem } from './weather.js';
 import { Health, HealthState } from './save/plant-health.js';
 import { levelFor } from './save/growth-levels.js';
 import { EntranceSystem } from './entrance.js';
+import { BreakTimerSystem } from './break-timer.js';
 import { WateringSystem } from './watering.js';
 import { GestureHint, GestureKind } from './effects/gesture-hint.js';
 
@@ -356,6 +357,7 @@ export class GuideSystem extends createSystem({
     this.breathBreak?.attachGuide(this);
     this.world.getSystem(WeatherSystem)?.attachGuide(this);
     this.world.getSystem(SharedTreeSystem)?.attachGuide(this);
+    this.world.getSystem(BreakTimerSystem)?.attachGuide(this);
 
     const panel = this.world.getSceneObject<UIKitMLAsset>('subtitle-panel');
     this.panel = panel ?? null;
