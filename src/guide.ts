@@ -230,6 +230,8 @@ const EVENT_SECONDS = 3;
 const REST_SHOW_SECONDS = 8;
 const REST_LINES = new Set<LineId>(['rest', 'restDwell', 'restGaze']);
 const SNIP_SECONDS = 1.6;
+/** "Your tree is feeling better" needs a tense spell seen for at least this long. */
+const TENSE_SEEN_SECONDS = 8;
 /**
  * The table hint (Comfort: move the table), first visit only, once, after the
  * seed is planted and never in the tutorial's first minute: when a hand often
@@ -332,6 +334,7 @@ export class GuideSystem extends createSystem({
   private inputChanges = 0;
   private breathBreak?: BreathBreakSystem;
   private greetedAt = 0;
+  private tenseFrom = 0;
   private tableHintDone = false;
   private reaches = 0;
   private reaching = [false, false];
@@ -425,7 +428,10 @@ export class GuideSystem extends createSystem({
     // Queued lines: after the welcome and the gift, never over a line or a session.
     if (this.queue.length > 0 && this.greeted && !this.giftPending && this.eventLeft <= 0 && !this.meditation?.active && !this.breathBreak?.inviteLine) {
       const next = this.queue.shift()!;
-      this.showEvent(next.id, next.seconds, next.target);
+      // "Feeling better" only if it still is when its turn comes.
+      if (next.id !== 'recovered' || (this.health?.state ?? Health.Healthy) === Health.Healthy) {
+        this.showEvent(next.id, next.seconds, next.target);
+      }
     }
     // After the first growth event, point out the stone once, straight after
     // the event line so no task line flashes (and gets half-spoken) in between.
@@ -666,7 +672,13 @@ export class GuideSystem extends createSystem({
     } else if ((bonsai.getValue(Bonsai, 'overwater') ?? 0) < 0.05) this.overflowWarned = false;
     // Well again: say so (the audio adds a light rising tone).
     const health = this.health?.state ?? Health.Healthy;
-    if (health === Health.Healthy && this.lastHealth !== Health.Healthy) this.showEvent('recovered', EVENT_SECONDS);
+    // Said only after a tense spell the player saw (a tree tense from days away can ease
+    // during the welcome: then nothing), and queued, so it never cuts into another line.
+    if (health !== Health.Healthy && this.lastHealth === Health.Healthy) this.tenseFrom = this.time;
+    if (health === Health.Healthy && this.lastHealth !== Health.Healthy) {
+      const seen = this.greeted ? this.time - Math.max(this.tenseFrom, this.greetedAt) : 0;
+      if (seen >= TENSE_SEEN_SECONDS) this.queueEvent('recovered', EVENT_SECONDS);
+    }
     this.lastHealth = health;
     // A healthy branch cut: no blame, just what to cut instead (it grows back next visit).
     const wrong = this.pruning?.wrongCuts ?? 0;
