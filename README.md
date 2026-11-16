@@ -8,12 +8,32 @@ Quest Browser and press **Enter VR**. Hands only, seated, 5 to 10 minutes, sound
 
 Made for the Meta VR Start Developer Competition 2026 (Productivity, New Experience).
 
+### For judges
+- **First visit:** the link above. To start over at any time: `?fresh`
+  (https://broder893.github.io/zen-garden-vr/?fresh).
+- **Second visit** (what coming back looks like: a new flower, the daily gift, days in a
+  row, the break length and its summary): https://broder893.github.io/zen-garden-vr/?nextvisit
+- **Accessibility:** poke **Comfort** at the front-left corner of the table (hold to
+  select, one hand, high contrast, large text, breathing pace, gentle fades, table
+  position). With hand tracking off, every care works by looking.
+- Built and tested in IWSDK's WebXR emulator (Quest 3 profile) with scripted hands; not
+  yet on a physical headset.
+
 ## The experience
 
+- **Arrival.** On a first visit, as the eyes open, the firefly flies in from the forest,
+  circles the table and lands on the seed while "Bloom Break" glows above the garden; a
+  see-through silhouette of the tree in bloom rises from the empty pot for two seconds,
+  so the goal is clear before the first gesture.
 - **Plant and grow.** Pinch the glowing seed, water the sprout by tilting the can over
-  it, and trim the glowing overgrown shoots with the shears. The bonsai grows through
-  four stages (sprout, young, mature, in bloom), each its own low-poly model made in
-  Blender; it carries snow in winter and drops leaves in autumn.
+  it, and trim the glowing overgrown shoots with the shears. The bonsai grows from a
+  seed through four stages (sprout, young, mature, in bloom), five low-poly models made
+  in Blender; it carries snow in winter and drops leaves in autumn. Every gesture
+  answers: the sprout springs up, the canopy opens cloud by cloud, a cut shoot tumbles
+  away, petals shower at the bloom, and the music gains a layer with each stage.
+- **A first breath with the sprout.** Right after the first growth, one short guided
+  breath ("Breathe in with your sprout..."): the young tree swells and settles with it.
+  No eyelids, tools stay in hand.
 - **Careful care.** The tree can be stressed, never lost. Pouring on a tree that already
   has its water pools in the pot (a glossy puddle) and stresses it; cutting a healthy
   (not glowing) branch leaves a stump and stresses it; about three wrong cuts wilt it. A
@@ -158,7 +178,7 @@ never required.
   `public/scenes/main.iwsdk.scene.json`. Models merge their parts per material and
   particles and the seven visit flowers are instanced (3 draw calls however many have
   grown); the stone lantern carries its two stone shades as vertex colours (one material,
-  so both lanterns save a draw call each); idle sparkles are not drawn: at most about 78 draw calls and 42k triangles per
+  so both lanterns save a draw call each); idle sparkles are not drawn: 62 to 74 draw calls and about 48k triangles per
   eye, with every unlock, the tree in bloom, all seven visit flowers, a subtitle and the
   ghost pinch on screen, and the shared tree in blossom at night in the rain. The garden's own textures take about 15 MB.
 - **Ambient animation**, all cheap: the wind (`src/wind.ts`, `src/wind-sway.ts`) is a few
@@ -199,9 +219,9 @@ never required.
   device at High and Medium and fails above 80 draw calls or 100k triangles per eye, or
   64 MB of GPU textures (measured at the WebGL uploads; the emulator's controller
   models, about 43 MB, are shown apart: a Quest used with hands never loads them).
-  Last run: 76-77 calls seated and 77-78 with the eyes closed (High and Medium; 79 before
-  the lantern change of 14 November; ±1 with what the guide shows at that moment), 42k
-  triangles, 57 MB (14.5 MB of it the garden's). `.iwsdk-scripts/draw-list.mjs` lists
+  Last run (14 November, evening): 62-74 calls (73 seated, 73-74 with the eyes closed;
+  ±1 with what the guide shows at that moment), about 48k triangles, 57 MB (14.5 MB of
+  it the garden's). `.iwsdk-scripts/draw-list.mjs` lists
   the draws of one frame by object when a count needs explaining.
 - **Shared tree service** (`server/shared-tree/`): a Cloudflare Worker with a D1
   database, a few dozen lines; anonymous counts, daily caps per garden, a rate limit per
@@ -245,9 +265,10 @@ Every push to `main` is built and published to GitHub Pages by
 `.github/workflows/deploy.yml`.
 
 In development, `FirstMomentsSystem` logs the seconds from entering VR to each reward
-(`[first-moments] planted at 10.2 s`). A scripted first visit: planted 10 s, first
-growth 21 s, mature 49 s, bloom 76 s; a first-time player takes longer, but the
-first reward (the sprout) still comes within the first minute.
+(`[first-moments] planted at 10.2 s`). A scripted first visit (14 November): first
+wonder 1.5 s, planted 10.5-13 s, first growth 22-26 s, first breath 26-30 s, bloom
+77-81 s; a first-time player takes longer, but the first reward (the sprout) still
+comes within the first minute.
 
 Address options for demos: `?fresh` starts a new garden, `?nextvisit` counts the
 next VR entry as a return visit without waiting (both are removed from the address
