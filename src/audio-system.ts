@@ -282,7 +282,8 @@ export class GardenAudioSystem extends createSystem({
     // Until audio is unlocked nothing is marked spoken, so the line on screen
     // at that moment is the first thing the guide says.
     const line = this.guide?.shownLine;
-    if (!line || line === this.lastLine || !this.engine.running) return;
+    // Hushed (eyes still closed at the entrance, or ?rec): the line waits, spoken once they open.
+    if (!line || line === this.lastLine || !this.engine.running || this.guide?.hushed) return;
     this.lastLine = line;
     // A soft high chime announces a breathing break before the words.
     if (line === 'breakInvite' || line === 'breakInviteTense') this.engine.musicChime(SCALE[4], 0.05);

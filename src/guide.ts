@@ -41,6 +41,7 @@ import { EntranceSystem } from './entrance.js';
 import { BreakTimerSystem } from './break-timer.js';
 import { WateringSystem } from './watering.js';
 import { GestureHint, GestureKind } from './effects/gesture-hint.js';
+import { REC, recAlreadySaid, recRemember } from './rec-mode.js';
 
 /** Firefly moods: each tints the glow so the task reads before the words do. */
 const MOOD = {
@@ -236,6 +237,8 @@ const EVENT_SECONDS = 3;
 const REST_SHOW_SECONDS = 8;
 const REST_LINES = new Set<LineId>(['rest', 'restDwell', 'restGaze']);
 const SNIP_SECONDS = 1.6;
+/** Lids closed more than this (and not for a breathing session): the guide keeps quiet. */
+const HUSH_LIDS = 0.02;
 /** "Your tree is feeling better" needs a tense spell seen for at least this long. */
 const TENSE_SEEN_SECONDS = 8;
 /**
@@ -285,6 +288,16 @@ export class GuideSystem extends createSystem({
   private hintAt = new Vector3();
   /** The line on screen right now (task or event); the voice speaks this. */
   shownLine: LineId = 'plantSeed';
+  /**
+   * True while the guide keeps quiet: no subtitle, no voice. The entrance's
+   * eyelids (or a return's) are closed or still opening, so the first line
+   * comes with open eyes; a breathing session's lines are never hushed.
+   * In recording mode (?rec, dev only) also a line said in an earlier load,
+   * and the resting line.
+   */
+  hushed = false;
+  /** Recording mode: the line on screen now was said in an earlier load. */
+  private repeat = false;
   private shownText = '';
   private subtitle: UIKit.Text | null = null;
   private panel: Object3D | null = null;
@@ -415,7 +428,11 @@ export class GuideSystem extends createSystem({
 
     // Greet in VR once the lights have warmed up (at page load it would expire unseen).
     const inVR = this.world.visibilityState.peek() === VisibilityState.Visible;
-    if (!this.greeted && inVR && (this.entrance?.lit ?? true)) {
+    this.lids ??= this.world.getSystem(EyelidSystem);
+    const lids = this.lids;
+    const eyesShut =
+      !!lids?.enabled && lids.amount > HUSH_LIDS && !lids.reasons.has('session') && !lids.sessionEnding && !this.meditation?.active;
+    if (!this.greeted && inVR && !eyesShut && (this.entrance?.lit ?? true)) {
       this.greeted = true;
       this.greetedAt = this.time;
       const p = this.persistence;
@@ -484,6 +501,8 @@ export class GuideSystem extends createSystem({
     }
     this.moveFirefly(delta, mood);
     this.updateHint(delta, cue !== null || invite !== null);
+    this.hushed = eyesShut || this.repeat;
+    if (!this.hushed) recRemember(this.shownLine);
     this.fadeRestLine(delta, cue === null && invite === null && !(this.eventLeft > 0));
     this.billboardPanel();
   }
@@ -496,9 +515,9 @@ export class GuideSystem extends createSystem({
   private fadeRestLine(delta: number, free: boolean): void {
     const resting = free && REST_LINES.has(this.line) && REST_LINES.has(this.shownLine);
     this.restShown = resting ? this.restShown + delta : 0;
-    const target = this.restShown > REST_SHOW_SECONDS ? 0 : 1;
-    // Fades out over about 1.5 s; comes back at once with a new line.
-    this.pillOpacity = target > this.pillOpacity ? 1 : Math.max(target, this.pillOpacity - delta / 1.5);
+    const target = this.hushed || this.restShown > REST_SHOW_SECONDS ? 0 : 1;
+    // Fades out over about 1.5 s; comes back at once with a new line; hushed: gone at once.
+    this.pillOpacity = this.hushed ? 0 : target > this.pillOpacity ? 1 : Math.max(target, this.pillOpacity - delta / 1.5);
     const shown = Math.round(this.pillOpacity * 20) / 20;
     if (shown === this.shownOpacity) return;
     this.shownOpacity = shown;
@@ -831,6 +850,7 @@ export class GuideSystem extends createSystem({
     if (text === this.shownText) return;
     this.shownText = text;
     this.shownLine = id;
+    this.repeat = recAlreadySaid(id) || (REC && REST_LINES.has(id));
     this.flash = 1;
     this.subtitle?.setProperties({ text });
   }
