@@ -202,8 +202,12 @@ const LEVEL_LINES: Record<number, LineId> = { 6: 'levelPot', 7: 'levelLantern', 
 const STAGE_LEVELS = 5;
 /** Seconds on the same task before the clearer help line appears. */
 const STUCK_SECONDS = 15;
-/** Still not planted after this long: point out the hands-free option. */
-const COMFORT_HINT_SECONDS = 30;
+/**
+ * Still not planted after this long: point out the hands-free option. It
+ * takes the place of the seed's help line (also at 15 s), which it covers:
+ * "No pinch? ..." speaks to the same player.
+ */
+const COMFORT_HINT_SECONDS = 15;
 /** Seconds before the ghost pinch appears, so players who already know just act. */
 const PINCH_HINT_DELAY = 1.5;
 
