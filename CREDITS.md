@@ -38,4 +38,16 @@ third-party logos or trademarks are used.
 
 ## Libraries
 
-- [Immersive Web SDK (IWSDK)](https://iwsdk.dev) and Three.js, under their own open-source licenses.
+Bundled in the published app (versions from `package-lock.json`):
+
+| Library or font | Version | License |
+|---|---|---|
+| [Immersive Web SDK (IWSDK)](https://iwsdk.dev) (`@iwsdk/core`) | 1.1.0-rc.2 | MIT |
+| Three.js (as `super-three`, IWSDK's build) | 0.185.0 | MIT |
+| [elics](https://github.com/felixtrz/elics) (ECS, via IWSDK) | 3.4.2 | MIT |
+| [@pmndrs/uikit](https://github.com/pmndrs/uikit), `uikit-horizon`, `uikit-lucide` | 1.0.78 | MIT |
+| [Lucide](https://lucide.dev) icons (via `uikit-lucide`) | 0.468.0 | ISC |
+| [Inter](https://github.com/rsms/inter) font, in MSDF form from `@pmndrs/msdfonts` | 1.0.78 | SIL Open Font License 1.1 |
+
+Development only (not published): the IWSDK CLI and Vite plugin (MIT), Vite, TypeScript
+and Vitest.

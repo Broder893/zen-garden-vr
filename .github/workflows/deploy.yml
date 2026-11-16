@@ -32,6 +32,8 @@ jobs:
       - run: npm run build
         env:
           NODE_ENV: production
+      # Notes for coding agents live beside the scenes and panels; they are not part of the app.
+      - run: rm -f dist/ui/AGENTS.md dist/scenes/AGENTS.md
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
