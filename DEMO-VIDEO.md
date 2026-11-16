@@ -58,32 +58,42 @@ converted by an online converter or by VLC (Media → Convert).
 - Keep it **2:30-2:50**. Judges see many videos: cut anything slow (speed up growth 2×).
 - Only real footage of the app. Do not add AI-generated clips or images.
 
-### Shot list and captions (about 2:45)
+### Shot list and captions (about 2:45), updated 16 November
+
+What exists today (all recorded in the emulator; see "Clips" below):
+- **Up to date:** `artifacts/first-minutes/first-minutes.webm` (116 s, 14 November evening,
+  with audio: arrival, title, silhouette, planting, growth, first breath with the sprout,
+  pruning, bloom with petals) and `artifacts/animations/after-*.webm` (10 s each: wind,
+  clouds, particles, birds).
+- **Stale** (before the new forest, the karesansui garden and the features of the 14th):
+  `artifacts/video/v01-v07` and `artifacts/01-09` (the last have no sound). Record again
+  with `bash scripts/record-extra.sh` (v01-v17) before cutting.
+
+Add a small fixed caption on every care shot: *Recorded in the WebXR emulator: hands are
+scripted.* The emulator draws hands only as thin outlines, so the tools seem to move by
+themselves; the ghost gesture in light should stay in frame. If you can borrow a Quest,
+30 seconds recorded on the headset with real hands is worth more than any other shot.
 
 | Time | Shot (clip / how to get it) | Caption |
 | --- | --- | --- |
-| 0:00–0:06 | Black, then the eyelids open on the sunset garden (`?time=sunset`, start of `01-arrive-and-plant`) | *Bloom Break* |
-| 0:06–0:25 | The firefly flies to the seed; the ghost pinch; the seed is planted (`01`) | *Hands only. No controllers.* / *The firefly shows each gesture in light.* |
-| 0:25–0:55 | Water, sprout, trim the glowing shoots, bloom (`02`, `03`, `04`; speed 2×) | *Tilt to pour. Trim to shape.* / *Your bonsai grows with your care.* |
-| 0:55–1:25 | Breathing break: the invitation, eyelids close, the light orb, "Open your eyes", something has changed (`09`); the trees sway with the breath (keep a little forest in frame) | *Every few minutes, a short break.* / *Close your eyes. Breathe.* / *The garden changes while you rest.* |
-| 1:25–1:45 | Four quick shots, 3 s each, of the same bonsai and forest: `?season=spring`, `summer`, `autumn`, `winter` (trees swaying, clouds drifting, petals / seeds / leaves / snow falling; ready-made 10 s takes in `artifacts/animations/after-*.webm`, the flock in `after-birds-summer-day.webm`); then night with `?weather=rain` | *A forest and a garden that follow the seasons.* |
-| 1:45–2:10 | `08-comfort-hold-to-select`: Comfort panel, high contrast, hold to select (ring filling), can pouring by itself; then a quick shot in one-hand mode and the subtitles | *No pinch? Hold to select.* / *One hand. High contrast. Subtitles always on.* |
-| 2:10–2:20 | A wilted tree (overwater or a wrong cut) recovering during a breath | *Mistakes show. The tree never dies.* |
-| 2:20–2:38 | `07-return-new-flower`: the new flower, the daily gift, the level badge; 3 seconds of the shared tree (`?` clip with the basin) | *Come back: care earns levels.* / *One tree, shared by every visitor.* |
-| 2:38–2:48 | Last frame held, slow fade | *Hands only · Seated · 5-10 minutes* + `broder893.github.io/zen-garden-vr` |
+| 0:00–0:12 | The eyes open; the firefly flies in from the forest, circles the table, lands on the seed; "Bloom Break" glows and fades; the silhouette of the tree in bloom (`first-minutes.webm` 0:00–0:12) | *Bloom Break* / *A breathing break with a bonsai.* |
+| 0:12–0:40 | The seed pinched (the sprout springs up), the can tilted, the first growth (the canopy opens), the first breath with the sprout (`first-minutes.webm`) | *Hands only. Seated.* / *Breathe in with your sprout.* |
+| 0:40–1:00 | Trim the glowing shoots (they tumble away), water, bloom with the petal shower (`first-minutes.webm`, speed 2×) | *Tilt to pour. Trim to shape.* |
+| 1:00–1:25 | A breathing break: the invitation, the eyelids close, the light orb and the card through them, "Open your eyes", something has changed (`v07`, recorded again) | *Close your eyes. Breathe.* / *The garden changes while you rest.* |
+| 1:25–1:50 | **One continuous shot with no pinch at all**: Comfort, Hold to select on, the ring filling, the can following the hand and pouring by itself; then high contrast, one hand, and the table moved higher and nearer (`v08`-`v10`, or by hand with `?fresh`) | *No pinch? Hold to select.* / *One hand. High contrast. Your table, your height.* |
+| 1:50–2:00 | A wilted tree recovering during a breath | *Mistakes show. The tree never dies.* |
+| 2:00–2:25 | `?nextvisit`: a new flower, the daily gift, "Another day in a row!", the badge with its dots, the question "How long is your break?", then the summary at the end (`v16`, and `artifacts/features/3-break-length.png`, `5-break-summary.png` as stills) | *Come back: one more day in a row.* / *Choose your break. See what it gave you.* |
+| 2:25–2:38 | Four seasons, 3 s each (`artifacts/animations/after-*.webm`, or `?season=`) and 3 s of the shared tree | *A garden that follows your seasons.* |
+| 2:38–2:45 | Last frame held, slow fade | *Hands only · Seated · 5-10 minutes* + `broder893.github.io/zen-garden-vr` |
 
-If it runs over 3:00, cut in this order: the wilted tree, the shared tree, the second
-half of the seasons shots, then the pruning detail.
+If it runs over 3:00, cut in this order: the wilted tree, the shared tree, two of the
+four seasons, then the pruning detail.
 
-### Order of work on 15 November
-1. Wait for the feature freeze (14 November); `npm run check:budget` and `npm test`.
-2. `npx @iwsdk/cli dev restart --allow-browser-automation`, then `npm run demo:record`
-   (all clips are stale after the Blender bonsai, the forest, the new voices and the
-   ambient animation of 14 November: wind, clouds, falling particles, birds).
-3. Record the extra shots by hand with the URL options above (`?season=`, `?time=`,
-   `?weather=`), and the wilted-tree recovery.
-4. Cut to the table above; add the captions; export 1080p MP4.
-5. Watch it once with sound off (captions must carry it) and once with sound on.
+### Order of work (16 November)
+1. `npx @iwsdk/cli dev restart --allow-browser-automation`, then
+   `bash scripts/record-extra.sh` (all clips v01-v17, about 40 minutes).
+2. Cut to the table above; add the captions; export 1080p MP4.
+3. Watch it once with sound off (captions must carry it) and once with sound on.
 
 ## 3. Publish
 
