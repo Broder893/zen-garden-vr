@@ -280,3 +280,4 @@ if hand tracking were off (gaze care) or controllers were in use.
 ## Credits
 
 All models, sounds and code are original to this project. See [CREDITS.md](CREDITS.md).
+The code is released under the [MIT License](LICENSE).
