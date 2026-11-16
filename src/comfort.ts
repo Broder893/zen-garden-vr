@@ -82,10 +82,11 @@ const TOOL_LAYOUT: Record<Hands, { can: [number, number, number]; shears: [numbe
 const TABLE_TOP_Y = 0.77;
 
 /**
- * The panel's authored x: over the table's left side edge at its front corner
- * (clear of the corner's visit flower); mirrored to the right with one hand, right.
+ * The panel's authored x: just outside the table's left side, at its front
+ * corner, so the label never cuts the table edge or the corner's visit flower;
+ * mirrored to the right with one hand, right.
  */
-const PANEL_X = -0.5;
+const PANEL_X = -0.54;
 
 /** A second touch on the same button this soon is the same poke, not a new one. */
 const CLICK_GUARD_MS = 450;
