@@ -39,9 +39,16 @@ the emulator could not prove (QA-REPORT.md).
 - [ ] There is an **Enter VR** button (top). Press it.
 - [ ] The table is **in front of you**, at a comfortable height for someone seated. If it's turned or off-center: hold the **Meta button** on your right hand to recenter.
 - [ ] The visit starts with **closed eyes**: about a second of dark, then two eyelids open over about 2 seconds while the light **warms up** and the firefly arrives from the distance. Comfortable, or unsettling?
+- [ ] **Arrival** (first visit, `?fresh`): as the eyes open, the firefly flies in from the trees on the left, circles behind the table and lands on the seed in about 6 seconds, while "Bloom Break" glows above the garden and fades. Never in front of your eyes, never fast? Can you pinch the seed during the flight?
+- [ ] As the firefly lands, a see-through **silhouette of the tree in bloom** rises from the empty pot for about 2 seconds. Did it make the goal clear, or was it confusing?
 - [ ] You hear the **music** (soft drone + chimes) and the **voice** reading the first subtitle: a calm recorded voice, not the headset's robotic one. *(If there's no voice but the subtitles are there, or the robotic voice: note it, it's an important point.)*
 
 ## 2. Tutorial: seed and water
+
+- [ ] Planting: the sprout **springs up** with a small bounce and the soil darkens a little.
+- [ ] At the first growth the canopy **opens cloud by cloud** (about half a second), then the firefly says "Breathe in with your sprout..." and the young tree swells with your breath once. No eyelids, the can stays in your hand. Pleasant, or an interruption?
+- [ ] The **music** gains a layer with each stage (only a drone before planting; single notes, small arpeggios, short melodies later). Always under the voice?
+- [ ] A cut shoot **falls, turning**, and shrinks away; at the bloom, **petals shower** around the tree (on its far side, not in your face).
 
 - [ ] Subtitle "Welcome. Pinch the glowing seed to plant it." readable without effort.
 - [ ] Next to the seed a small **ghost pinch** in light (two dots closing, a ring flashing) shows the gesture. Visible without effort?
