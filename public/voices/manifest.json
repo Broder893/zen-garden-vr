@@ -388,5 +388,10 @@
   "voice": "firefly",
   "file": "firefly/tableHint.mp3",
   "seconds": 2.66
+ },
+ "sproutBreath": {
+  "voice": "narrator",
+  "file": "narrator/sproutBreath.mp3",
+  "seconds": 2.14
  }
 }

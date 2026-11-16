@@ -35,7 +35,7 @@ const FIRST_LINES: readonly LineId[] = [
   'plantSeed', 'plantSeedDwell', 'plantSeedGaze', 'welcomeBack', 'welcomeGift', 'resumed',
   'comfortHint', 'plantSeedHelp', 'planted', 'pickCan', 'pickCanDwell', 'pickCanGaze',
   'tiltCan', 'tiltCanDwell', 'moveSpout', 'pouring', 'pickCanHelp', 'tiltCanHelp', 'watchTool',
-  'putBack', 'handsMissing', 'controllersOn', 'handsBack', 'grewYoung', 'pickShears',
+  'putBack', 'handsMissing', 'controllersOn', 'handsBack', 'grewYoung', 'sproutBreath', 'pickShears',
   'pickShearsDwell', 'pickShearsGaze', 'touchShoot', 'snip', 'pickShearsHelp', 'touchShootHelp',
   'rest', 'restDwell', 'restGaze', 'meditateHint', 'meditateHintDwell',
 ];
