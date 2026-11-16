@@ -89,6 +89,16 @@ themselves; the ghost gesture in light should stay in frame. If you can borrow a
 If it runs over 3:00, cut in this order: the wilted tree, the shared tree, two of the
 four seasons, then the pruning detail.
 
+### Recording mode (`?rec`, dev server only)
+
+The clips of 16 November afternoon (`artifacts/video-final2/`, same names as
+`artifacts/video-final/`) were recorded with `?rec`: the guide remembers, in the tab's
+sessionStorage, the lines it already said in earlier clips and neither shows nor speaks
+them again; the resting line ("Rest, rake the sand...") never shows; the break-length
+panel shows only in `v13-comfort` (`?rec=breakpanel`). It does not exist in the published
+app. In every build the guide stays quiet while the entrance's eyelids are closed or
+opening, so `v01-open` opens on a garden with no text.
+
 ### Order of work (16 November)
 1. `npx @iwsdk/cli dev restart --allow-browser-automation`, then
    `bash scripts/record-extra.sh` (all clips v01-v17, about 40 minutes).
