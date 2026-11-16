@@ -287,6 +287,17 @@ Notes:
   19.9 s, bloom 102.9 s): the capture slows the emulator and the scripted gestures. See
   `artifacts/first-minutes/times.md`.
 
+## 16 November: release `rc-1`
+
+No change to the game since `rc-0`: documents, credits, the deploy (it no longer
+publishes `ui/AGENTS.md` and `scenes/AGENTS.md`) and new Devpost images
+(`artifacts/devpost-16nov/`). Typecheck, 59 tests, build and check:budget (62-73 draw
+calls) pass. The published site loads with no console error; the shared-tree service
+answers. A 15-minute session in the heaviest garden (`artifacts/review/long-session.txt`):
+mean frame 16.67 ms throughout, p99 19.7-22.5 ms, worst 27.1 ms; geometries, textures and
+programs stop growing after the breathing break and the end of the break (105 / 12 / 31);
+JS heap 289-324 MB, going up and down with garbage collection. See `WIN-REPORT.md`.
+
 ## Not verified here
 
 - A real Quest: hands, frame rate, voice and comfort (see the short list in
