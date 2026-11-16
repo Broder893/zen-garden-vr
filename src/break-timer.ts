@@ -21,6 +21,7 @@ import { PersistenceSystem } from './persistence.js';
 import { PruningSystem } from './pruning.js';
 import { BREAK_MINUTES, BreakMinutes } from './save/comfort-settings.js';
 import { levelFor, nextLevel } from './save/growth-levels.js';
+import { REC, REC_BREAK_PANEL } from './rec-mode.js';
 
 /** No answer in this long: the last choice is used. */
 const ASK_SECONDS = 8;
@@ -173,7 +174,8 @@ export class BreakTimerSystem extends createSystem({
   private start(): void {
     const g = this.guide;
     if (!g || !this.persistence || !(this.entrance?.lit ?? true)) return;
-    if (!this.persistence.returning) {
+    // Recording mode (?rec, dev only): no question, except in the Comfort clip (?rec=breakpanel).
+    if (!this.persistence.returning || (REC && !REC_BREAK_PANEL)) {
       this.state = 'done';
       return;
     }
