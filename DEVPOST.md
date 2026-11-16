@@ -49,11 +49,13 @@ Bloom Break is a WebXR app built with Meta's Immersive Web SDK (IWSDK) and Three
 
 Everything is original or openly licensed. The bonsai and the forest are low-poly Blender models tinted by code; the rest is procedural and merged per material. A script plays the heaviest moments against a budget of 80 draw calls per eye (the garden uses 62 to 74), and quality lowers itself if the headset struggles. Music, ambience and sounds are synthesised live with the Web Audio API; the guide's voices are generated with Kokoro TTS and fall back to the device's voice. Progress is saved locally in a versioned, validated format.
 
-We had no headset: every step was built and replayed by scripted hands in IWSDK's WebXR emulator, on its Quest 3 profile.
+We had no headset: every step was built and replayed by scripted hands in IWSDK's WebXR emulator, on its Quest 3 profile. Video and screenshots were recorded in Meta's IWER WebXR emulator with simulated hands.
 
 ### What's next
 
 Tuning on real Quest hardware, more life in the garden (a koi pond, butterflies), more plants, and more languages.
+
+Target launch: Meta Horizon Store, spring 2027.
 
 ---
 
