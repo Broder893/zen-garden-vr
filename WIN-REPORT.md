@@ -8,6 +8,15 @@ Il servizio dell'albero condiviso pubblicato risponde (`/tree` 200).
 Tutto è stato provato **solo nell'emulatore WebXR** (IWER, profilo Quest 3) con mani
 scritte da script. Nulla è stato provato su un visore.
 
+## rc-2 (16 novembre, 10:40)
+
+Le ultime quattro richieste dell'autore, sopra `rc-1`: la voce registrata di
+`sproutBreath` (verificata nell'emulatore: si sente il file, non la voce del dispositivo,
+ed è tra le prime righe scaricate); il suggerimento Comfort dopo 15 s invece di 30 s (a
+15 s prende il posto della riga di aiuto sul seme); `LICENSE` MIT; in `DEVPOST.md` il
+lancio previsto sullo Store e come sono stati registrati video e immagini. Controlli verdi
+(59 test, 62-73 draw call). Da qui `main` è congelato: nessun push senza chiedere.
+
 ## Com'è andato il piano
 
 Il piano prevedeva 14 analisi in parallelo, un backlog, correzioni in rami separati, una
