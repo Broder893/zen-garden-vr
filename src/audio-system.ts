@@ -18,6 +18,7 @@ import { SeasonSystem } from './season.js';
 import { DayNightSystem } from './day-night.js';
 import { Health, HealthState } from './save/plant-health.js';
 import { WateringSystem } from './watering.js';
+import { REC_NO_VOICE } from './rec-mode.js';
 
 /** Lines are spoken again only after this long, so task hints never nag. */
 const REPEAT_SECONDS = 14;
@@ -294,6 +295,8 @@ export class GardenAudioSystem extends createSystem({
     const last = this.spokenAt.get(line);
     if (!ALWAYS_SPOKEN.has(line) && last !== undefined && this.time - last < REPEAT_SECONDS) return;
     this.spokenAt.set(line, this.time);
+    // Recording mode without voices (?rec&novoice, dev only): the subtitle carries the line.
+    if (REC_NO_VOICE) return;
     this.voice.say(line);
     log(`say ${line}`);
   }

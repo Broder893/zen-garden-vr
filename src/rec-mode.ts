@@ -5,7 +5,8 @@
  * again; with ?rec it remembers, in sessionStorage, the lines it already said
  * in earlier loads of the tab and neither shows nor speaks them again. It also
  * leaves out the resting line ("Rest, rake the sand...") and the break-length
- * panel, which shows only with `?rec=breakpanel`. The normal game is unchanged.
+ * panel, which shows only with `?rec=breakpanel`. With `&novoice` neither the
+ * firefly nor the narrator speaks. The normal game is unchanged.
  */
 const params = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search);
 
@@ -13,6 +14,8 @@ const params = typeof window === 'undefined' ? null : new URLSearchParams(window
 export const REC = import.meta.env.DEV && !!params?.has('rec');
 /** Recording mode that still asks for the break's length (the Comfort clip). */
 export const REC_BREAK_PANEL = REC && params?.get('rec') === 'breakpanel';
+/** Recording mode without the guide's voice (`?rec&novoice`): music, ambience, sounds and subtitles stay. */
+export const REC_NO_VOICE = REC && !!params?.has('novoice');
 
 const KEY = 'zen-rec-said';
 
