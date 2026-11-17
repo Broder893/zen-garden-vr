@@ -21,7 +21,7 @@ Close your eyes, breathe, and open them on a garden that changed: a hands-only b
 
 - **Try it:** https://broder893.github.io/zen-garden-vr/
 - **Second visit (what coming back looks like):** https://broder893.github.io/zen-garden-vr/?nextvisit
-- **Demo video:** _(add the YouTube/Vimeo link)_
+- **Demo video:** https://youtu.be/Ei8cFmRoZHw
 - **Source:** https://github.com/Broder893/zen-garden-vr
 
 ---
